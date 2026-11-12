@@ -562,8 +562,8 @@ const modoDiario = () => S.me && S.me.layout === 'diario';
 // módulo de demandas: área GFC, coordenação/liderança e administradores
 const podeGfc = (p = S.me) => !!p && (p.area === 'gfc' || isGestao(p) || !!p.admin);
 // a Rotina do GFC é a gestão de demandas: vale para quem é do GFC e para quem está olhando a área/pessoa do GFC
-const rotinaGfc = () => podeGfc() && S.gfcTela !== 'calendario' && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
-const abaRotinaGfc = () => podeGfc() && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
+const rotinaGfc = () => podeGfc() && !gfcSemBanco() && S.gfcTela !== 'calendario' && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
+const abaRotinaGfc = () => podeGfc() && !gfcSemBanco() && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
 
 // ---------- visibilidade: privacidade só na rotina (espelha o banco) ----------
 function podeVerPessoa(id, me = S.me) {
@@ -1171,6 +1171,7 @@ function vRotina() {
     });
   });
   return `
+  ${podeGfc() && gfcSemBanco() && (S.me.area === 'gfc' || S.me.admin) ? `<div class="small muted">As demandas do GFC aparecem aqui depois que o script <b>supabase/gfc_e_comentarios.sql</b> for rodado no Supabase.</div>` : ''}
   <div class="toolbar">${abaRotinaGfc() ? abasGfc() : ''}${selEscopo(false)}<div class="grow toolbar"><button class="btn pri" data-act="novaRot">${ic('plus')}Nova rotina</button></div></div>
   <section class="card"><div class="card-b" style="padding-top:12px">
     <div class="scroll-x" data-key="cal"><table class="cal"><thead><tr><th class="stick" style="z-index:3"></th>${dias.map(d => { const g = dt(d).getDay(); return `<th ${d === HOJE ? 'class="hoje" data-hoje' : ''}><span>${DIAS[g][0]}</span>${dt(d).getDate()}</th>`; }).join('')}<th style="width:56px">mês</th></tr></thead><tbody>${body}</tbody></table></div>
