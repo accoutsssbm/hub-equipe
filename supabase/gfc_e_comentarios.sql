@@ -62,7 +62,8 @@ create table if not exists public.gfc_responsaveis (
 
 -- 3) Demandas e seus itens (site/frota)
 --    etapas: [{id, titulo, exec: 'terceiro'|'gfc', dias}]  (prazo em dias úteis)
---    passos: {<id da etapa>: {st, enviado_em, concluido_em, dias, resp, obs}}
+--    passos: {<mês 'AAAA-MM' nas mensais | '_' nas avulsas>: {<id da etapa>: {st, enviado_em, concluido_em, dias, resp, obs}}}
+--    Demanda mensal (recorrente): a 1ª etapa começa no dia útil nº dia_util de cada mês.
 create table if not exists public.gfc_demandas (
   id uuid primary key default gen_random_uuid(),
   titulo text not null,
@@ -86,6 +87,10 @@ create table if not exists public.gfc_itens (
   criado_em timestamptz not null default now()
 );
 create index if not exists gfc_itens_demanda on public.gfc_itens(demanda_id);
+-- demandas mensais (colunas incluídas depois da 1ª versão; seguro rodar de novo)
+alter table public.gfc_demandas add column if not exists recorrente boolean not null default false;
+alter table public.gfc_demandas add column if not exists dia_util int check (dia_util between 1 and 23);
+alter table public.gfc_demandas add column if not exists ativo boolean not null default true;
 
 -- 4) Permissões (RLS)
 alter table public.paralela_comentarios enable row level security;
