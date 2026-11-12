@@ -561,6 +561,9 @@ const ativos = () => S.pessoas.filter(p => p.ativo !== false);
 const modoDiario = () => S.me && S.me.layout === 'diario';
 // módulo de demandas: área GFC, coordenação/liderança e administradores
 const podeGfc = (p = S.me) => !!p && (p.area === 'gfc' || isGestao(p) || !!p.admin);
+// a Rotina do GFC é a gestão de demandas: vale para quem é do GFC e para quem está olhando a área/pessoa do GFC
+const rotinaGfc = () => podeGfc() && S.gfcTela !== 'calendario' && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
+const abaRotinaGfc = () => podeGfc() && (S.me.area === 'gfc' || S.escopo === 'area:gfc' || (String(S.escopo).startsWith('p:') && (P(S.escopo.slice(2)) || {}).area === 'gfc'));
 
 // ---------- visibilidade: privacidade só na rotina (espelha o banco) ----------
 function podeVerPessoa(id, me = S.me) {
@@ -951,7 +954,6 @@ const frotaTxt = p => [p.site, p.frotas].filter(Boolean).join(' · ');
 const root = document.getElementById('app');
 const NAV = [['inicio', 'Início', 'home'], ['rotina', 'Rotina', 'rot'], ['paralelas', 'Paralelas', 'par'], ['projetos', 'Projetos', 'proj'], ['painel', 'Painel', 'painel']];
 const NAV2 = [['notas', 'Minhas notas', 'nota'], ['equipe', 'Equipe', 'equipe']];
-const navLista = curto => podeGfc() ? [...NAV, ['gfc', curto ? 'GFC' : 'Demandas GFC', 'gfc']] : NAV;
 
 function render() {
   if (S.modo === 'online' && !S.sessao) { root.innerHTML = telaLogin(); return; }
@@ -961,15 +963,15 @@ function render() {
   const ativoEl = document.activeElement && document.activeElement.id;
   const minhas = unidades().filter(u => u.pid === S.me.id && !u.done && u.tipo !== 'item').length;
   const navBtn = ([v, t, i]) => `<button class="nav ${S.view === v || (v === 'projetos' && S.view === 'projeto') ? 'on' : ''}" data-act="ir" data-v="${v}">${ic(i)}<span>${t}</span>${v === 'paralelas' && minhas ? `<span class="cnt num">${minhas}</span>` : ''}</button>`;
-  if (S.view === 'gfc' && !podeGfc()) S.view = 'inicio';
-  const titulo = { inicio: modoDiario() ? 'Diário de bordo' : 'Meu dia', rotina: 'Rotina', paralelas: 'Atividades paralelas', projetos: 'Projetos', projeto: 'Projeto', painel: 'Painel', notas: 'Minhas notas', equipe: 'Equipe', gfc: 'Demandas GFC' }[S.view];
-  const comMes = ['rotina', 'paralelas', 'painel'].includes(S.view);
+  if (S.view === 'gfc') S.view = 'rotina';
+  const titulo = { inicio: modoDiario() ? 'Diário de bordo' : 'Meu dia', rotina: 'Rotina', paralelas: 'Atividades paralelas', projetos: 'Projetos', projeto: 'Projeto', painel: 'Painel', notas: 'Minhas notas', equipe: 'Equipe' }[S.view];
+  const comMes = ['rotina', 'paralelas', 'painel'].includes(S.view) && !(S.view === 'rotina' && rotinaGfc());
   const tema = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.innerHTML = `
   <div class="app">
     <aside class="side">
       <div class="brand"><div class="brand-mark">ET</div><div><b>${esc(CONFIG.NOME_APP)}</b><small>${esc(CONFIG.SUBTITULO)}</small></div></div>
-      ${navLista().map(navBtn).join('')}
+      ${NAV.map(navBtn).join('')}
       <div class="side-sep"></div>
       ${NAV2.map(navBtn).join('')}
       <div class="side-foot">${S.modo === 'online' ? `<button class="nav" data-act="sair">${ic('sair')}<span>Sair</span></button>` : ''}</div>
@@ -985,7 +987,7 @@ function render() {
       </header>
       <div class="content">${viewAtual()}</div>
     </div>
-    <nav class="bottom">${navLista(true).map(navBtn).join('')}</nav>
+    <nav class="bottom">${NAV.map(navBtn).join('')}</nav>
   </div>`;
   root.querySelectorAll('.scroll-x[data-key]').forEach(el => {
     if (scrolls[el.dataset.key] != null) el.scrollLeft = scrolls[el.dataset.key];
@@ -1003,7 +1005,6 @@ function viewAtual() {
     case 'painel': return vPainel();
     case 'notas': return vNotas();
     case 'equipe': return vEquipe();
-    case 'gfc': return vGfc();
     default: return vInicio();
   }
 }
@@ -1146,6 +1147,7 @@ function atualizarTimer() {
 // Rotina
 // =====================================================================
 function vRotina() {
+  if (rotinaGfc()) return vGfc();
   const ids = idsEscopo(S.escopo), y = S.y, m = S.m, n = diasMes(y, m);
   const dias = Array.from({ length: n }, (_, i) => iso(new Date(y, m, i + 1)));
   const pessoas = ids.map(P).filter(Boolean).sort((a, b) => (a.area + a.nome).localeCompare(b.area + b.nome));
@@ -1169,7 +1171,7 @@ function vRotina() {
     });
   });
   return `
-  <div class="toolbar">${selEscopo(false)}<div class="grow toolbar"><button class="btn pri" data-act="novaRot">${ic('plus')}Nova rotina</button></div></div>
+  <div class="toolbar">${abaRotinaGfc() ? abasGfc() : ''}${selEscopo(false)}<div class="grow toolbar"><button class="btn pri" data-act="novaRot">${ic('plus')}Nova rotina</button></div></div>
   <section class="card"><div class="card-b" style="padding-top:12px">
     <div class="scroll-x" data-key="cal"><table class="cal"><thead><tr><th class="stick" style="z-index:3"></th>${dias.map(d => { const g = dt(d).getDay(); return `<th ${d === HOJE ? 'class="hoje" data-hoje' : ''}><span>${DIAS[g][0]}</span>${dt(d).getDate()}</th>`; }).join('')}<th style="width:56px">mês</th></tr></thead><tbody>${body}</tbody></table></div>
   </div></section>
@@ -1654,10 +1656,11 @@ function kpisGfc(r) {
   </div>`;
 }
 
+const abasGfc = () => `<div class="seg">${[['demandas', 'Demandas'], ['cadastros', 'Cadastros'], ['calendario', 'Calendário de rotinas']].map(([v, t]) => `<button class="${S.gfcTela === v ? 'on' : ''}" data-act="gfcTela" data-v="${v}">${t}</button>`).join('')}</div>`;
 function vGfc() {
   if (gfcSemBanco()) return `<section class="card"><div class="card-b" style="padding-top:16px"><h2>Módulo ainda não ativado no banco</h2><p class="muted" style="max-width:72ch">As tabelas das demandas do GFC não foram encontradas no Supabase. O administrador precisa rodar uma vez o script <b>supabase/gfc_e_comentarios.sql</b> no SQL Editor do Supabase e depois atualizar esta página.</p></div></section>`;
   const dem = demAberta(); if (dem) return vGfcDemanda(dem); S.gfcAberta = null;
-  const abas = `<div class="seg">${[['demandas', 'Demandas'], ['cadastros', 'Cadastros']].map(([v, t]) => `<button class="${S.gfcTela === v ? 'on' : ''}" data-act="gfcTela" data-v="${v}">${t}</button>`).join('')}</div>`;
+  const abas = abasGfc() + (S.me.area !== 'gfc' ? selEscopo(false) : '');
   if (S.gfcTela === 'cadastros') return `<div class="toolbar">${abas}<span class="muted small">Sites, frotas e responsáveis reaproveitados ao montar cada demanda.</span></div>${vGfcCadastros()}`;
   const todas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) }));
   const lista = todas.filter(({ o }) => S.gfcFiltro === 'todas' || (S.gfcFiltro === 'finalizadas' ? o.finalizada : !o.finalizada))
@@ -1757,7 +1760,7 @@ function cardGfcPainel(ids) {
   if (!podeGfc() || gfcSemBanco() || !S.gfcDemandas.length || !ids.some(id => (P(id) || {}).area === 'gfc')) return '';
   const abertas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) })).filter(x => !x.o.finalizada);
   const r = resumoGfc(abertas.map(x => x.d)), red = v => v ? 'style="color:var(--bad);font-weight:600"' : '';
-  return `<section class="card"><div class="card-h"><h2>Demandas GFC</h2><span class="muted small">situação atual · ${abertas.length} em andamento</span><button class="btn sm no-print" data-act="ir" data-v="gfc">Abrir demandas</button></div>
+  return `<section class="card"><div class="card-h"><h2>Demandas GFC</h2><span class="muted small">situação atual · ${abertas.length} em andamento</span><button class="btn sm no-print" data-act="gfcLista">Abrir na Rotina</button></div>
     <div class="scroll-x"><table class="tbl"><thead><tr><th>Demanda</th><th>Conclusão</th><th class="r">Ação do GFC</th><th class="r">Aguardando terceiros</th><th class="r">GFC impactada</th><th class="r">Vencidas</th></tr></thead><tbody>
     ${abertas.length ? abertas.map(({ d, o }) => `<tr class="clk" data-act="abrirDem" data-id="${d.id}"><td><b>${esc(d.titulo)}</b></td><td><div class="minibar">${meter(o.pct)}<span class="num small">${pctTxt(o.pct)} <span class="muted">(${o.concl}/${o.total})</span></span></div></td><td class="r num">${o.acao}</td><td class="r num">${o.terceiros}</td><td class="r num">${o.impactadas}</td><td class="r num" ${red(o.vencidas)}>${o.vencidas}</td></tr>`).join('')
       + `<tr><td><b>Total</b></td><td><span class="num small">${pctTxt(pct(r.concl, r.total))} <span class="muted">(${r.concl}/${r.total})</span></span></td><td class="r num"><b>${r.acao}</b></td><td class="r num"><b>${r.terceiros}</b></td><td class="r num"><b>${r.impactadas}</b></td><td class="r num" ${red(r.vencidas)}><b>${r.vencidas}</b></td></tr>`
@@ -2349,7 +2352,7 @@ function abrirAg(t, id, d) {
   if (t === 'item') return modalItem(S.itens.find(x => x.id === id));
 }
 const ACT = {
-  ir(el) { fecharModal(); S.view = el.dataset.v; if (S.view === 'gfc') S.gfcAberta = null; ls.set('hub-view', S.view === 'projeto' ? 'projetos' : S.view); render(); window.scrollTo(0, 0); },
+  ir(el) { fecharModal(); S.view = el.dataset.v; if (S.view === 'rotina') S.gfcAberta = null; ls.set('hub-view', S.view === 'projeto' ? 'projetos' : S.view); render(); window.scrollTo(0, 0); },
   mes(el) {
     let m = S.m + Number(el.dataset.d), y = S.y; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } S.m = m; S.y = y;
     if (S.modo === 'online' && iso(new Date(y, m, 1)) < S.execDesde) recarregar(); else render();
@@ -2430,10 +2433,11 @@ const ACT = {
     } catch (e) { toast(msgErro(e)); }
   },
   // demandas GFC
-  gfcTela(el) { S.gfcTela = el.dataset.v; render(); },
+  gfcTela(el) { S.gfcTela = el.dataset.v; S.gfcAberta = null; render(); },
+  gfcLista() { fecharModal(); S.view = 'rotina'; S.gfcTela = 'demandas'; S.gfcAberta = null; if (!abaRotinaGfc()) S.escopo = 'area:gfc'; render(); window.scrollTo(0, 0); },
   gfcFiltro(el) { S.gfcFiltro = el.dataset.v; render(); },
   gfcSit(el) { S.gfcSit = el.dataset.v; render(); },
-  abrirDem(el) { S.view = 'gfc'; S.gfcAberta = el.dataset.id; S.gfcSite = ''; S.gfcSit = 'todas'; render(); window.scrollTo(0, 0); },
+  abrirDem(el) { S.view = 'rotina'; S.gfcTela = 'demandas'; if (!abaRotinaGfc()) S.escopo = 'area:gfc'; S.gfcAberta = el.dataset.id; S.gfcSite = ''; S.gfcSit = 'todas'; render(); window.scrollTo(0, 0); },
   gfcVoltar() { S.gfcAberta = null; render(); window.scrollTo(0, 0); },
   novaDem: () => modalGfcDem(null),
   editarDem() { modalGfcDem(demAberta()); },
