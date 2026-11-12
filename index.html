@@ -397,6 +397,14 @@ textarea.inp{min-height:76px;resize:vertical}
 .cad-site:first-child{border-top:0}
 .fr-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:14px;padding:2px 10px;font-size:12px;background:var(--surface2);cursor:pointer}
 .fr-chip:hover{border-color:var(--faint)}
+.cal td.dcel{padding:0;position:relative;height:34px}
+.dbar{position:absolute;left:1px;right:1px;top:4px;display:flex;align-items:center;height:26px;border-radius:6px;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 16%,var(--surface));overflow:hidden;cursor:pointer;padding:0 7px;color:var(--fg);font-size:11.5px;font-weight:600;text-align:left}
+.dbar i{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--c) 45%,transparent)}
+.dbar span{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbar span b{font-weight:500;color:var(--muted)}
+.dbar.venc{box-shadow:0 0 0 2px color-mix(in srgb,var(--bad) 70%,transparent)}
+.dbar.ok{border-color:var(--ok)}
+.cal tr.drow th.stick{padding-top:9px;padding-bottom:9px}
 .print-only{display:none}
 @media print{
   .side,.bottom,.top,.demo-bar,.no-print,.toast{display:none!important}
@@ -542,7 +550,7 @@ const S = {
   modo: 'teste', me: null, sessao: null,
   pessoas: [], rotinas: [], exec: [], paralelas: [], etapas: [], notas: [], projetos: [], sprints: [], itens: [],
   comentarios: [], gfcSites: [], gfcFrotas: [], gfcResp: [], gfcDemandas: [], gfcItens: [], faltando: [],
-  gfcTela: 'demandas', gfcFiltro: 'abertas', gfcAberta: null, gfcSite: '', gfcSit: 'todas',
+  gfcTela: 'calendario', gfcVolta: 'demandas', gfcFiltro: 'abertas', gfcAberta: null, gfcSite: '', gfcSit: 'todas',
   execMap: new Map(),
   view: ls.get('hub-view', 'inicio'),
   y: now.getFullYear(), m: now.getMonth(),
@@ -730,7 +738,7 @@ function aplicarDados(d, meDemo) {
   S.comentarios = me ? (d.paralela_comentarios || []).slice() : [];
   S.gfcSites = d.gfc_sites || []; S.gfcFrotas = d.gfc_frotas || []; S.gfcResp = d.gfc_responsaveis || [];
   S.gfcDemandas = (d.gfc_demandas || []).map(x => ({ ...x, etapas: Array.isArray(x.etapas) ? x.etapas : [] }));
-  S.gfcItens = (d.gfc_itens || []).map(x => ({ ...x, passos: x.passos && typeof x.passos === 'object' ? x.passos : {} }));
+  S.gfcItens = (d.gfc_itens || []).map(x => ({ ...x, passos: fmtPassos(x.passos) }));
   S.faltando = d.faltando || [];
   S.execMap = new Map(S.exec.map(e => [e.rotina_id + '|' + String(e.data).slice(0, 10), e]));
   if (me && (!S.escopo || !escopoOpcoes().some(o => o[0] === S.escopo))) S.escopo = escopoPadrao();
@@ -965,7 +973,7 @@ function render() {
   const navBtn = ([v, t, i]) => `<button class="nav ${S.view === v || (v === 'projetos' && S.view === 'projeto') ? 'on' : ''}" data-act="ir" data-v="${v}">${ic(i)}<span>${t}</span>${v === 'paralelas' && minhas ? `<span class="cnt num">${minhas}</span>` : ''}</button>`;
   if (S.view === 'gfc') S.view = 'rotina';
   const titulo = { inicio: modoDiario() ? 'Diário de bordo' : 'Meu dia', rotina: 'Rotina', paralelas: 'Atividades paralelas', projetos: 'Projetos', projeto: 'Projeto', painel: 'Painel', notas: 'Minhas notas', equipe: 'Equipe' }[S.view];
-  const comMes = ['rotina', 'paralelas', 'painel'].includes(S.view) && !(S.view === 'rotina' && rotinaGfc());
+  const comMes = ['rotina', 'paralelas', 'painel'].includes(S.view);
   const tema = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.innerHTML = `
   <div class="app">
@@ -1146,6 +1154,40 @@ function atualizarTimer() {
 // =====================================================================
 // Rotina
 // =====================================================================
+// linhas de demandas no calendário: barras coloridas por etapa (azul = retorno de terceiros, amarelo = GFC)
+function linhasGfcCal(dias) {
+  const n = dias.length, cab = `<tr class="pessoa"><td colspan="${n + 2}"><span class="whoin">${ic('gfc', 'style="width:15px;height:15px"')} Demandas do GFC <span class="muted small">· ${nomeMes()}</span></span></td></tr>`;
+  const mesIni = dias[0], mesFim = dias[n - 1];
+  const dems = S.gfcDemandas.filter(demNoMes).sort((a, b) => (b.recorrente - a.recorrente) || String(a.titulo).localeCompare(b.titulo, 'pt-BR'));
+  const linhas = dems.map(dem => {
+    const o = statsDem(dem), its = itensDem(dem.id), dono = new Array(n).fill(-1);
+    let janelas;
+    if (dem.recorrente) janelas = planoMes(dem);
+    else {
+      if (o.finalizada) return '';
+      const lims = []; its.forEach(it => dem.etapas.forEach((_, k) => { const x = celula(dem, it, k); if (x.limite) lims.push(x.limite); }));
+      const fim = [HOJE, ...lims].sort().pop(), ini = String(dem.inicio || HOJE).slice(0, 10);
+      if (fim < mesIni || ini > mesFim) return '';
+      janelas = [{ ini, fim, avulsa: true }];
+    }
+    janelas.forEach((j, k) => dias.forEach((d, i) => { if (d >= j.ini && d <= j.fim) dono[i] = k; }));
+    let cels = '';
+    for (let i = 0; i < n;) {
+      const k = dono[i];
+      if (k < 0) { const g = dt(dias[i]).getDay(); cels += `<td class="${g === 0 || g === 6 ? 'we' : ''}"></td>`; i++; continue; }
+      let len = 1; while (i + len < n && dono[i + len] === k) len++;
+      const et = janelas[k].avulsa ? null : dem.etapas[k];
+      const e = et ? o.porEtapa[k] : { total: o.total, concl: o.concl }, p = pct(e.concl, e.total) || 0;
+      const venc = its.some(it => (et ? [k] : dem.etapas.map((_, q) => q)).some(q => celula(dem, it, q).vencida));
+      const rot = et ? et.titulo : 'Demanda avulsa';
+      const dica = `${rot}: ${fmtD(janelas[k].ini)} a ${fmtD(janelas[k].fim)} · ${e.concl} de ${e.total} concluídas${janelas[k].curta ? ' · prazo reduzido pelo fim do mês' : ''}`;
+      cels += `<td colspan="${len}" class="dcel"><button class="dbar ${venc ? 'venc' : ''} ${p === 100 ? 'ok' : ''}" style="--c:var(${!et ? '--a-dev' : et.exec === 'gfc' ? '--accent' : '--info'})" data-act="abrirDem" data-id="${dem.id}" title="${esc(dica)}"><i style="width:${p}%"></i><span>${esc(rot)} <b class="num">${e.concl}/${e.total}</b></span></button></td>`;
+      i += len;
+    }
+    return `<tr class="drow"><th class="stick" scope="row"><span class="rt" data-act="abrirDem" data-id="${dem.id}">${esc(dem.titulo)}</span><span class="rm">${dem.recorrente ? `Mensal · cobrança no ${Number(dem.dia_util) || 1}º dia útil` : 'Avulsa'} · ${o.itens} ${o.itens === 1 ? 'item' : 'itens'}</span></th>${cels}<td class="pct num" style="color:var(--${o.finalizada ? 'ok' : o.vencidas ? 'bad' : 'fg'})">${pctTxt(o.pct)}</td></tr>`;
+  }).filter(Boolean);
+  return cab + (linhas.join('') || `<tr><td colspan="${n + 2}" class="muted small" style="text-align:left;padding:8px 0">Nenhuma demanda neste mês. Crie na aba Demandas e marque “Repete todo mês” para ela aparecer aqui todos os meses.</td></tr>`);
+}
 function vRotina() {
   if (rotinaGfc()) return vGfc();
   const ids = idsEscopo(S.escopo), y = S.y, m = S.m, n = diasMes(y, m);
@@ -1170,13 +1212,15 @@ function vRotina() {
       body += `<tr><th class="stick" scope="row"><span class="rt" data-act="editarRot" data-id="${r.id}">${esc(r.titulo)}</span><span class="rm">${quandoRotina(r)}${isFrota(p) ? ' · ' + fmtH(r.horas_prev) : ''}${r.privada ? ' · privada' : ''}</span></th>${cels}<td class="pct num" style="color:var(--${corPct(v) || 'faint'})">${v == null ? '—' : v + '%'}</td></tr>`;
     });
   });
+  const comGfc = abaRotinaGfc();
+  if (comGfc) body = linhasGfcCal(dias) + (pessoas.length > 1 ? '' : `<tr class="pessoa"><td colspan="${n + 2}"><span class="whoin">${ic('rot', 'style="width:15px;height:15px"')} Rotinas</span></td></tr>`) + body;
   return `
   ${podeGfc() && gfcSemBanco() && (S.me.area === 'gfc' || S.me.admin) ? `<div class="small muted">As demandas do GFC aparecem aqui depois que o script <b>supabase/gfc_e_comentarios.sql</b> for rodado no Supabase.</div>` : ''}
   <div class="toolbar">${abaRotinaGfc() ? abasGfc() : ''}${selEscopo(false)}<div class="grow toolbar"><button class="btn pri" data-act="novaRot">${ic('plus')}Nova rotina</button></div></div>
   <section class="card"><div class="card-b" style="padding-top:12px">
     <div class="scroll-x" data-key="cal"><table class="cal"><thead><tr><th class="stick" style="z-index:3"></th>${dias.map(d => { const g = dt(d).getDay(); return `<th ${d === HOJE ? 'class="hoje" data-hoje' : ''}><span>${DIAS[g][0]}</span>${dt(d).getDate()}</th>`; }).join('')}<th style="width:56px">mês</th></tr></thead><tbody>${body}</tbody></table></div>
   </div></section>
-  <div class="legend"><span><i class="cell done"></i>Feito</span><span><i class="cell late"></i>Não realizado</span><span><i class="cell today"></i>Hoje</span><span><i class="cell fut"></i>Previsto</span><span>Clique no nome da rotina para editar e num quadrinho para registrar.</span></div>`;
+  <div class="legend"><span><i class="cell done"></i>Feito</span><span><i class="cell late"></i>Não realizado</span><span><i class="cell today"></i>Hoje</span><span><i class="cell fut"></i>Previsto</span>${comGfc ? '<span><i class="sw" style="background:var(--info)"></i>Retorno de terceiros</span><span><i class="sw" style="background:var(--accent)"></i>Atualização do GFC</span><span><i class="sw" style="background:var(--bad)"></i>Borda vermelha: há solicitação vencida</span>' : ''}<span>Clique no nome da rotina para editar e num quadrinho para registrar.${comGfc ? ' Clique numa barra para abrir a demanda.' : ''}</span></div>`;
 }
 
 // =====================================================================
@@ -1599,20 +1643,50 @@ const itensDem = did => S.gfcItens.filter(i => i.demanda_id === did).sort((a, b)
 const respGfc = dem => { const p = P(dem.responsavel_gfc); return p ? p.nome : ''; };
 const gfcSemBanco = () => S.faltando.some(t => t.startsWith('gfc_'));
 const demAberta = () => S.gfcDemandas.find(d => d.id === S.gfcAberta);
+function fmtPassos(p) {
+  if (!p || typeof p !== 'object') return {};
+  const ks = Object.keys(p);
+  return ks.length && !ks.every(k => k === '_' || /^\d{4}-\d{2}$/.test(k)) ? { _: p } : p;
+}
+// demandas mensais: o acompanhamento recomeça a cada mês; as avulsas têm um acompanhamento só
+const mesAtual = () => `${S.y}-${pad(S.m + 1)}`;
+const chaveMes = dem => dem.recorrente ? mesAtual() : '_';
+const passosDe = (it, dem) => it.passos[chaveMes(dem)] || {};
+const demNoMes = d => !d.recorrente || (d.ativo !== false && String(d.inicio || '').slice(0, 7) <= mesAtual());
+const ultimoUtil = (y, m) => { let d = iso(new Date(y, m + 1, 0)); while (!util(d)) d = addDias(d, -1); return d; };
+function nDiaUtil(y, m, n) {
+  let d = iso(new Date(y, m, 1)); while (!util(d)) d = addDias(d, 1);
+  const ult = ultimoUtil(y, m);
+  for (let k = 1; k < n && d < ult;) { d = addDias(d, 1); if (util(d)) k++; }
+  return d;
+}
+// calendário do mês de uma demanda mensal: a 1ª etapa começa no N-ésimo dia útil;
+// cada etapa seguinte começa no dia útil após o fim da anterior; nada passa do último dia útil do mês
+function planoMes(dem, y = S.y, m = S.m) {
+  const ult = ultimoUtil(y, m); let fimAnt = null;
+  return dem.etapas.map((et, k) => {
+    const ini = k === 0 ? nDiaUtil(y, m, Number(dem.dia_util) || 1) : (fimAnt < ult ? addUteis(fimAnt, 1) : ult);
+    const ideal = addUteis(k === 0 ? ini : fimAnt, Number(et.dias) || 0);
+    let fim = ideal > ult ? ult : ideal; if (fim < ini) fim = ini;
+    fimAnt = fim;
+    return { ini, fim, curta: ideal > ult, uteis: uteisEntre(k === 0 ? addUteis(ini, 1) : ini, fim).length };
+  });
+}
+const nomeMes = () => `${MESES[S.m]} de ${S.y}`;
 
 // situação calculada de uma solicitação (site/frota × etapa)
 function celula(dem, it, k) {
-  const ets = dem.etapas, et = ets[k], c = it.passos[et.id] || {};
+  const ets = dem.etapas, et = ets[k], pp = passosDe(it, dem), c = pp[et.id] || {};
   const st = c.st || 'pendente';
-  let j = k - 1; while (j >= 0 && (it.passos[ets[j].id] || {}).st === 'na') j--;
-  const prev = j >= 0 ? { et: ets[j], c: it.passos[ets[j].id] || {} } : null;
+  let j = k - 1; while (j >= 0 && (pp[ets[j].id] || {}).st === 'na') j--;
+  const prev = j >= 0 ? { et: ets[j], c: pp[ets[j].id] || {} } : null;
   const prevSt = prev ? (prev.c.st || 'pendente') : null;
   const liberada = !prev || prevSt === 'concluido';
   const aberta = st !== 'concluido' && st !== 'na';
   // a contagem do prazo: terceiro conta da data da solicitação; GFC conta da conclusão da etapa anterior (ou do início da demanda)
   const base = et.exec === 'terceiro' ? (c.enviado_em || null) : (prev ? (prevSt === 'concluido' ? prev.c.concluido_em || null : null) : dem.inicio);
   const dias = c.dias ?? et.dias;
-  const limite = base && dias != null && dias !== '' ? addUteis(String(base).slice(0, 10), Number(dias)) : null;
+  const limite = dem.recorrente ? planoMes(dem)[k].fim : (base && dias != null && dias !== '' ? addUteis(String(base).slice(0, 10), Number(dias)) : null);
   const vencida = aberta && !!limite && limite < HOJE;
   const impactada = et.exec === 'gfc' && aberta && (st === 'aguardando' || (!liberada && prev.et.exec === 'terceiro' && prevSt === 'solicitado'));
   const terceiros = et.exec === 'terceiro' && st === 'solicitado';
@@ -1657,28 +1731,29 @@ function kpisGfc(r) {
   </div>`;
 }
 
-const abasGfc = () => `<div class="seg">${[['demandas', 'Demandas'], ['cadastros', 'Cadastros'], ['calendario', 'Calendário de rotinas']].map(([v, t]) => `<button class="${S.gfcTela === v ? 'on' : ''}" data-act="gfcTela" data-v="${v}">${t}</button>`).join('')}</div>`;
+const quandoDem = d => d.recorrente ? `mensal · ${Number(d.dia_util) || 1}º dia útil (${fmtD(planoMes(d)[0] ? planoMes(d)[0].ini : null)})${d.ativo === false ? ' · pausada' : ''}` : 'avulsa · início ' + fmtD(d.inicio);
+const abasGfc = () => `<div class="seg">${[['calendario', 'Calendário'], ['demandas', 'Demandas'], ['cadastros', 'Cadastros']].map(([v, t]) => `<button class="${S.gfcTela === v ? 'on' : ''}" data-act="gfcTela" data-v="${v}">${t}</button>`).join('')}</div>`;
 function vGfc() {
   if (gfcSemBanco()) return `<section class="card"><div class="card-b" style="padding-top:16px"><h2>Módulo ainda não ativado no banco</h2><p class="muted" style="max-width:72ch">As tabelas das demandas do GFC não foram encontradas no Supabase. O administrador precisa rodar uma vez o script <b>supabase/gfc_e_comentarios.sql</b> no SQL Editor do Supabase e depois atualizar esta página.</p></div></section>`;
   const dem = demAberta(); if (dem) return vGfcDemanda(dem); S.gfcAberta = null;
   const abas = abasGfc() + (S.me.area !== 'gfc' ? selEscopo(false) : '');
   if (S.gfcTela === 'cadastros') return `<div class="toolbar">${abas}<span class="muted small">Sites, frotas e responsáveis reaproveitados ao montar cada demanda.</span></div>${vGfcCadastros()}`;
   const todas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) }));
-  const lista = todas.filter(({ o }) => S.gfcFiltro === 'todas' || (S.gfcFiltro === 'finalizadas' ? o.finalizada : !o.finalizada))
+  const lista = todas.filter(({ d, o }) => S.gfcFiltro === 'todas' || (demNoMes(d) && (S.gfcFiltro === 'finalizadas' ? o.finalizada : !o.finalizada)))
     .sort((a, b) => (a.o.finalizada - b.o.finalizada) || (String(b.d.criado_em || '') > String(a.d.criado_em || '') ? 1 : -1));
-  const r = resumoGfc(todas.filter(x => !x.o.finalizada).map(x => x.d));
+  const r = resumoGfc(todas.filter(x => demNoMes(x.d) && !x.o.finalizada).map(x => x.d));
   const segs = [['abertas', 'Em andamento'], ['finalizadas', 'Finalizadas'], ['todas', 'Todas']];
   return `
   <div class="toolbar">${abas}<div class="seg">${segs.map(([v, t]) => `<button class="${S.gfcFiltro === v ? 'on' : ''}" data-act="gfcFiltro" data-v="${v}">${t}</button>`).join('')}</div>
     <div class="grow"><button class="btn pri" data-act="novaDem">${ic('plus')}Nova demanda</button></div></div>
-  <div class="small muted">Indicadores das demandas em andamento. Cada solicitação é um site/frota numa etapa da demanda.</div>
+  <div class="small muted">Indicadores de ${nomeMes()} (troque o mês no topo). Demandas mensais recomeçam a cada mês; cada solicitação é um site/frota numa etapa.</div>
   ${kpisGfc(r)}
   ${lista.length ? `<div class="pgrid">${lista.map(({ d, o }) => `<article class="card pcard" data-act="abrirDem" data-id="${d.id}">
     <div class="chips">${o.finalizada ? '<span class="pill ok">Finalizada</span>' : '<span class="pill acc">Em andamento</span>'}${o.vencidas ? `<span class="pill bad">${o.vencidas} vencida${o.vencidas > 1 ? 's' : ''}</span>` : ''}${o.impactadas ? `<span class="pill warn">${o.impactadas} GFC impactada${o.impactadas > 1 ? 's' : ''}</span>` : ''}</div>
     <h2>${esc(d.titulo)}</h2>${d.descricao ? `<p>${esc(d.descricao)}</p>` : ''}
     <div class="minibar">${meter(o.pct, o.finalizada ? 'ok' : '')}<b class="num small">${pctTxt(o.pct)}</b></div>
     <div class="foot num"><span>${o.concl} de ${o.total} concluídas</span><span>·</span><span>${o.acao} ação do GFC</span><span>·</span><span>${o.terceiros} aguardando terceiros</span></div>
-    <div class="foot"><span class="num">${o.sites} ${o.sites === 1 ? 'site' : 'sites'} · ${o.itens} ${o.itens === 1 ? 'item' : 'itens'} · ${d.etapas.length} ${d.etapas.length === 1 ? 'etapa' : 'etapas'}</span>${respGfc(d) ? `<span>·</span><span>${esc(respGfc(d))}</span>` : ''}<span>·</span><span class="num">início ${fmtD(d.inicio)}</span></div>
+    <div class="foot"><span class="num">${o.sites} ${o.sites === 1 ? 'site' : 'sites'} · ${o.itens} ${o.itens === 1 ? 'item' : 'itens'} · ${d.etapas.length} ${d.etapas.length === 1 ? 'etapa' : 'etapas'}</span>${respGfc(d) ? `<span>·</span><span>${esc(respGfc(d))}</span>` : ''}<span>·</span><span class="num">${quandoDem(d)}</span></div>
   </article>`).join('')}</div>` : `<section class="card"><div class="empty">${S.gfcDemandas.length ? 'Nenhuma demanda com esse filtro.' : 'Nenhuma demanda aberta. Cadastre sites e frotas na aba Cadastros e depois crie a primeira demanda.'}</div></section>`}`;
 }
 
@@ -1702,7 +1777,7 @@ function celHtml(dem, it, k) {
     ${solicitar ? `<button class="btn sm" data-act="gfcSolicitar" data-it="${it.id}" data-k="${k}" title="Registrar a solicitação com a data de hoje">Solicitar</button>` : ''}</div>`;
 }
 function vGfcDemanda(dem) {
-  const o = statsDem(dem), ets = dem.etapas, its = itensDem(dem.id);
+  const o = statsDem(dem), ets = dem.etapas, its = itensDem(dem.id), plano = dem.recorrente ? planoMes(dem) : null;
   const sites = [...new Map(its.map(i => [chaveSite(i), nomeSite(i)])).entries()];
   if (S.gfcSite && !sites.some(([k]) => k === S.gfcSite)) S.gfcSite = '';
   const passa = it => {
@@ -1714,7 +1789,9 @@ function vGfcDemanda(dem) {
   const vis = its.filter(passa);
   const estagios = ets.map((et, k) => {
     const e = o.porEtapa[k], p = pct(e.concl, e.total);
+    const pl = plano && plano[k];
     return `<div class="estagio"><span class="small muted">Etapa ${k + 1} · ${et.exec === 'gfc' ? 'GFC executa' : 'terceiro executa'} · ${plUteis(et.dias)}</span><b>${esc(et.titulo)}</b>
+      ${pl ? `<span class="small num">${k === 0 && et.exec === 'terceiro' ? 'Cobrança ' + fmtD(pl.ini) + ' · retorno até ' + fmtD(pl.fim) : fmtD(pl.ini) + ' a ' + fmtD(pl.fim)}${pl.curta ? ` <span style="color:var(--warn)">· só ${plUteis(pl.uteis)} no mês</span>` : ''}</span>` : ''}
       <div class="minibar">${meter(p, p === 100 ? 'ok' : '')}<span class="num small">${pctTxt(p)}</span></div><span class="small muted num">${e.concl} de ${e.total} concluídas</span>
       ${e.solicitar ? `<button class="btn sm" data-act="gfcSolicitarTodas" data-k="${k}">Registrar ${e.solicitar} ${e.solicitar === 1 ? 'solicitação' : 'solicitações'} hoje</button>` : ''}</div>`;
   }).join('');
@@ -1728,18 +1805,18 @@ function vGfcDemanda(dem) {
         ${ets.map((_, k) => `<td>${celHtml(dem, it, k)}</td>`).join('')}<td class="r num" style="font-weight:600;color:var(--${p === 100 ? 'ok' : 'fg'})">${pctTxt(p)}</td></tr>`; }).join('');
   });
   return `
-  <div class="toolbar"><button class="btn" data-act="gfcVoltar">${ic('back')}Demandas</button><h2 style="font-size:18px;min-width:0;overflow-wrap:anywhere">${esc(dem.titulo)}</h2>
+  <div class="toolbar"><button class="btn" data-act="gfcVoltar">${ic('back')}Voltar</button><h2 style="font-size:18px;min-width:0;overflow-wrap:anywhere">${esc(dem.titulo)}</h2>
     <div class="grow toolbar"><button class="btn" data-act="gfcDuplicar" title="Nova demanda com os mesmos sites, frotas e etapas">${ic('copy')}Duplicar</button><button class="btn pri" data-act="editarDem">${ic('edit')}Editar etapas, sites e frotas</button></div></div>
   <section class="card"><div class="card-b" style="padding-top:16px"><div class="resumo-dem">
     <div><div class="big-pct num">${pctTxt(o.pct)}</div><div class="muted small num" style="margin-top:4px">${o.concl} de ${o.total} solicitações concluídas</div>${meter(o.pct, o.finalizada ? 'ok' : '')}
       <div class="chips" style="margin-top:10px">${o.finalizada ? '<span class="pill ok">Finalizada</span>' : ''}<span class="pill acc num">${o.acao} ação do GFC</span><span class="pill info num">${o.terceiros} aguardando terceiros</span><span class="pill warn num">${o.impactadas} GFC impactada</span><span class="pill bad num">${o.vencidas} vencidas</span><span class="pill nodot num">${o.noPrazo} no prazo</span></div>
-      <div class="small muted" style="margin-top:10px">${dem.descricao ? esc(dem.descricao) + '<br>' : ''}Início ${fmtDA(dem.inicio)}${respGfc(dem) ? ' · responsável no GFC: ' + esc(respGfc(dem)) : ''}</div></div>
+      <div class="small muted" style="margin-top:10px">${dem.descricao ? esc(dem.descricao) + '<br>' : ''}${dem.recorrente ? `<b>Mensal</b> · ciclo de ${nomeMes()} · cobrança no ${Number(dem.dia_util) || 1}º dia útil${demNoMes(dem) ? '' : ' · <span style="color:var(--warn)">fora do período desta demanda</span>'}` : 'Avulsa · início ' + fmtDA(dem.inicio)}${respGfc(dem) ? ' · responsável no GFC: ' + esc(respGfc(dem)) : ''}</div></div>
     <div class="estagios">${estagios}</div></div></div></section>
   ${its.length ? `<div class="toolbar"><select class="sel" data-chg="gfcSite" aria-label="Site"><option value="">Todos os sites</option>${sites.map(([k, n]) => `<option value="${esc(k)}" ${k === S.gfcSite ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>
     <div class="seg">${GFC_SIT.map(([v, t]) => `<button class="${S.gfcSit === v ? 'on' : ''}" data-act="gfcSit" data-v="${v}">${t}</button>`).join('')}</div></div>
   <section class="card"><div class="scroll-x" data-key="gfc"><table class="gfc-tbl"><thead><tr><th class="stick">Site / frota</th>${ets.map((et, k) => `<th>${k + 1}. ${esc(et.titulo)}<small>${et.exec === 'gfc' ? 'GFC' : 'Terceiro'} · ${plUteis(et.dias)}</small></th>`).join('')}<th class="r">Item</th></tr></thead>
     <tbody>${corpo || `<tr><td colspan="${ets.length + 2}" class="muted" style="text-align:center;padding:18px">Nenhum site/frota com esse filtro.</td></tr>`}</tbody></table></div></section>
-  <div class="legend"><span>O quadradinho marca a conclusão. Clique na situação para registrar data da solicitação, prazo, responsável ou observação.</span><span>Cada site/frota segue as etapas em ordem, sem depender dos outros.</span></div>`
+  <div class="legend"><span>O quadradinho marca a conclusão. Clique na situação para registrar data da solicitação, prazo, responsável ou observação.</span><span>Cada site/frota segue as etapas em ordem, sem depender dos outros.</span>${dem.recorrente ? '<span>Demanda mensal: troque o mês no topo para ver ou registrar outro ciclo.</span>' : ''}</div>`
   : `<section class="card"><div class="empty">Nenhum site ou frota nesta demanda. <button class="linkbtn" data-act="editarDem">Incluir sites e frotas</button></div></section>`}`;
 }
 
@@ -1756,12 +1833,12 @@ function vGfcCadastros() {
       <div class="rows">${resps.map(r => `<div class="row clk" data-act="gfcEditResp" data-id="${r.id}"><div class="t"><b>${esc(r.nome)}</b>${r.funcao ? `<span class="small muted">${esc(r.funcao)}</span>` : ''}</div></div>`).join('') || '<div class="empty">Nenhum responsável externo cadastrado.</div>'}</div></div></section></div>`;
 }
 
-// painel: situação atual das demandas GFC (não depende do mês)
+// painel: demandas GFC do mês escolhido (as avulsas aparecem até serem concluídas)
 function cardGfcPainel(ids) {
   if (!podeGfc() || gfcSemBanco() || !S.gfcDemandas.length || !ids.some(id => (P(id) || {}).area === 'gfc')) return '';
-  const abertas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) })).filter(x => !x.o.finalizada);
+  const abertas = S.gfcDemandas.filter(demNoMes).map(d => ({ d, o: statsDem(d) })).filter(x => !x.o.finalizada);
   const r = resumoGfc(abertas.map(x => x.d)), red = v => v ? 'style="color:var(--bad);font-weight:600"' : '';
-  return `<section class="card"><div class="card-h"><h2>Demandas GFC</h2><span class="muted small">situação atual · ${abertas.length} em andamento</span><button class="btn sm no-print" data-act="gfcLista">Abrir na Rotina</button></div>
+  return `<section class="card"><div class="card-h"><h2>Demandas GFC</h2><span class="muted small">${nomeMes()} · ${abertas.length} em andamento</span><button class="btn sm no-print" data-act="gfcLista">Abrir na Rotina</button></div>
     <div class="scroll-x"><table class="tbl"><thead><tr><th>Demanda</th><th>Conclusão</th><th class="r">Ação do GFC</th><th class="r">Aguardando terceiros</th><th class="r">GFC impactada</th><th class="r">Vencidas</th></tr></thead><tbody>
     ${abertas.length ? abertas.map(({ d, o }) => `<tr class="clk" data-act="abrirDem" data-id="${d.id}"><td><b>${esc(d.titulo)}</b></td><td><div class="minibar">${meter(o.pct)}<span class="num small">${pctTxt(o.pct)} <span class="muted">(${o.concl}/${o.total})</span></span></div></td><td class="r num">${o.acao}</td><td class="r num">${o.terceiros}</td><td class="r num">${o.impactadas}</td><td class="r num" ${red(o.vencidas)}>${o.vencidas}</td></tr>`).join('')
       + `<tr><td><b>Total</b></td><td><span class="num small">${pctTxt(pct(r.concl, r.total))} <span class="muted">(${r.concl}/${r.total})</span></span></td><td class="r num"><b>${r.acao}</b></td><td class="r num"><b>${r.terceiros}</b></td><td class="r num"><b>${r.impactadas}</b></td><td class="r num" ${red(r.vencidas)}><b>${r.vencidas}</b></td></tr>`
@@ -2025,20 +2102,24 @@ function pickerHtml(sel, chaves) {
 }
 function modalGfcDem(dem) {
   const novo = !dem;
-  dem = dem || { titulo: '', descricao: '', inicio: HOJE, responsavel_gfc: S.me.area === 'gfc' ? S.me.id : null, etapas: [{ id: uid(), titulo: 'Solicitação', exec: 'terceiro', dias: 5 }] };
+  dem = dem || { titulo: '', descricao: '', inicio: iso(new Date(S.y, S.m, 1)), recorrente: true, dia_util: 15, ativo: true, responsavel_gfc: S.me.area === 'gfc' ? S.me.id : null, etapas: [{ id: uid(), titulo: 'Retorno dos sites', exec: 'terceiro', dias: 5 }, { id: uid(), titulo: 'Atualização no sistema', exec: 'gfc', dias: 10 }] };
   const sel = new Set(novo ? [] : itensDem(dem.id).map(chaveItem)), chaves = new Set();
   const picker = pickerHtml(sel, chaves);
   const gfcPessoas = ativos().filter(p => p.area === 'gfc' || isGestao(p));
   abrirModal(novo ? 'Nova demanda' : 'Editar demanda', `<form data-form="gfcDem">
     ${fldI('titulo', 'Demanda', dem.titulo, 'text', 'required maxlength="140" placeholder="Ex.: Atualização de horímetro"', true)}
     <div class="fld full">${lbl('descricao', 'Descrição (opcional)')}<textarea class="inp" id="f-descricao" name="descricao" style="min-height:56px">${esc(dem.descricao || '')}</textarea></div>
-    ${fldI('inicio', 'Início', dem.inicio, 'date', 'required')}
+    <label class="cb"><input type="checkbox" id="f-recorrente" name="recorrente" data-chg="gfcRec" ${dem.recorrente ? 'checked' : ''}> Repete todo mês — o sistema monta o calendário de cada mês sozinho</label>
+    <div class="fld" id="w-diautil" ${dem.recorrente ? '' : 'hidden'}>${lbl('dia_util', 'Cobrança no dia útil nº')}${inp('dia_util', dem.dia_util ?? 15, 'number', 'min="1" max="23" step="1" data-chg="gfcRec"')}</div>
+    ${fldI('inicio', dem.recorrente ? 'Vale a partir de' : 'Início', String(dem.inicio || '').slice(0, 10), 'date', 'required data-chg="gfcRec"')}
+    ${!novo && dem.recorrente ? `<label class="cb"><input type="checkbox" name="ativo" ${dem.ativo !== false ? 'checked' : ''}> Ativa — desmarque para parar de repetir</label>` : ''}
+    <div class="fld full small" id="f-prev" style="background:var(--surface2);border-radius:7px;padding:8px 10px" ${dem.recorrente ? '' : 'hidden'}></div>
     <div class="fld">${lbl('responsavel_gfc', 'Responsável no GFC')}<select class="sel" id="f-responsavel_gfc" name="responsavel_gfc">${optsPessoas(gfcPessoas, dem.responsavel_gfc, 'Sem responsável')}</select></div>
     <div class="fld full"><div style="display:flex;align-items:center;gap:8px"><label style="margin-right:auto">Etapas — cada site/frota passa por elas nesta ordem</label><button class="btn sm" type="button" data-act="gfcAddEtapa">${ic('plus')}Etapa</button></div><div id="gfc-etapas" class="etapas"></div></div>
     <div class="fld full"><label>Sites e frotas envolvidos</label>${picker}</div>
     ${!novo ? '<div class="fld full small muted">Frotas desmarcadas saem da demanda junto com o acompanhamento delas.</div>' : ''}
     ${botoesModal(!novo && 'gfcExcluirDem')}</form>`,
-    { id: novo ? null : dem.id, etapas: dem.etapas.map(e => ({ ...e })), chaves, mount: desenharGfcEtapas }, true);
+    { id: novo ? null : dem.id, etapas: dem.etapas.map(e => ({ ...e })), chaves, mount: () => { desenharGfcEtapas(); CHG.gfcRec(); } }, true);
 }
 function lerGfcEtapas() {
   const box = document.getElementById('gfc-etapas'); if (!box) return modalCtx.etapas;
@@ -2055,7 +2136,7 @@ function desenharGfcEtapas() {
     <select class="sel" data-f="exec" aria-label="Quem executa a etapa ${k + 1}">${opts({ terceiro: 'Terceiro executa', gfc: 'GFC executa' }, e.exec)}</select>
     <input class="inp" type="number" min="0" max="120" step="1" data-f="dias" value="${e.dias ?? ''}" placeholder="dias úteis" aria-label="Prazo da etapa ${k + 1} em dias úteis" title="Prazo em dias úteis">
     <button class="iconbtn" type="button" data-act="gfcRmEtapa" data-i="${k}" aria-label="Remover etapa ${k + 1}" ${ets.length < 2 ? 'disabled' : ''}>${ic('x')}</button></div>`).join('')
-    + '<div class="small muted">Prazo em dias úteis (segunda a sexta). Etapa de terceiro: conta a partir da data da solicitação. Etapa do GFC: conta a partir da conclusão da etapa anterior.</div>';
+    + '<div class="small muted">Prazo em dias úteis (segunda a sexta). Na demanda mensal, cada etapa começa no dia útil seguinte ao fim da anterior e nenhuma passa do último dia útil do mês. Na avulsa, a etapa de terceiro conta da data da solicitação e a do GFC, da conclusão da anterior.</div>';
 }
 function modalGfcCel(dem, it, k) {
   const x = celula(dem, it, k), et = x.et, c = x.c, terc = et.exec === 'terceiro';
@@ -2065,9 +2146,10 @@ function modalGfcCel(dem, it, k) {
     <div class="fld full small muted">${esc(dem.titulo)} · ${esc(nomeSite(it))} · etapa ${k + 1}, executada por ${terc ? 'terceiro' : 'GFC'}${!x.liberada ? ' · a etapa anterior ainda não foi concluída' : ''}</div>
     <div class="fld">${lbl('st', 'Situação')}<select class="sel" id="f-st" name="st" data-chg="gfcStSel">${sts.map(v => `<option value="${v}" ${v === x.st ? 'selected' : ''}>${rotSt[v]}</option>`).join('')}</select></div>
     ${fldI('resp', 'Responsável', x.resp, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — não precisa ser da equipe"')}
-    ${terc ? fldI('enviado_em', 'Data da solicitação', c.enviado_em || '', 'date', 'data-chg="gfcPrazo"') : `<div class="fld"><label>Contagem do prazo a partir de</label><div class="inp" style="background:var(--surface2)">${x.base ? fmtDA(x.base) : 'conclusão da etapa anterior'}</div></div>`}
-    ${fldI('dias', 'Prazo (dias úteis)', x.dias ?? '', 'number', 'min="0" max="120" step="1" data-chg="gfcPrazo"')}
-    <div class="fld"><label>Data limite (calculada)</label><div class="inp num" id="f-limite" style="background:var(--surface2)">—</div></div>
+    ${terc ? fldI('enviado_em', 'Data da solicitação', c.enviado_em || '', 'date', 'data-chg="gfcPrazo"') : dem.recorrente ? '' : `<div class="fld"><label>Contagem do prazo a partir de</label><div class="inp" style="background:var(--surface2)">${x.base ? fmtDA(x.base) : 'conclusão da etapa anterior'}</div></div>`}
+    ${dem.recorrente ? `<div class="fld"><label>Data limite (calendário de ${MESES[S.m]})</label><div class="inp num" style="background:var(--surface2)">${fmtDA(x.limite)} (${DIAS[dt(x.limite).getDay()]})</div></div>`
+      : `${fldI('dias', 'Prazo (dias úteis)', x.dias ?? '', 'number', 'min="0" max="120" step="1" data-chg="gfcPrazo"')}
+    <div class="fld"><label>Data limite (calculada)</label><div class="inp num" id="f-limite" style="background:var(--surface2)">—</div></div>`}
     <div class="fld" id="w-concl" ${x.st === 'concluido' ? '' : 'hidden'}>${lbl('concluido_em', 'Data de conclusão')}${inp('concluido_em', c.concluido_em || HOJE, 'date')}</div>
     <div class="fld full">${lbl('obs', 'Observação')}<textarea class="inp" id="f-obs" name="obs" placeholder="Ex.: site pediu mais dois dias; falta a planilha do consultor">${esc(c.obs || '')}</textarea></div>
     ${botoesModal()}</form>${datalistResp()}`, { dem: dem.id, it: it.id, k, base: x.base, terc, mount: () => CHG.gfcPrazo() });
@@ -2101,8 +2183,9 @@ function modalGfcResp(r) {
     ${fldI('funcao', 'Função ou empresa (opcional)', r.funcao, 'text', 'maxlength="80" placeholder="Ex.: CSP, consultor, contato do site"')}
     ${botoesModal(!novo && 'gfcExcluirResp')}</form>`, { id: novo ? null : r.id });
 }
-async function salvarPasso(it, etId, patch) {
-  const passos = { ...it.passos, [etId]: { ...(it.passos[etId] || {}), ...patch } };
+async function salvarPasso(it, dem, etId, patch) {
+  const mk = chaveMes(dem), doMes = it.passos[mk] || {};
+  const passos = { ...it.passos, [mk]: { ...doMes, [etId]: { ...(doMes[etId] || {}), ...patch } } };
   await API.atualizar('gfc_itens', it.id, { passos });
   it.passos = passos;
 }
@@ -2271,7 +2354,9 @@ const FORM = {
   gfcDem(f, fd) {
     const ets = lerGfcEtapas().filter(e => e.titulo);
     if (!ets.length) { toast('Inclua pelo menos uma etapa com nome.'); return; }
-    const row = { titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), inicio: fd.get('inicio'), responsavel_gfc: fd.get('responsavel_gfc') || null, etapas: ets };
+    const rec = fd.get('recorrente') === 'on';
+    const row = { titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), inicio: fd.get('inicio'), responsavel_gfc: fd.get('responsavel_gfc') || null, etapas: ets,
+      recorrente: rec, dia_util: rec ? Math.min(23, Math.max(1, Math.round(Number(fd.get('dia_util')) || 1))) : null, ativo: rec && modalCtx.id && f.querySelector('[name=ativo]') ? fd.get('ativo') === 'on' : true };
     const marcados = new Set(fd.getAll('pick')), id = modalCtx.id, mostrados = modalCtx.chaves;
     salvar(async () => {
       const dem = id ? await API.atualizar('gfc_demandas', id, row) : await API.inserir('gfc_demandas', { ...row, criado_por: S.me.id });
@@ -2287,13 +2372,13 @@ const FORM = {
   gfcCel(f, fd) {
     const dem = S.gfcDemandas.find(d => d.id === modalCtx.dem), it = S.gfcItens.find(i => i.id === modalCtx.it), et = dem.etapas[modalCtx.k];
     const st = fd.get('st'), padrao = et.exec === 'gfc' ? respGfc(dem) : (it.responsavel || ''), resp = (fd.get('resp') || '').trim();
-    const dias = fd.get('dias') === '' ? null : Math.max(0, Math.round(Number(fd.get('dias'))));
+    const dias = !fd.has('dias') || fd.get('dias') === '' ? null : Math.max(0, Math.round(Number(fd.get('dias'))));
     const patch = {
       st, resp: resp && resp !== padrao ? resp : null, dias: dias === et.dias ? null : dias, obs: txt(fd.get('obs')),
       enviado_em: et.exec === 'terceiro' ? (fd.get('enviado_em') || (st === 'solicitado' ? HOJE : null)) : null,
       concluido_em: st === 'concluido' ? (fd.get('concluido_em') || HOJE) : null
     };
-    salvar(() => salvarPasso(it, et.id, patch), 'Atualizado');
+    salvar(() => salvarPasso(it, dem, et.id, patch), 'Atualizado');
   },
   gfcItem(f, fd) { salvar(() => API.atualizar('gfc_itens', modalCtx.id, { responsavel: txt(fd.get('responsavel')), obs: txt(fd.get('obs')) }), 'Atualizado'); },
   gfcSite(f, fd) {
@@ -2438,32 +2523,32 @@ const ACT = {
   gfcLista() { fecharModal(); S.view = 'rotina'; S.gfcTela = 'demandas'; S.gfcAberta = null; if (!abaRotinaGfc()) S.escopo = 'area:gfc'; render(); window.scrollTo(0, 0); },
   gfcFiltro(el) { S.gfcFiltro = el.dataset.v; render(); },
   gfcSit(el) { S.gfcSit = el.dataset.v; render(); },
-  abrirDem(el) { S.view = 'rotina'; S.gfcTela = 'demandas'; if (!abaRotinaGfc()) S.escopo = 'area:gfc'; S.gfcAberta = el.dataset.id; S.gfcSite = ''; S.gfcSit = 'todas'; render(); window.scrollTo(0, 0); },
-  gfcVoltar() { S.gfcAberta = null; render(); window.scrollTo(0, 0); },
+  abrirDem(el) { S.gfcVolta = S.view === 'rotina' && S.gfcTela === 'calendario' ? 'calendario' : 'demandas'; S.view = 'rotina'; S.gfcTela = 'demandas'; if (!abaRotinaGfc()) S.escopo = 'area:gfc'; S.gfcAberta = el.dataset.id; S.gfcSite = ''; S.gfcSit = 'todas'; render(); window.scrollTo(0, 0); },
+  gfcVoltar() { S.gfcAberta = null; S.gfcTela = S.gfcVolta || 'demandas'; render(); window.scrollTo(0, 0); },
   novaDem: () => modalGfcDem(null),
   editarDem() { modalGfcDem(demAberta()); },
   gfcExcluirDem() { const id = modalCtx.id; confirmar('Excluir esta demanda com todo o acompanhamento dos sites e frotas?', () => salvar(async () => { await API.excluir('gfc_demandas', id); S.gfcAberta = null; }, 'Demanda excluída')); },
   gfcDuplicar() {
     const dem = demAberta();
     confirmar(`Criar uma nova demanda a partir de “${dem.titulo}”, com os mesmos sites, frotas, responsáveis e etapas, e o acompanhamento zerado?`, () => salvar(async () => {
-      const n = await API.inserir('gfc_demandas', { titulo: dem.titulo + ' (nova)', descricao: dem.descricao || null, inicio: HOJE, responsavel_gfc: dem.responsavel_gfc || null, etapas: dem.etapas.map(e => ({ ...e })), criado_por: S.me.id });
+      const n = await API.inserir('gfc_demandas', { titulo: dem.titulo + ' (nova)', descricao: dem.descricao || null, inicio: HOJE, responsavel_gfc: dem.responsavel_gfc || null, etapas: dem.etapas.map(e => ({ ...e })), recorrente: !!dem.recorrente, dia_util: dem.dia_util ?? null, ativo: true, criado_por: S.me.id });
       await API.inserirLote('gfc_itens', itensDem(dem.id).map(i => ({ demanda_id: n.id, site_id: i.site_id, site_nome: i.site_nome, frota_id: i.frota_id, frota_nome: i.frota_nome, responsavel: i.responsavel, passos: {} })));
       S.gfcAberta = n.id;
     }, 'Nova demanda criada'));
   },
-  gfcAddEtapa() { modalCtx.etapas = lerGfcEtapas(); modalCtx.etapas.push({ id: uid(), titulo: '', exec: 'gfc', dias: 2 }); desenharGfcEtapas(); const ins = document.querySelectorAll('#gfc-etapas [data-f="titulo"]'); if (ins.length) ins[ins.length - 1].focus(); },
-  gfcRmEtapa(el) { modalCtx.etapas = lerGfcEtapas(); if (modalCtx.etapas.length < 2) return; modalCtx.etapas.splice(Number(el.dataset.i), 1); desenharGfcEtapas(); },
+  gfcAddEtapa() { modalCtx.etapas = lerGfcEtapas(); modalCtx.etapas.push({ id: uid(), titulo: '', exec: 'gfc', dias: 2 }); desenharGfcEtapas(); CHG.gfcRec(); const ins = document.querySelectorAll('#gfc-etapas [data-f="titulo"]'); if (ins.length) ins[ins.length - 1].focus(); },
+  gfcRmEtapa(el) { modalCtx.etapas = lerGfcEtapas(); if (modalCtx.etapas.length < 2) return; modalCtx.etapas.splice(Number(el.dataset.i), 1); desenharGfcEtapas(); CHG.gfcRec(); },
   gfcChk(el) {
     const { dem, it, k } = ctxCel(el), x = celula(dem, it, k);
     const patch = x.st === 'concluido' ? { st: x.et.exec === 'terceiro' && x.c.enviado_em ? 'solicitado' : 'pendente', concluido_em: null } : { st: 'concluido', concluido_em: HOJE };
-    salvar(() => salvarPasso(it, x.et.id, patch), x.st === 'concluido' ? null : 'Concluído');
+    salvar(() => salvarPasso(it, dem, x.et.id, patch), x.st === 'concluido' ? null : 'Concluído');
   },
-  gfcSolicitar(el) { const { dem, it, k } = ctxCel(el); salvar(() => salvarPasso(it, dem.etapas[k].id, { st: 'solicitado', enviado_em: HOJE }), 'Solicitação registrada hoje'); },
+  gfcSolicitar(el) { const { dem, it, k } = ctxCel(el); salvar(() => salvarPasso(it, dem, dem.etapas[k].id, { st: 'solicitado', enviado_em: HOJE }), 'Solicitação registrada hoje'); },
   gfcSolicitarTodas(el) {
     const dem = demAberta(), k = Number(el.dataset.k), et = dem.etapas[k];
     const alvo = itensDem(dem.id).filter(it => { const x = celula(dem, it, k); return x.acao && et.exec === 'terceiro'; });
     confirmar(`Registrar hoje (${fmtD(HOJE)}) a solicitação de “${et.titulo}” para ${alvo.length} ${alvo.length === 1 ? 'site/frota' : 'sites/frotas'}? O prazo de cada um passa a contar a partir de hoje.`,
-      () => salvar(async () => { for (const it of alvo) await salvarPasso(it, et.id, { st: 'solicitado', enviado_em: HOJE }); }, 'Solicitações registradas'));
+      () => salvar(async () => { for (const it of alvo) await salvarPasso(it, dem, et.id, { st: 'solicitado', enviado_em: HOJE }); }, 'Solicitações registradas'));
   },
   gfcCel(el) { const { dem, it, k } = ctxCel(el); modalGfcCel(dem, it, k); },
   gfcItem(el) { modalGfcItem(S.gfcItens.find(i => i.id === el.dataset.id)); },
@@ -2509,10 +2594,25 @@ const CHG = {
     const w = document.getElementById('w-concl'); if (w) w.hidden = el.value !== 'concluido';
     const env = document.getElementById('f-enviado_em'); if (env && el.value === 'solicitado' && !env.value) { env.value = HOJE; CHG.gfcPrazo(); }
   },
+  gfcRec() {
+    const rec = document.getElementById('f-recorrente'); if (!rec) return;
+    document.getElementById('w-diautil').hidden = !rec.checked;
+    const prev = document.getElementById('f-prev'); prev.hidden = !rec.checked;
+    const l = document.querySelector('label[for="f-inicio"]'); if (l) l.textContent = rec.checked ? 'Vale a partir de' : 'Início';
+    if (!rec.checked) return;
+    const ets = lerGfcEtapas().filter(e => e.titulo), n = Number(document.getElementById('f-dia_util').value) || 1;
+    if (!ets.length) { prev.textContent = 'Inclua as etapas para ver as datas.'; return; }
+    const ini = document.getElementById('f-inicio').value || HOJE, y0 = dt(ini).getFullYear(), m0 = dt(ini).getMonth();
+    const meses = [0, 1, 2].map(k => [new Date(y0, m0 + k, 1).getFullYear(), new Date(y0, m0 + k, 1).getMonth()]);
+    prev.innerHTML = '<b>Como fica no calendário</b>' + meses.map(([y, m]) => {
+      const pl = planoMes({ dia_util: n, etapas: ets }, y, m);
+      return `<div class="num" style="margin-top:4px"><span style="text-transform:capitalize">${MESES[m]}</span>: ${pl.map((j, k) => `${esc(ets[k].titulo)} ${k === 0 && ets[k].exec === 'terceiro' ? 'cobrança ' + fmtD(j.ini) + ', retorno até ' + fmtD(j.fim) : fmtD(j.ini) + ' a ' + fmtD(j.fim)}${j.curta ? ` <span style="color:var(--warn)">(só ${plUteis(j.uteis)})</span>` : ''}`).join(' · ')}</div>`;
+    }).join('');
+  },
   gfcPrazo() {
-    const out = document.getElementById('f-limite'); if (!out) return;
+    const out = document.getElementById('f-limite'), fdias = document.getElementById('f-dias'); if (!out || !fdias) return;
     const env = document.getElementById('f-enviado_em'), base = modalCtx.terc ? (env && env.value) : modalCtx.base;
-    const d = document.getElementById('f-dias').value;
+    const d = fdias.value;
     if (!base) { out.textContent = 'definida quando a contagem começar'; return; }
     if (d === '') { out.textContent = 'sem prazo'; return; }
     const lim = addUteis(String(base).slice(0, 10), Math.max(0, Math.round(Number(d))));
@@ -2540,6 +2640,7 @@ document.addEventListener('input', e => {
   const c = e.target.dataset && e.target.dataset.chg;
   if (c === 'rangeProg') CHG.rangeProg(e.target);
   if (c === 'gfcPrazo') CHG.gfcPrazo();
+  if (c === 'gfcRec' || e.target.closest('#gfc-etapas')) CHG.gfcRec();
   if (c === 'parBusca') { clearTimeout(buscaT); const el = e.target; buscaT = setTimeout(() => CHG.parBusca(el), 300); }
 });
 document.addEventListener('submit', e => { const f = e.target; if (f.dataset.form && FORM[f.dataset.form]) { e.preventDefault(); FORM[f.dataset.form](f, new FormData(f)); } });
@@ -2672,19 +2773,21 @@ function seedDemo() {
   const gfc_frotas = [['gf1', 'gs_a', '797F', 'Contato A'], ['gf2', 'gs_a', '794AC', 'Contato A'], ['gf3', 'gs_b', 'D11', 'Contato B'], ['gf4', 'gs_b', '350', 'Contato B'], ['gf5', 'gs_c', '988', 'Contato C']]
     .map(([id, site_id, nome, responsavel]) => ({ id, site_id, nome, responsavel, ativo: true }));
   const gfc_responsaveis = [['gr1', 'Contato A', 'CSP do Site A'], ['gr2', 'Contato B', 'CSP do Site B'], ['gr3', 'Contato C', 'Consultor do Site C']].map(([id, nome, funcao]) => ({ id, nome, funcao }));
+  const mes0 = iso(new Date(d0.getFullYear(), d0.getMonth() - 1, 1)), mk = HOJE.slice(0, 7);
+  const etMensal = (a, b) => [{ id: a, titulo: 'Retorno dos sites', exec: 'terceiro', dias: 5 }, { id: b, titulo: 'Atualização no sistema', exec: 'gfc', dias: 10 }];
   const gfc_demandas = [
-    { id: 'gd1', titulo: 'Atualização de horímetro', descricao: 'Exemplo: cada site envia o horímetro atualizado das frotas.', inicio: D(-10), responsavel_gfc: 'p_vit', etapas: [{ id: 'ge1', titulo: 'Atualizar horímetro', exec: 'terceiro', dias: 5 }], criado_por: 'p_vit', criado_em: ca(-10) },
-    { id: 'gd2', titulo: 'Fechamento mensal das frotas', descricao: 'Exemplo com etapas em sequência.', inicio: D(-4), responsavel_gfc: 'p_gab', etapas: [{ id: 'ge2', titulo: 'Horímetro', exec: 'terceiro', dias: 3 }, { id: 'ge3', titulo: 'Atualizar ROM', exec: 'gfc', dias: 2 }, { id: 'ge4', titulo: 'Vida útil e forecast', exec: 'terceiro', dias: 5 }], criado_por: 'p_vit', criado_em: ca(-4) }
+    { id: 'gd1', titulo: 'Atualização de horímetro (avulsa)', descricao: 'Exemplo de demanda avulsa: cada site envia o horímetro atualizado das frotas.', inicio: D(-10), recorrente: false, ativo: true, responsavel_gfc: 'p_vit', etapas: [{ id: 'ge1', titulo: 'Atualizar horímetro', exec: 'terceiro', dias: 5 }], criado_por: 'p_vit', criado_em: ca(-10) },
+    { id: 'gd2', titulo: 'Horímetro', descricao: 'Exemplo mensal: cobrança no 15º dia útil, 5 dias úteis de retorno e até 10 de atualização.', inicio: mes0, recorrente: true, dia_util: 15, ativo: true, responsavel_gfc: 'p_vit', etapas: etMensal('ge2', 'ge3'), criado_por: 'p_vit', criado_em: ca(-30) },
+    { id: 'gd3', titulo: 'Mapa de componentes', descricao: 'Exemplo mensal cobrado no mesmo dia do horímetro.', inicio: mes0, recorrente: true, dia_util: 15, ativo: true, responsavel_gfc: 'p_gab', etapas: etMensal('ge4', 'ge5'), criado_por: 'p_vit', criado_em: ca(-30) }
   ];
   const gi = (id, demanda_id, fid, passos) => { const f = gfc_frotas.find(x => x.id === fid), st = gfc_sites.find(x => x.id === f.site_id); return { id, demanda_id, site_id: st.id, site_nome: st.nome, frota_id: f.id, frota_nome: f.nome, responsavel: f.responsavel, obs: null, passos, criado_em: ca(-10) }; };
   const ok = (env, fim) => ({ st: 'concluido', enviado_em: D(env), concluido_em: D(fim) });
   const gfc_itens = [
-    gi('gi1', 'gd1', 'gf1', { ge1: ok(-10, -8) }), gi('gi2', 'gd1', 'gf2', { ge1: ok(-10, -6) }),
-    gi('gi3', 'gd1', 'gf3', { ge1: { st: 'solicitado', enviado_em: D(-10) } }), gi('gi4', 'gd1', 'gf4', { ge1: { st: 'solicitado', enviado_em: D(-2) } }),
-    gi('gi5', 'gd1', 'gf5', { ge1: ok(-10, -7) }),
-    gi('gi6', 'gd2', 'gf1', { ge2: ok(-4, -2) }), gi('gi7', 'gd2', 'gf2', { ge2: ok(-4, -3), ge3: { st: 'concluido', concluido_em: D(-1) }, ge4: { st: 'solicitado', enviado_em: D(-1) } }),
-    gi('gi8', 'gd2', 'gf3', { ge2: { st: 'solicitado', enviado_em: D(-4) } }), gi('gi9', 'gd2', 'gf4', {}),
-    gi('gi10', 'gd2', 'gf5', { ge2: ok(-4, -3), ge3: { st: 'aguardando', obs: 'Falta a planilha de componentes do consultor' } })
+    gi('gi1', 'gd1', 'gf1', { _: { ge1: ok(-10, -8) } }), gi('gi2', 'gd1', 'gf2', { _: { ge1: ok(-10, -6) } }),
+    gi('gi3', 'gd1', 'gf3', { _: { ge1: { st: 'solicitado', enviado_em: D(-10) } } }), gi('gi4', 'gd1', 'gf4', { _: { ge1: { st: 'solicitado', enviado_em: D(-2) } } }),
+    gi('gi5', 'gd1', 'gf5', { _: { ge1: ok(-10, -7) } }),
+    ...['gf1', 'gf2', 'gf3', 'gf4', 'gf5'].map((f, k) => gi('gh' + k, 'gd2', f, {})),
+    ...['gf1', 'gf2', 'gf3', 'gf5'].map((f, k) => gi('gm' + k, 'gd3', f, k === 0 ? { [mk]: { ge4: { st: 'solicitado', enviado_em: HOJE } } } : {}))
   ];
   const paralela_comentarios = [{ id: uid(), paralela_id: 'a3', autor_id: 'p_vit', texto: 'Slides de vida útil prontos. Falta a revisão técnica.', criado_em: ca(-1) }];
   return { pessoas, rotinas, rotina_exec, paralelas, etapas, notas, projetos, sprints, itens, paralela_comentarios, gfc_sites, gfc_frotas, gfc_responsaveis, gfc_demandas, gfc_itens, versao: 2 };
