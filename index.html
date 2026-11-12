@@ -74,7 +74,7 @@ h1{font-size:20px}h2{font-size:16px}h3{font-size:14px}
 .main{min-width:0;display:flex;flex-direction:column}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:12px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
 .top h1{margin-right:auto}
-.content{padding-block:20px 40px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;max-width:1400px;width:100%}
+.content{padding-block:20px 40px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;width:100%}
 .month{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:2px}
 .month span{min-width:128px;text-align:center;font-weight:600;text-transform:capitalize;font-size:13px}
 .iconbtn{border:0;background:none;width:32px;height:32px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
@@ -104,7 +104,8 @@ h1{font-size:20px}h2{font-size:16px}h3{font-size:14px}
 .btn.danger{color:var(--bad)}
 .btn.sm{padding:4px 9px;font-size:12px}
 .sel,.inp{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:7px 10px;font-size:13px;min-width:0}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;overflow-x:auto;max-width:100%;background:var(--surface)}
+.seg button{white-space:nowrap;flex:none}
 .seg button{border:0;background:none;padding:6px 11px;font-size:12.5px;cursor:pointer;color:var(--muted)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button.on{background:var(--accent-soft);color:var(--fg);font-weight:600}
@@ -264,7 +265,7 @@ details.late summary{cursor:pointer;font-size:12.5px;color:var(--bad);padding:8p
 .nota small{color:var(--faint)}
 
 /* gráfico */
-.chart svg{display:block;width:100%;height:auto}
+.chart svg{display:block;width:100%;height:auto;max-height:320px}
 .hbar{display:grid;grid-template-columns:120px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:12.5px;padding:4px 0}
 .hbar .meter{margin:0;height:9px}
 
@@ -346,6 +347,56 @@ textarea.inp{min-height:76px;resize:vertical}
 .hstats{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .hstats b{font-size:15px;color:var(--fg);margin-right:3px}
 .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+/* comentários (feed) da paralela */
+.feed{border-top:1px solid var(--line);padding:14px 18px 18px;display:flex;flex-direction:column;gap:10px}
+.modal form.feed-form{display:flex;gap:8px;align-items:flex-start;padding:0;grid-template-columns:none}
+.feed-form textarea.inp{flex:1;min-height:42px}
+.cmt{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line2)}
+.cmt:first-child{border-top:0}
+.cmt .t{flex:1;min-width:0}
+.cmt p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+
+/* demandas GFC */
+.kpis.k6{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gfc-tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px}
+.gfc-tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;font-weight:600;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:bottom}
+.gfc-tbl th small{display:block;text-transform:none;letter-spacing:0;font-weight:500;color:var(--faint)}
+.gfc-tbl td{padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.gfc-tbl .stick{position:sticky;left:0;z-index:2;background:var(--surface);min-width:150px;max-width:220px;border-right:1px solid var(--line)}
+.gfc-tbl tr.grp td{background:var(--surface2);font-weight:600;font-size:12px;padding:6px 8px}
+.gfc-tbl tr.grp td.stick{background:var(--surface2)}
+.gc{display:flex;align-items:center;gap:7px;min-width:168px;padding:5px 7px;border-radius:7px;border:1px solid var(--line2);background:var(--surface2)}
+.gc .gc-t{border:0;background:none;padding:0;text-align:left;cursor:pointer;min-width:0;flex:1;color:inherit}
+.gc .gc-t b{display:block;font-size:12px;font-weight:600;white-space:nowrap}
+.gc .gc-t small{display:block;font-size:11px;color:var(--muted);white-space:nowrap}
+.gc .btn.sm{padding:2px 7px;font-size:11px}
+.gc.concluido{border-color:color-mix(in srgb,var(--ok) 40%,transparent);background:color-mix(in srgb,var(--ok) 9%,var(--surface))}
+.gc.concluido .gc-t b{color:var(--ok)}
+.gc.solicitado{border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.gc.solicitado .gc-t b{color:var(--info)}
+.gc.aguardando{border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
+.gc.aguardando .gc-t b{color:var(--warn)}
+.gc.acao{border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+.gc.vencida{border-color:var(--bad)}
+.gc.vencida .gc-t small{color:var(--bad);font-weight:600}
+.gc.bloq,.gc.na{opacity:.6}
+.gc .chk:disabled{cursor:not-allowed;opacity:.5}
+.estagios{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.estagio{border:1px solid var(--line2);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.estagio .meter{margin:0}
+.big-pct{font-family:var(--font-head);font-size:34px;font-weight:600;line-height:1}
+.resumo-dem{display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:18px;align-items:start}
+.et-row{display:grid;grid-template-columns:minmax(0,1fr) 200px 96px 32px;gap:6px;align-items:center}
+.picker{border:1px solid var(--line);border-radius:7px;max-height:300px;overflow:auto;padding:4px 10px}
+.picker .ps{padding:8px 0;border-top:1px solid var(--line2)}
+.picker .ps:first-child{border-top:0}
+.picker .pf{display:flex;flex-wrap:wrap;gap:4px 14px;padding:4px 0 0 24px}
+.picker label{display:inline-flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.cad-site{padding:10px 0;border-top:1px solid var(--line2)}
+.cad-site:first-child{border-top:0}
+.fr-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:14px;padding:2px 10px;font-size:12px;background:var(--surface2);cursor:pointer}
+.fr-chip:hover{border-color:var(--faint)}
 .print-only{display:none}
 @media print{
   .side,.bottom,.top,.demo-bar,.no-print,.toast{display:none!important}
@@ -357,6 +408,8 @@ textarea.inp{min-height:76px;resize:vertical}
 }
 @media (max-width:1100px){.mes-wrap{grid-template-columns:minmax(0,1fr)}.etapa{grid-template-columns:1fr 1fr 1fr;}.etapa [data-f=titulo]{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:820px){
+  .resumo-dem{grid-template-columns:minmax(0,1fr)}
+  .et-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 70px 32px}
   .app{grid-template-columns:minmax(0,1fr)}
   .side{display:none}
   .top,.content,.demo-bar{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -451,6 +504,9 @@ const ls = {
 };
 const inicial = n => String(n || '?').split(/\s+/).filter(Boolean).map(x => x[0]).slice(0, 2).join('').toUpperCase();
 const semanaDe = d => { const x = dt(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return iso(x); };
+// soma dias úteis (segunda a sexta; feriados não são considerados)
+const addUteis = (s, n) => { let d = s, k = 0; while (k < n) { d = addDias(d, 1); if (util(d)) k++; } return d; };
+const fmtDA = s => s ? `${fmtD(s)}/${dt(s).getFullYear()}` : '—';
 
 const ICON = {
   home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -473,7 +529,10 @@ const ICON = {
   ref: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 20v-5h-5"/>',
   down: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
   print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
-  alvo: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>'
+  alvo: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
+  gfc: '<path d="M10 6h10M10 12h10M10 18h10M3.5 6l1.3 1.3L7.5 4.6M3.5 12l1.3 1.3 2.7-2.7M3.5 18l1.3 1.3 2.7-2.7"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>'
 };
 const ic = (n, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]}</svg>`;
 
@@ -482,6 +541,8 @@ const now = new Date();
 const S = {
   modo: 'teste', me: null, sessao: null,
   pessoas: [], rotinas: [], exec: [], paralelas: [], etapas: [], notas: [], projetos: [], sprints: [], itens: [],
+  comentarios: [], gfcSites: [], gfcFrotas: [], gfcResp: [], gfcDemandas: [], gfcItens: [], faltando: [],
+  gfcTela: 'demandas', gfcFiltro: 'abertas', gfcAberta: null, gfcSite: '', gfcSit: 'todas',
   execMap: new Map(),
   view: ls.get('hub-view', 'inicio'),
   y: now.getFullYear(), m: now.getMonth(),
@@ -498,6 +559,8 @@ const isFrota = p => !!p && p.area === 'frota';
 const carga = p => Number(p && p.carga_horas) || (p && p.papel === 'estagiario' ? 6 : 8);
 const ativos = () => S.pessoas.filter(p => p.ativo !== false);
 const modoDiario = () => S.me && S.me.layout === 'diario';
+// módulo de demandas: área GFC, coordenação/liderança e administradores
+const podeGfc = (p = S.me) => !!p && (p.area === 'gfc' || isGestao(p) || !!p.admin);
 
 // ---------- visibilidade: privacidade só na rotina (espelha o banco) ----------
 function podeVerPessoa(id, me = S.me) {
@@ -541,6 +604,8 @@ function unidades() {
 // Camada de dados
 // =====================================================================
 const TABELAS = ['pessoas', 'rotinas', 'rotina_exec', 'paralelas', 'etapas', 'notas', 'projetos', 'sprints', 'itens'];
+// tabelas novas: se ainda não existirem no banco, o restante do app continua funcionando
+const TABELAS_OPC = ['paralela_comentarios', 'gfc_sites', 'gfc_frotas', 'gfc_responsaveis', 'gfc_demandas', 'gfc_itens'];
 let sb = null;
 let DEMO = null;
 const DEMO_KEY = 'hub-equipe-demo-v2';
@@ -561,8 +626,12 @@ const API = {
     if (S.modo === 'online') {
       const ref = new Date(Math.min(new Date(S.y, S.m, 1), new Date(now.getFullYear(), now.getMonth(), 1)));
       S.execDesde = iso(new Date(ref.getFullYear(), ref.getMonth() - 1, 1));
-      const res = await Promise.all(TABELAS.map(t => buscarTudo(t)));
-      const d = {}; TABELAS.forEach((t, i) => d[t] = res[i]);
+      const faltando = [];
+      const [res, opc] = await Promise.all([
+        Promise.all(TABELAS.map(t => buscarTudo(t))),
+        Promise.all(TABELAS_OPC.map(t => buscarTudo(t).catch(() => { faltando.push(t); return []; })))
+      ]);
+      const d = { faltando }; TABELAS.forEach((t, i) => d[t] = res[i]); TABELAS_OPC.forEach((t, i) => d[t] = opc[i]);
       aplicarDados(d);
     } else {
       S.pessoas = DEMO.pessoas;
@@ -578,6 +647,15 @@ const API = {
     const r = { id: uid(), criado_em: new Date().toISOString(), ...row };
     DEMO[t].push(r); salvarDemo(); return r;
   },
+  async inserirLote(t, rows) {
+    if (!rows.length) return [];
+    if (S.modo === 'online') {
+      const { data, error } = await sb.from(t).insert(rows).select();
+      if (error) throw error; return data;
+    }
+    const out = rows.map(row => ({ id: uid(), criado_em: new Date().toISOString(), ...row }));
+    DEMO[t].push(...out); salvarDemo(); return out;
+  },
   async atualizar(t, id, patch) {
     if (S.modo === 'online') {
       const { data, error } = await sb.from(t).update(patch).eq('id', id).select().single();
@@ -592,7 +670,9 @@ const API = {
     }
     DEMO[t] = DEMO[t].filter(x => x.id !== id);
     if (t === 'rotinas') DEMO.rotina_exec = DEMO.rotina_exec.filter(e => e.rotina_id !== id);
-    if (t === 'paralelas') DEMO.etapas = DEMO.etapas.filter(e => e.paralela_id !== id);
+    if (t === 'paralelas') { DEMO.etapas = DEMO.etapas.filter(e => e.paralela_id !== id); DEMO.paralela_comentarios = DEMO.paralela_comentarios.filter(c => c.paralela_id !== id); }
+    if (t === 'gfc_demandas') DEMO.gfc_itens = DEMO.gfc_itens.filter(i => i.demanda_id !== id);
+    if (t === 'gfc_sites') DEMO.gfc_frotas = DEMO.gfc_frotas.filter(f => f.site_id !== id);
     if (t === 'projetos') { DEMO.sprints = DEMO.sprints.filter(s => s.projeto_id !== id); DEMO.itens = DEMO.itens.filter(i => i.projeto_id !== id); }
     if (t === 'sprints') DEMO.itens.forEach(i => { if (i.sprint_id === id) i.sprint_id = null; });
     salvarDemo();
@@ -644,6 +724,11 @@ function aplicarDados(d, meDemo) {
   S.etapas = me ? d.etapas.map(e => ({ ...e })) : [];
   S.notas = me ? d.notas.filter(n => n.dono_id === me.id) : [];
   S.projetos = d.projetos; S.sprints = d.sprints; S.itens = d.itens;
+  S.comentarios = me ? (d.paralela_comentarios || []).slice() : [];
+  S.gfcSites = d.gfc_sites || []; S.gfcFrotas = d.gfc_frotas || []; S.gfcResp = d.gfc_responsaveis || [];
+  S.gfcDemandas = (d.gfc_demandas || []).map(x => ({ ...x, etapas: Array.isArray(x.etapas) ? x.etapas : [] }));
+  S.gfcItens = (d.gfc_itens || []).map(x => ({ ...x, passos: x.passos && typeof x.passos === 'object' ? x.passos : {} }));
+  S.faltando = d.faltando || [];
   S.execMap = new Map(S.exec.map(e => [e.rotina_id + '|' + String(e.data).slice(0, 10), e]));
   if (me && (!S.escopo || !escopoOpcoes().some(o => o[0] === S.escopo))) S.escopo = escopoPadrao();
 }
@@ -866,6 +951,7 @@ const frotaTxt = p => [p.site, p.frotas].filter(Boolean).join(' · ');
 const root = document.getElementById('app');
 const NAV = [['inicio', 'Início', 'home'], ['rotina', 'Rotina', 'rot'], ['paralelas', 'Paralelas', 'par'], ['projetos', 'Projetos', 'proj'], ['painel', 'Painel', 'painel']];
 const NAV2 = [['notas', 'Minhas notas', 'nota'], ['equipe', 'Equipe', 'equipe']];
+const navLista = curto => podeGfc() ? [...NAV, ['gfc', curto ? 'GFC' : 'Demandas GFC', 'gfc']] : NAV;
 
 function render() {
   if (S.modo === 'online' && !S.sessao) { root.innerHTML = telaLogin(); return; }
@@ -875,14 +961,15 @@ function render() {
   const ativoEl = document.activeElement && document.activeElement.id;
   const minhas = unidades().filter(u => u.pid === S.me.id && !u.done && u.tipo !== 'item').length;
   const navBtn = ([v, t, i]) => `<button class="nav ${S.view === v || (v === 'projetos' && S.view === 'projeto') ? 'on' : ''}" data-act="ir" data-v="${v}">${ic(i)}<span>${t}</span>${v === 'paralelas' && minhas ? `<span class="cnt num">${minhas}</span>` : ''}</button>`;
-  const titulo = { inicio: modoDiario() ? 'Diário de bordo' : 'Meu dia', rotina: 'Rotina', paralelas: 'Atividades paralelas', projetos: 'Projetos', projeto: 'Projeto', painel: 'Painel', notas: 'Minhas notas', equipe: 'Equipe' }[S.view];
+  if (S.view === 'gfc' && !podeGfc()) S.view = 'inicio';
+  const titulo = { inicio: modoDiario() ? 'Diário de bordo' : 'Meu dia', rotina: 'Rotina', paralelas: 'Atividades paralelas', projetos: 'Projetos', projeto: 'Projeto', painel: 'Painel', notas: 'Minhas notas', equipe: 'Equipe', gfc: 'Demandas GFC' }[S.view];
   const comMes = ['rotina', 'paralelas', 'painel'].includes(S.view);
   const tema = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.innerHTML = `
   <div class="app">
     <aside class="side">
       <div class="brand"><div class="brand-mark">ET</div><div><b>${esc(CONFIG.NOME_APP)}</b><small>${esc(CONFIG.SUBTITULO)}</small></div></div>
-      ${NAV.map(navBtn).join('')}
+      ${navLista().map(navBtn).join('')}
       <div class="side-sep"></div>
       ${NAV2.map(navBtn).join('')}
       <div class="side-foot">${S.modo === 'online' ? `<button class="nav" data-act="sair">${ic('sair')}<span>Sair</span></button>` : ''}</div>
@@ -898,7 +985,7 @@ function render() {
       </header>
       <div class="content">${viewAtual()}</div>
     </div>
-    <nav class="bottom">${NAV.map(navBtn).join('')}</nav>
+    <nav class="bottom">${navLista(true).map(navBtn).join('')}</nav>
   </div>`;
   root.querySelectorAll('.scroll-x[data-key]').forEach(el => {
     if (scrolls[el.dataset.key] != null) el.scrollLeft = scrolls[el.dataset.key];
@@ -916,6 +1003,7 @@ function viewAtual() {
     case 'painel': return vPainel();
     case 'notas': return vNotas();
     case 'equipe': return vEquipe();
+    case 'gfc': return vGfc();
     default: return vInicio();
   }
 }
@@ -1360,6 +1448,7 @@ function vPainel() {
       <td><div class="minibar">${meter(v, corPct(v))}<span class="num small">${v == null ? '—' : v + '%'}</span></div></td><td class="r num">${x.feitas}<span class="muted small">/${x.esperadas}</span></td><td class="r num">${x.entregas}</td><td class="r num">${x.entregas ? pct(x.noPrazo, x.entregas) + '%' : '—'}</td>
       <td class="r num">${x.abertos}</td><td class="r num" ${x.atrasados ? 'style="color:var(--bad);font-weight:600"' : ''}>${x.atrasados}</td><td class="r num" ${f && x.mediaDia > x.carga ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? fmtH(x.mediaDia) : '<span class="muted">—</span>'}</td><td class="r num" ${f && x.acima ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? x.acima : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
   </tbody></table></div><div class="card-b small muted" style="padding-top:8px">Horas contam só para Performance de Frota. Nas outras áreas o acompanhamento é por data de entrega.</div></section>
+  ${cardGfcPainel(ids)}
   <section class="card"><div class="card-h"><h2>Projetos em andamento</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Projeto</th><th>Área</th><th>Progresso</th><th>Sprint atual</th><th class="r">Itens atrasados</th><th>Fim previsto</th></tr></thead><tbody>
     ${projs.length ? projs.map(p => { const pr = progProj(p.id), sp = sprintAtual(p.id), at = S.itens.filter(i => i.projeto_id === p.id && itemAtrasado(i)).length; return `<tr class="clk" data-act="abrirProj" data-id="${p.id}"><td><b>${esc(p.nome)}</b></td><td>${tagArea(p.area)}</td><td><div class="minibar">${meter(pr)}<span class="num small">${pr}%</span></div></td><td>${sp ? esc(sp.nome) + ` <span class="muted small num">até ${fmtD(sp.fim)}</span>` : '—'}</td><td class="r num" ${at ? 'style="color:var(--bad);font-weight:600"' : ''}>${at}</td><td class="num">${fmtD(p.fim)}</td></tr>`; }).join('') : '<tr><td colspan="6" class="muted">Nenhum projeto em andamento.</td></tr>'}
   </tbody></table></div></section>`;
@@ -1488,6 +1577,195 @@ function vEquipe() {
 }
 
 // =====================================================================
+// Demandas GFC
+// Demanda = processo principal. Cada site/frota incluído percorre as
+// etapas da demanda em sequência; cada site/frota × etapa é uma
+// solicitação com situação, responsável e prazo em dias úteis.
+// Itens diferentes não dependem uns dos outros.
+// =====================================================================
+const GFC_SIT = [['todas', 'Todas'], ['acao', 'Ação do GFC'], ['terceiros', 'Aguardando terceiros'], ['impactadas', 'GFC impactada'], ['vencidas', 'Vencidas'], ['concluidas', 'Concluídas']];
+const plUteis = n => n == null || n === '' ? 'sem prazo' : n + (Number(n) === 1 ? ' dia útil' : ' dias úteis');
+const porNome = (a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { numeric: true });
+const siteDe = id => S.gfcSites.find(x => x.id === id);
+const frotaDe = id => S.gfcFrotas.find(x => x.id === id);
+const nomeSite = it => (siteDe(it.site_id) || {}).nome || it.site_nome || 'Sem site';
+const nomeFrota = it => it.frota_id ? ((frotaDe(it.frota_id) || {}).nome || it.frota_nome || '—') : (it.frota_nome || 'Site todo');
+const chaveSite = it => it.site_id || it.site_nome || '';
+const chaveItem = it => it.frota_id ? 'f:' + it.frota_id : 's:' + it.site_id;
+const itensDem = did => S.gfcItens.filter(i => i.demanda_id === did).sort((a, b) => (nomeSite(a) + '|' + nomeFrota(a)).localeCompare(nomeSite(b) + '|' + nomeFrota(b), 'pt-BR', { numeric: true }));
+const respGfc = dem => { const p = P(dem.responsavel_gfc); return p ? p.nome : ''; };
+const gfcSemBanco = () => S.faltando.some(t => t.startsWith('gfc_'));
+const demAberta = () => S.gfcDemandas.find(d => d.id === S.gfcAberta);
+
+// situação calculada de uma solicitação (site/frota × etapa)
+function celula(dem, it, k) {
+  const ets = dem.etapas, et = ets[k], c = it.passos[et.id] || {};
+  const st = c.st || 'pendente';
+  let j = k - 1; while (j >= 0 && (it.passos[ets[j].id] || {}).st === 'na') j--;
+  const prev = j >= 0 ? { et: ets[j], c: it.passos[ets[j].id] || {} } : null;
+  const prevSt = prev ? (prev.c.st || 'pendente') : null;
+  const liberada = !prev || prevSt === 'concluido';
+  const aberta = st !== 'concluido' && st !== 'na';
+  // a contagem do prazo: terceiro conta da data da solicitação; GFC conta da conclusão da etapa anterior (ou do início da demanda)
+  const base = et.exec === 'terceiro' ? (c.enviado_em || null) : (prev ? (prevSt === 'concluido' ? prev.c.concluido_em || null : null) : dem.inicio);
+  const dias = c.dias ?? et.dias;
+  const limite = base && dias != null && dias !== '' ? addUteis(String(base).slice(0, 10), Number(dias)) : null;
+  const vencida = aberta && !!limite && limite < HOJE;
+  const impactada = et.exec === 'gfc' && aberta && (st === 'aguardando' || (!liberada && prev.et.exec === 'terceiro' && prevSt === 'solicitado'));
+  const terceiros = et.exec === 'terceiro' && st === 'solicitado';
+  const acao = aberta && liberada && st === 'pendente';
+  const resp = c.resp || (et.exec === 'gfc' ? respGfc(dem) : it.responsavel) || '';
+  return { et, c, st, liberada, aberta, base, dias, limite, vencida, impactada, terceiros, acao, resp };
+}
+function statsDem(dem) {
+  const its = itensDem(dem.id), ets = dem.etapas;
+  const o = { total: 0, concl: 0, terceiros: 0, vencidas: 0, impactadas: 0, acao: 0, noPrazo: 0, porEtapa: ets.map(() => ({ total: 0, concl: 0, solicitar: 0 })), porItem: {}, itens: its.length, sites: new Set(its.map(chaveSite)).size };
+  its.forEach(it => {
+    const pi = o.porItem[it.id] = { total: 0, concl: 0 };
+    ets.forEach((et, k) => {
+      const x = celula(dem, it, k); if (x.st === 'na') return;
+      o.total++; pi.total++; o.porEtapa[k].total++;
+      if (x.st === 'concluido') { o.concl++; pi.concl++; o.porEtapa[k].concl++; return; }
+      if (x.terceiros) o.terceiros++;
+      if (x.vencida) o.vencidas++; else if (x.limite) o.noPrazo++;
+      if (x.impactada) o.impactadas++;
+      if (x.acao) { o.acao++; if (et.exec === 'terceiro') o.porEtapa[k].solicitar++; }
+    });
+  });
+  o.pct = pct(o.concl, o.total);
+  o.finalizada = o.total > 0 && o.concl === o.total;
+  return o;
+}
+function resumoGfc(dems) {
+  const r = { total: 0, concl: 0, terceiros: 0, vencidas: 0, impactadas: 0, acao: 0, abertas: 0, demNoPrazo: 0 };
+  dems.forEach(d => { const o = statsDem(d); ['total', 'concl', 'terceiros', 'vencidas', 'impactadas', 'acao'].forEach(k => r[k] += o[k]); if (!o.finalizada) { r.abertas++; if (!o.vencidas) r.demNoPrazo++; } });
+  return r;
+}
+const pctTxt = v => v == null ? '—' : v + '%';
+function kpisGfc(r) {
+  const p = pct(r.concl, r.total);
+  return `<div class="kpis k6">
+    <div class="card kpi"><div class="l">Solicitações concluídas</div><div class="v num">${pctTxt(p)}</div><div class="s num">${r.concl} de ${r.total}</div>${meter(p, 'ok')}</div>
+    <div class="card kpi"><div class="l">Ação do GFC</div><div class="v num">${r.acao}</div><div class="s">a solicitar ou a executar</div></div>
+    <div class="card kpi"><div class="l">Aguardando terceiros</div><div class="v num">${r.terceiros}</div><div class="s">solicitadas, sem retorno</div></div>
+    <div class="card kpi"><div class="l">GFC impactada</div><div class="v num" ${r.impactadas ? 'style="color:var(--warn)"' : ''}>${r.impactadas}</div><div class="s">paradas por falta de informação externa</div></div>
+    <div class="card kpi"><div class="l">Prazo vencido</div><div class="v num" ${r.vencidas ? 'style="color:var(--bad)"' : ''}>${r.vencidas}</div><div class="s">solicitações em aberto</div></div>
+    <div class="card kpi"><div class="l">Demandas no prazo</div><div class="v num">${r.abertas ? r.demNoPrazo + ' de ' + r.abertas : '—'}</div><div class="s">abertas sem nada vencido</div></div>
+  </div>`;
+}
+
+function vGfc() {
+  if (gfcSemBanco()) return `<section class="card"><div class="card-b" style="padding-top:16px"><h2>Módulo ainda não ativado no banco</h2><p class="muted" style="max-width:72ch">As tabelas das demandas do GFC não foram encontradas no Supabase. O administrador precisa rodar uma vez o script <b>supabase/gfc_e_comentarios.sql</b> no SQL Editor do Supabase e depois atualizar esta página.</p></div></section>`;
+  const dem = demAberta(); if (dem) return vGfcDemanda(dem); S.gfcAberta = null;
+  const abas = `<div class="seg">${[['demandas', 'Demandas'], ['cadastros', 'Cadastros']].map(([v, t]) => `<button class="${S.gfcTela === v ? 'on' : ''}" data-act="gfcTela" data-v="${v}">${t}</button>`).join('')}</div>`;
+  if (S.gfcTela === 'cadastros') return `<div class="toolbar">${abas}<span class="muted small">Sites, frotas e responsáveis reaproveitados ao montar cada demanda.</span></div>${vGfcCadastros()}`;
+  const todas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) }));
+  const lista = todas.filter(({ o }) => S.gfcFiltro === 'todas' || (S.gfcFiltro === 'finalizadas' ? o.finalizada : !o.finalizada))
+    .sort((a, b) => (a.o.finalizada - b.o.finalizada) || (String(b.d.criado_em || '') > String(a.d.criado_em || '') ? 1 : -1));
+  const r = resumoGfc(todas.filter(x => !x.o.finalizada).map(x => x.d));
+  const segs = [['abertas', 'Em andamento'], ['finalizadas', 'Finalizadas'], ['todas', 'Todas']];
+  return `
+  <div class="toolbar">${abas}<div class="seg">${segs.map(([v, t]) => `<button class="${S.gfcFiltro === v ? 'on' : ''}" data-act="gfcFiltro" data-v="${v}">${t}</button>`).join('')}</div>
+    <div class="grow"><button class="btn pri" data-act="novaDem">${ic('plus')}Nova demanda</button></div></div>
+  <div class="small muted">Indicadores das demandas em andamento. Cada solicitação é um site/frota numa etapa da demanda.</div>
+  ${kpisGfc(r)}
+  ${lista.length ? `<div class="pgrid">${lista.map(({ d, o }) => `<article class="card pcard" data-act="abrirDem" data-id="${d.id}">
+    <div class="chips">${o.finalizada ? '<span class="pill ok">Finalizada</span>' : '<span class="pill acc">Em andamento</span>'}${o.vencidas ? `<span class="pill bad">${o.vencidas} vencida${o.vencidas > 1 ? 's' : ''}</span>` : ''}${o.impactadas ? `<span class="pill warn">${o.impactadas} GFC impactada${o.impactadas > 1 ? 's' : ''}</span>` : ''}</div>
+    <h2>${esc(d.titulo)}</h2>${d.descricao ? `<p>${esc(d.descricao)}</p>` : ''}
+    <div class="minibar">${meter(o.pct, o.finalizada ? 'ok' : '')}<b class="num small">${pctTxt(o.pct)}</b></div>
+    <div class="foot num"><span>${o.concl} de ${o.total} concluídas</span><span>·</span><span>${o.acao} ação do GFC</span><span>·</span><span>${o.terceiros} aguardando terceiros</span></div>
+    <div class="foot"><span class="num">${o.sites} ${o.sites === 1 ? 'site' : 'sites'} · ${o.itens} ${o.itens === 1 ? 'item' : 'itens'} · ${d.etapas.length} ${d.etapas.length === 1 ? 'etapa' : 'etapas'}</span>${respGfc(d) ? `<span>·</span><span>${esc(respGfc(d))}</span>` : ''}<span>·</span><span class="num">início ${fmtD(d.inicio)}</span></div>
+  </article>`).join('')}</div>` : `<section class="card"><div class="empty">${S.gfcDemandas.length ? 'Nenhuma demanda com esse filtro.' : 'Nenhuma demanda aberta. Cadastre sites e frotas na aba Cadastros e depois crie a primeira demanda.'}</div></section>`}`;
+}
+
+function celHtml(dem, it, k) {
+  const x = celula(dem, it, k), et = x.et;
+  let cls = x.st, rot, sub = '';
+  if (x.st === 'concluido') { rot = 'Concluído'; sub = x.c.concluido_em ? fmtD(x.c.concluido_em) : ''; }
+  else if (x.st === 'na') rot = 'Não se aplica';
+  else if (x.st === 'aguardando') rot = 'Falta info. externa';
+  else if (!x.liberada) { cls = x.impactada ? 'aguardando bloq' : 'bloq'; rot = x.impactada ? 'Aguardando terceiro' : 'Após etapa anterior'; }
+  else if (x.st === 'solicitado') { rot = 'Aguardando retorno'; sub = x.c.enviado_em ? 'enviado ' + fmtD(x.c.enviado_em) : ''; }
+  else { rot = et.exec === 'terceiro' ? 'A solicitar' : 'A fazer'; cls = 'acao'; }
+  if (x.limite && x.aberta) sub = (sub ? sub + ' · ' : '') + (x.vencida ? 'venceu ' : 'prazo ') + fmtD(x.limite);
+  if (x.vencida) cls += ' vencida';
+  const pode = x.liberada && x.st !== 'na';
+  const solicitar = et.exec === 'terceiro' && x.st === 'pendente' && x.liberada;
+  const dica = [x.resp ? 'Responsável: ' + x.resp : '', x.c.obs || ''].filter(Boolean).join(' · ');
+  return `<div class="gc ${cls}" ${dica ? `title="${esc(dica)}"` : ''}>
+    <button class="chk ${x.st === 'concluido' ? 'on' : ''}" data-act="gfcChk" data-it="${it.id}" data-k="${k}" ${pode ? '' : 'disabled'} aria-label="${x.st === 'concluido' ? 'Desmarcar' : 'Marcar como concluído'}">${ic('check')}</button>
+    <button class="gc-t" data-act="gfcCel" data-it="${it.id}" data-k="${k}"><b>${rot}</b>${sub ? `<small>${sub}</small>` : ''}${x.c.resp ? `<small>${esc(x.c.resp)}</small>` : ''}</button>
+    ${solicitar ? `<button class="btn sm" data-act="gfcSolicitar" data-it="${it.id}" data-k="${k}" title="Registrar a solicitação com a data de hoje">Solicitar</button>` : ''}</div>`;
+}
+function vGfcDemanda(dem) {
+  const o = statsDem(dem), ets = dem.etapas, its = itensDem(dem.id);
+  const sites = [...new Map(its.map(i => [chaveSite(i), nomeSite(i)])).entries()];
+  if (S.gfcSite && !sites.some(([k]) => k === S.gfcSite)) S.gfcSite = '';
+  const passa = it => {
+    if (S.gfcSite && chaveSite(it) !== S.gfcSite) return false;
+    if (S.gfcSit === 'todas') return true;
+    const xs = ets.map((_, k) => celula(dem, it, k));
+    return { acao: xs.some(x => x.acao), terceiros: xs.some(x => x.terceiros), impactadas: xs.some(x => x.impactada), vencidas: xs.some(x => x.vencida), concluidas: xs.every(x => !x.aberta) }[S.gfcSit];
+  };
+  const vis = its.filter(passa);
+  const estagios = ets.map((et, k) => {
+    const e = o.porEtapa[k], p = pct(e.concl, e.total);
+    return `<div class="estagio"><span class="small muted">Etapa ${k + 1} · ${et.exec === 'gfc' ? 'GFC executa' : 'terceiro executa'} · ${plUteis(et.dias)}</span><b>${esc(et.titulo)}</b>
+      <div class="minibar">${meter(p, p === 100 ? 'ok' : '')}<span class="num small">${pctTxt(p)}</span></div><span class="small muted num">${e.concl} de ${e.total} concluídas</span>
+      ${e.solicitar ? `<button class="btn sm" data-act="gfcSolicitarTodas" data-k="${k}">Registrar ${e.solicitar} ${e.solicitar === 1 ? 'solicitação' : 'solicitações'} hoje</button>` : ''}</div>`;
+  }).join('');
+  let corpo = '';
+  sites.forEach(([sk, sn]) => {
+    const doSite = vis.filter(i => chaveSite(i) === sk); if (!doSite.length) return;
+    const t = its.filter(i => chaveSite(i) === sk).reduce((a, i) => ({ total: a.total + o.porItem[i.id].total, concl: a.concl + o.porItem[i.id].concl }), { total: 0, concl: 0 });
+    corpo += `<tr class="grp"><td class="stick">${esc(sn)}</td><td colspan="${ets.length + 1}"><span class="num muted">${t.concl} de ${t.total} · ${pctTxt(pct(t.concl, t.total))}</span></td></tr>`;
+    corpo += doSite.map(it => { const pi = o.porItem[it.id], p = pct(pi.concl, pi.total);
+      return `<tr><td class="stick"><button class="linkbtn" data-act="gfcItem" data-id="${it.id}" style="font-weight:600;text-decoration:none">${esc(nomeFrota(it))}</button><span class="small muted" style="display:block">${esc(it.responsavel || 'sem responsável')}</span></td>
+        ${ets.map((_, k) => `<td>${celHtml(dem, it, k)}</td>`).join('')}<td class="r num" style="font-weight:600;color:var(--${p === 100 ? 'ok' : 'fg'})">${pctTxt(p)}</td></tr>`; }).join('');
+  });
+  return `
+  <div class="toolbar"><button class="btn" data-act="gfcVoltar">${ic('back')}Demandas</button><h2 style="font-size:18px;min-width:0;overflow-wrap:anywhere">${esc(dem.titulo)}</h2>
+    <div class="grow toolbar"><button class="btn" data-act="gfcDuplicar" title="Nova demanda com os mesmos sites, frotas e etapas">${ic('copy')}Duplicar</button><button class="btn pri" data-act="editarDem">${ic('edit')}Editar etapas, sites e frotas</button></div></div>
+  <section class="card"><div class="card-b" style="padding-top:16px"><div class="resumo-dem">
+    <div><div class="big-pct num">${pctTxt(o.pct)}</div><div class="muted small num" style="margin-top:4px">${o.concl} de ${o.total} solicitações concluídas</div>${meter(o.pct, o.finalizada ? 'ok' : '')}
+      <div class="chips" style="margin-top:10px">${o.finalizada ? '<span class="pill ok">Finalizada</span>' : ''}<span class="pill acc num">${o.acao} ação do GFC</span><span class="pill info num">${o.terceiros} aguardando terceiros</span><span class="pill warn num">${o.impactadas} GFC impactada</span><span class="pill bad num">${o.vencidas} vencidas</span><span class="pill nodot num">${o.noPrazo} no prazo</span></div>
+      <div class="small muted" style="margin-top:10px">${dem.descricao ? esc(dem.descricao) + '<br>' : ''}Início ${fmtDA(dem.inicio)}${respGfc(dem) ? ' · responsável no GFC: ' + esc(respGfc(dem)) : ''}</div></div>
+    <div class="estagios">${estagios}</div></div></div></section>
+  ${its.length ? `<div class="toolbar"><select class="sel" data-chg="gfcSite" aria-label="Site"><option value="">Todos os sites</option>${sites.map(([k, n]) => `<option value="${esc(k)}" ${k === S.gfcSite ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>
+    <div class="seg">${GFC_SIT.map(([v, t]) => `<button class="${S.gfcSit === v ? 'on' : ''}" data-act="gfcSit" data-v="${v}">${t}</button>`).join('')}</div></div>
+  <section class="card"><div class="scroll-x" data-key="gfc"><table class="gfc-tbl"><thead><tr><th class="stick">Site / frota</th>${ets.map((et, k) => `<th>${k + 1}. ${esc(et.titulo)}<small>${et.exec === 'gfc' ? 'GFC' : 'Terceiro'} · ${plUteis(et.dias)}</small></th>`).join('')}<th class="r">Item</th></tr></thead>
+    <tbody>${corpo || `<tr><td colspan="${ets.length + 2}" class="muted" style="text-align:center;padding:18px">Nenhum site/frota com esse filtro.</td></tr>`}</tbody></table></div></section>
+  <div class="legend"><span>O quadradinho marca a conclusão. Clique na situação para registrar data da solicitação, prazo, responsável ou observação.</span><span>Cada site/frota segue as etapas em ordem, sem depender dos outros.</span></div>`
+  : `<section class="card"><div class="empty">Nenhum site ou frota nesta demanda. <button class="linkbtn" data-act="editarDem">Incluir sites e frotas</button></div></section>`}`;
+}
+
+function vGfcCadastros() {
+  const sites = S.gfcSites.slice().sort(porNome), resps = S.gfcResp.slice().sort(porNome);
+  return `<div class="grid2">
+    <section class="card"><div class="card-h"><h2>Sites e frotas</h2><button class="btn sm pri" data-act="gfcNovoSite">${ic('plus')}Site</button></div><div class="card-b">
+      ${sites.length ? sites.map(s => { const fs = S.gfcFrotas.filter(f => f.site_id === s.id).sort(porNome);
+        return `<div class="cad-site" ${s.ativo === false ? 'style="opacity:.55"' : ''}><div class="toolbar" style="gap:8px"><b style="margin-right:auto">${esc(s.nome)}</b>${s.ativo === false ? '<span class="pill nodot">inativo</span>' : ''}<button class="btn sm" data-act="gfcNovaFrota" data-site="${s.id}">${ic('plus')}Frota</button><button class="iconbtn" data-act="gfcEditSite" data-id="${s.id}" aria-label="Editar site ${esc(s.nome)}" title="Editar site">${ic('edit')}</button></div>
+          <div class="chips" style="margin-top:6px">${fs.length ? fs.map(f => `<button class="fr-chip" data-act="gfcEditFrota" data-id="${f.id}" ${f.ativo === false ? 'style="opacity:.55"' : ''}><b>${esc(f.nome)}</b>${f.responsavel ? `<span class="muted">${esc(f.responsavel)}</span>` : ''}</button>`).join('') : '<span class="small muted">Nenhuma frota. Sem frotas, o site entra nas demandas como um item só.</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre o primeiro site.</div>'}
+    </div></section>
+    <section class="card"><div class="card-h"><h2>Responsáveis</h2><button class="btn sm pri" data-act="gfcNovoResp">${ic('plus')}Responsável</button></div><div class="card-b">
+      <div class="small muted" style="margin-bottom:6px">Pessoas de fora da equipe (CSP, consultor, contato do site). Basta o nome. Quem é da equipe já aparece nas sugestões.</div>
+      <div class="rows">${resps.map(r => `<div class="row clk" data-act="gfcEditResp" data-id="${r.id}"><div class="t"><b>${esc(r.nome)}</b>${r.funcao ? `<span class="small muted">${esc(r.funcao)}</span>` : ''}</div></div>`).join('') || '<div class="empty">Nenhum responsável externo cadastrado.</div>'}</div></div></section></div>`;
+}
+
+// painel: situação atual das demandas GFC (não depende do mês)
+function cardGfcPainel(ids) {
+  if (!podeGfc() || gfcSemBanco() || !S.gfcDemandas.length || !ids.some(id => (P(id) || {}).area === 'gfc')) return '';
+  const abertas = S.gfcDemandas.map(d => ({ d, o: statsDem(d) })).filter(x => !x.o.finalizada);
+  const r = resumoGfc(abertas.map(x => x.d)), red = v => v ? 'style="color:var(--bad);font-weight:600"' : '';
+  return `<section class="card"><div class="card-h"><h2>Demandas GFC</h2><span class="muted small">situação atual · ${abertas.length} em andamento</span><button class="btn sm no-print" data-act="ir" data-v="gfc">Abrir demandas</button></div>
+    <div class="scroll-x"><table class="tbl"><thead><tr><th>Demanda</th><th>Conclusão</th><th class="r">Ação do GFC</th><th class="r">Aguardando terceiros</th><th class="r">GFC impactada</th><th class="r">Vencidas</th></tr></thead><tbody>
+    ${abertas.length ? abertas.map(({ d, o }) => `<tr class="clk" data-act="abrirDem" data-id="${d.id}"><td><b>${esc(d.titulo)}</b></td><td><div class="minibar">${meter(o.pct)}<span class="num small">${pctTxt(o.pct)} <span class="muted">(${o.concl}/${o.total})</span></span></div></td><td class="r num">${o.acao}</td><td class="r num">${o.terceiros}</td><td class="r num">${o.impactadas}</td><td class="r num" ${red(o.vencidas)}>${o.vencidas}</td></tr>`).join('')
+      + `<tr><td><b>Total</b></td><td><span class="num small">${pctTxt(pct(r.concl, r.total))} <span class="muted">(${r.concl}/${r.total})</span></span></td><td class="r num"><b>${r.acao}</b></td><td class="r num"><b>${r.terceiros}</b></td><td class="r num"><b>${r.impactadas}</b></td><td class="r num" ${red(r.vencidas)}><b>${r.vencidas}</b></td></tr>`
+      : '<tr><td colspan="6" class="muted">Nenhuma demanda em andamento.</td></tr>'}
+    </tbody></table></div><div class="card-b small muted" style="padding-top:8px">${r.abertas ? `${r.demNoPrazo} de ${r.abertas} demandas sem solicitação vencida.` : ''}</div></section>`;
+}
+
+// =====================================================================
 // Login
 // =====================================================================
 function telaLogin() {
@@ -1566,7 +1844,7 @@ function modalParalela(a) {
     ${fldI('prazo_hora', 'Até que horas (opcional)', hm(a.prazo_hora), 'time')}
     <div class="fld full" id="w-horas" ${temFrota(a.responsaveis) && !ets.length ? '' : 'hidden'}><label>Horas (Performance de Frota)</label><div style="display:flex;gap:8px">${inp('horas_prev', a.horas_prev, 'number', 'step="0.5" min="0" placeholder="Previstas" aria-label="Horas previstas"')}${inp('horas_real', a.horas_real, 'number', 'step="0.5" min="0" placeholder="Gastas" aria-label="Horas gastas"')}</div></div>
     <div class="fld full"><div style="display:flex;align-items:center;gap:8px"><label style="margin-right:auto">Etapas — partes da atividade, cada uma com seu responsável e período</label><button class="btn sm" type="button" data-act="addEtapa">${ic('plus')}Etapa</button></div><div id="etapas" class="etapas"></div></div>
-    <div class="actions">${!novo && podeExcluirParalela(a) ? '<button class="btn danger left" type="button" data-act="excluirPar">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`,
+    <div class="actions">${!novo && podeExcluirParalela(a) ? '<button class="btn danger left" type="button" data-act="excluirPar">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>${novo ? '' : feedHtml(a.id)}`,
     { id: novo ? null : a.id, etapas: ets, removidas: [], mount: () => { montarMencoes(a.responsaveis, ids => { const w = document.getElementById('w-horas'); if (w) w.hidden = !temFrota(ids) || lerEtapas().length > 0; }); desenharEtapas(); } }, true);
 }
 function lerEtapas() {
@@ -1712,6 +1990,119 @@ function modalConcluirHoras(tipo, id) {
     ${fldI('horas_real', 'Horas gastas no total', ref.horas_real ?? '', 'number', 'step="0.5" min="0" placeholder="Ex.: 2,5"')}<div class="fld"></div>
     <div class="actions"><button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Concluir</button></div></form>`, { tipo, id });
 }
+
+// --- comentários da atividade paralela (feed) ---
+function feedLista(aid) {
+  const cs = S.comentarios.filter(c => c.paralela_id === aid).sort((a, b) => String(b.criado_em) > String(a.criado_em) ? 1 : -1);
+  if (!cs.length) return '<div class="small muted">Nenhum comentário ainda. Use para registrar atualizações e combinados desta atividade.</div>';
+  return cs.map(c => { const p = P(c.autor_id);
+    return `<div class="cmt">${p ? av(p) : '<span class="av gestao">?</span>'}<div class="t"><b class="small">${esc(p ? p.nome : 'Ex-integrante')}</b> <span class="small muted num">${new Date(c.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>${c.autor_id === S.me.id ? ` <button class="linkbtn small muted" type="button" data-act="rmComent" data-id="${c.id}">excluir</button>` : ''}<p>${esc(c.texto)}</p></div></div>`; }).join('');
+}
+function feedHtml(aid) {
+  if (S.faltando.includes('paralela_comentarios')) return '<div class="feed small muted">Comentários indisponíveis: falta criar a tabela no banco (script supabase/gfc_e_comentarios.sql).</div>';
+  return `<section class="feed" aria-label="Comentários"><h3>Comentários e atualizações</h3>
+    <form class="feed-form" data-form="comentario"><textarea class="inp" name="texto" id="f-coment" maxlength="2000" placeholder="Escreva uma atualização. Fica registrada com seu nome, data e hora." aria-label="Novo comentário"></textarea><button class="btn pri" type="submit">Comentar</button></form>
+    <div id="feed-lista">${feedLista(aid)}</div></section>`;
+}
+
+// --- demandas GFC ---
+const datalistResp = () => `<datalist id="dl-resp">${[...new Set([...S.gfcResp.map(r => r.nome), ...ativos().map(p => p.nome)])].sort().map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>`;
+const botoesModal = (excluir) => `<div class="actions">${excluir ? `<button class="btn danger left" type="button" data-act="${excluir}">Excluir</button>` : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div>`;
+function pickerHtml(sel, chaves) {
+  const sites = S.gfcSites.filter(s => s.ativo !== false || sel.has('s:' + s.id) || S.gfcFrotas.some(f => f.site_id === s.id && sel.has('f:' + f.id))).sort(porNome);
+  if (!sites.length) return '<div class="small muted">Nenhum site cadastrado. Cadastre sites e frotas na aba Cadastros.</div>';
+  return `<div class="picker">${sites.map(s => {
+    const fs = S.gfcFrotas.filter(f => f.site_id === s.id && (f.ativo !== false || sel.has('f:' + f.id))).sort(porNome);
+    if (!fs.length) { chaves.add('s:' + s.id); return `<div class="ps"><label><input type="checkbox" name="pick" value="s:${s.id}" ${sel.has('s:' + s.id) ? 'checked' : ''}><b>${esc(s.nome)}</b><span class="muted small">sem frotas — acompanha o site todo</span></label></div>`; }
+    fs.forEach(f => chaves.add('f:' + f.id));
+    return `<div class="ps"><label><input type="checkbox" data-chg="gfcPickSite" data-site="${s.id}" ${fs.every(f => sel.has('f:' + f.id)) ? 'checked' : ''}><b>${esc(s.nome)}</b><span class="muted small">${fs.length === 1 ? 'marcar a frota' : `marcar as ${fs.length} frotas`}</span></label>
+      <div class="pf">${fs.map(f => `<label><input type="checkbox" name="pick" value="f:${f.id}" data-site="${s.id}" ${sel.has('f:' + f.id) ? 'checked' : ''}>${esc(f.nome)}${f.responsavel ? `<span class="muted small">· ${esc(f.responsavel)}</span>` : ''}</label>`).join('')}</div></div>`;
+  }).join('')}</div>`;
+}
+function modalGfcDem(dem) {
+  const novo = !dem;
+  dem = dem || { titulo: '', descricao: '', inicio: HOJE, responsavel_gfc: S.me.area === 'gfc' ? S.me.id : null, etapas: [{ id: uid(), titulo: 'Solicitação', exec: 'terceiro', dias: 5 }] };
+  const sel = new Set(novo ? [] : itensDem(dem.id).map(chaveItem)), chaves = new Set();
+  const picker = pickerHtml(sel, chaves);
+  const gfcPessoas = ativos().filter(p => p.area === 'gfc' || isGestao(p));
+  abrirModal(novo ? 'Nova demanda' : 'Editar demanda', `<form data-form="gfcDem">
+    ${fldI('titulo', 'Demanda', dem.titulo, 'text', 'required maxlength="140" placeholder="Ex.: Atualização de horímetro"', true)}
+    <div class="fld full">${lbl('descricao', 'Descrição (opcional)')}<textarea class="inp" id="f-descricao" name="descricao" style="min-height:56px">${esc(dem.descricao || '')}</textarea></div>
+    ${fldI('inicio', 'Início', dem.inicio, 'date', 'required')}
+    <div class="fld">${lbl('responsavel_gfc', 'Responsável no GFC')}<select class="sel" id="f-responsavel_gfc" name="responsavel_gfc">${optsPessoas(gfcPessoas, dem.responsavel_gfc, 'Sem responsável')}</select></div>
+    <div class="fld full"><div style="display:flex;align-items:center;gap:8px"><label style="margin-right:auto">Etapas — cada site/frota passa por elas nesta ordem</label><button class="btn sm" type="button" data-act="gfcAddEtapa">${ic('plus')}Etapa</button></div><div id="gfc-etapas" class="etapas"></div></div>
+    <div class="fld full"><label>Sites e frotas envolvidos</label>${picker}</div>
+    ${!novo ? '<div class="fld full small muted">Frotas desmarcadas saem da demanda junto com o acompanhamento delas.</div>' : ''}
+    ${botoesModal(!novo && 'gfcExcluirDem')}</form>`,
+    { id: novo ? null : dem.id, etapas: dem.etapas.map(e => ({ ...e })), chaves, mount: desenharGfcEtapas }, true);
+}
+function lerGfcEtapas() {
+  const box = document.getElementById('gfc-etapas'); if (!box) return modalCtx.etapas;
+  return [...box.querySelectorAll('.et-row')].map(el => {
+    const e = modalCtx.etapas[Number(el.dataset.i)], v = n => el.querySelector(`[data-f="${n}"]`).value;
+    return { id: e.id, titulo: v('titulo').trim(), exec: v('exec'), dias: v('dias') === '' ? null : Math.max(0, Math.round(Number(v('dias')))) };
+  });
+}
+function desenharGfcEtapas() {
+  const box = document.getElementById('gfc-etapas'); if (!box) return;
+  const ets = modalCtx.etapas;
+  box.innerHTML = ets.map((e, k) => `<div class="et-row" data-i="${k}">
+    <input class="inp" data-f="titulo" value="${esc(e.titulo || '')}" placeholder="Etapa ${k + 1} — ex.: Solicitar horímetro" aria-label="Nome da etapa ${k + 1}" maxlength="80">
+    <select class="sel" data-f="exec" aria-label="Quem executa a etapa ${k + 1}">${opts({ terceiro: 'Terceiro executa', gfc: 'GFC executa' }, e.exec)}</select>
+    <input class="inp" type="number" min="0" max="120" step="1" data-f="dias" value="${e.dias ?? ''}" placeholder="dias úteis" aria-label="Prazo da etapa ${k + 1} em dias úteis" title="Prazo em dias úteis">
+    <button class="iconbtn" type="button" data-act="gfcRmEtapa" data-i="${k}" aria-label="Remover etapa ${k + 1}" ${ets.length < 2 ? 'disabled' : ''}>${ic('x')}</button></div>`).join('')
+    + '<div class="small muted">Prazo em dias úteis (segunda a sexta). Etapa de terceiro: conta a partir da data da solicitação. Etapa do GFC: conta a partir da conclusão da etapa anterior.</div>';
+}
+function modalGfcCel(dem, it, k) {
+  const x = celula(dem, it, k), et = x.et, c = x.c, terc = et.exec === 'terceiro';
+  const sts = terc ? ['pendente', 'solicitado', 'concluido', 'na'] : ['pendente', 'aguardando', 'concluido', 'na'];
+  const rotSt = { pendente: terc ? 'A solicitar' : 'A fazer', solicitado: 'Solicitado — aguardando retorno', aguardando: 'Parada — falta informação externa', concluido: 'Concluído', na: 'Não se aplica' };
+  abrirModal(`${nomeFrota(it)} — ${et.titulo}`, `<form data-form="gfcCel">
+    <div class="fld full small muted">${esc(dem.titulo)} · ${esc(nomeSite(it))} · etapa ${k + 1}, executada por ${terc ? 'terceiro' : 'GFC'}${!x.liberada ? ' · a etapa anterior ainda não foi concluída' : ''}</div>
+    <div class="fld">${lbl('st', 'Situação')}<select class="sel" id="f-st" name="st" data-chg="gfcStSel">${sts.map(v => `<option value="${v}" ${v === x.st ? 'selected' : ''}>${rotSt[v]}</option>`).join('')}</select></div>
+    ${fldI('resp', 'Responsável', x.resp, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — não precisa ser da equipe"')}
+    ${terc ? fldI('enviado_em', 'Data da solicitação', c.enviado_em || '', 'date', 'data-chg="gfcPrazo"') : `<div class="fld"><label>Contagem do prazo a partir de</label><div class="inp" style="background:var(--surface2)">${x.base ? fmtDA(x.base) : 'conclusão da etapa anterior'}</div></div>`}
+    ${fldI('dias', 'Prazo (dias úteis)', x.dias ?? '', 'number', 'min="0" max="120" step="1" data-chg="gfcPrazo"')}
+    <div class="fld"><label>Data limite (calculada)</label><div class="inp num" id="f-limite" style="background:var(--surface2)">—</div></div>
+    <div class="fld" id="w-concl" ${x.st === 'concluido' ? '' : 'hidden'}>${lbl('concluido_em', 'Data de conclusão')}${inp('concluido_em', c.concluido_em || HOJE, 'date')}</div>
+    <div class="fld full">${lbl('obs', 'Observação')}<textarea class="inp" id="f-obs" name="obs" placeholder="Ex.: site pediu mais dois dias; falta a planilha do consultor">${esc(c.obs || '')}</textarea></div>
+    ${botoesModal()}</form>${datalistResp()}`, { dem: dem.id, it: it.id, k, base: x.base, terc, mount: () => CHG.gfcPrazo() });
+}
+function modalGfcItem(it) {
+  abrirModal(`${nomeSite(it)} — ${nomeFrota(it)}`, `<form data-form="gfcItem">
+    ${fldI('responsavel', 'Responsável pelo retorno (etapas de terceiros)', it.responsavel, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — não precisa ser da equipe"', true)}
+    <div class="fld full">${lbl('obs', 'Observação')}<textarea class="inp" id="f-obs" name="obs">${esc(it.obs || '')}</textarea></div>
+    <div class="actions"><button class="btn danger left" type="button" data-act="gfcRmItem">Remover da demanda</button><button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>${datalistResp()}`, { id: it.id });
+}
+function modalGfcSite(s) {
+  const novo = !s; s = s || { ativo: true };
+  abrirModal(novo ? 'Novo site' : 'Editar site', `<form data-form="gfcSite">
+    ${fldI('nome', 'Nome do site', s.nome, 'text', 'required maxlength="60"', true)}
+    ${!novo ? `<label class="cb"><input type="checkbox" name="ativo" ${s.ativo !== false ? 'checked' : ''}> Ativo — desmarque para não aparecer em novas demandas</label>` : ''}
+    ${botoesModal(!novo && 'gfcExcluirSite')}</form>`, { id: novo ? null : s.id });
+}
+function modalGfcFrota(f, siteId) {
+  const novo = !f; f = f || { site_id: siteId, ativo: true };
+  abrirModal(novo ? 'Nova frota' : 'Editar frota', `<form data-form="gfcFrota">
+    <div class="fld">${lbl('site_id', 'Site')}<select class="sel" id="f-site_id" name="site_id">${S.gfcSites.slice().sort(porNome).map(s => `<option value="${s.id}" ${s.id === f.site_id ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}</select></div>
+    ${fldI('nome', 'Frota / modelo', f.nome, 'text', 'required maxlength="40" placeholder="Ex.: 797F"')}
+    ${fldI('responsavel', 'Responsável padrão (opcional)', f.responsavel, 'text', 'list="dl-resp" maxlength="80" placeholder="Sugerido ao incluir esta frota numa demanda"', true)}
+    ${!novo ? `<label class="cb"><input type="checkbox" name="ativo" ${f.ativo !== false ? 'checked' : ''}> Ativa — desmarque para não aparecer em novas demandas</label>` : ''}
+    ${botoesModal(!novo && 'gfcExcluirFrota')}</form>${datalistResp()}`, { id: novo ? null : f.id });
+}
+function modalGfcResp(r) {
+  const novo = !r; r = r || {};
+  abrirModal(novo ? 'Novo responsável' : 'Editar responsável', `<form data-form="gfcResp">
+    ${fldI('nome', 'Nome', r.nome, 'text', 'required maxlength="80"')}
+    ${fldI('funcao', 'Função ou empresa (opcional)', r.funcao, 'text', 'maxlength="80" placeholder="Ex.: CSP, consultor, contato do site"')}
+    ${botoesModal(!novo && 'gfcExcluirResp')}</form>`, { id: novo ? null : r.id });
+}
+async function salvarPasso(it, etId, patch) {
+  const passos = { ...it.passos, [etId]: { ...(it.passos[etId] || {}), ...patch } };
+  await API.atualizar('gfc_itens', it.id, { passos });
+  it.passos = passos;
+}
+const ctxCel = el => ({ dem: demAberta(), it: S.gfcItens.find(i => i.id === el.dataset.it), k: Number(el.dataset.k) });
 
 // ---------- foto de perfil: recorta o centro e reduz para 160×160 ----------
 function reduzirFoto(file) {
@@ -1864,6 +2255,59 @@ const FORM = {
     if (S.pessoas.some(p => p.email.toLowerCase() === email)) { toast('Esse e-mail já está cadastrado.'); return; }
     salvar(async () => { await API.criarAcesso(email, fd.get('senha')); await API.inserir('pessoas', { ...row, email, ativo: true }); }, 'Pessoa cadastrada');
   },
+  async comentario(f, fd) {
+    const t = (fd.get('texto') || '').trim(), aid = modalCtx.id; if (!t || !aid) return;
+    const b = f.querySelector('button[type=submit]'); b.disabled = true;
+    try {
+      const c = await API.inserir('paralela_comentarios', { paralela_id: aid, autor_id: S.me.id, texto: t });
+      S.comentarios.push(c); f.reset();
+      const l = document.getElementById('feed-lista'); if (l) l.innerHTML = feedLista(aid);
+    } catch (e) { toast(msgErro(e)); } finally { b.disabled = false; }
+  },
+  gfcDem(f, fd) {
+    const ets = lerGfcEtapas().filter(e => e.titulo);
+    if (!ets.length) { toast('Inclua pelo menos uma etapa com nome.'); return; }
+    const row = { titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), inicio: fd.get('inicio'), responsavel_gfc: fd.get('responsavel_gfc') || null, etapas: ets };
+    const marcados = new Set(fd.getAll('pick')), id = modalCtx.id, mostrados = modalCtx.chaves;
+    salvar(async () => {
+      const dem = id ? await API.atualizar('gfc_demandas', id, row) : await API.inserir('gfc_demandas', { ...row, criado_por: S.me.id });
+      const atuais = id ? S.gfcItens.filter(i => i.demanda_id === id) : [], tem = new Set(atuais.map(chaveItem));
+      for (const i of atuais) if (mostrados.has(chaveItem(i)) && !marcados.has(chaveItem(i))) await API.excluir('gfc_itens', i.id);
+      await API.inserirLote('gfc_itens', [...marcados].filter(k => !tem.has(k)).map(k => {
+        const [t, xid] = k.split(':'), fr = t === 'f' ? frotaDe(xid) : null, st = fr ? siteDe(fr.site_id) : siteDe(xid);
+        return { demanda_id: dem.id, site_id: st ? st.id : null, site_nome: st ? st.nome : null, frota_id: fr ? fr.id : null, frota_nome: fr ? fr.nome : null, responsavel: fr ? fr.responsavel || null : null, passos: {} };
+      }));
+      S.gfcAberta = dem.id;
+    }, 'Demanda salva');
+  },
+  gfcCel(f, fd) {
+    const dem = S.gfcDemandas.find(d => d.id === modalCtx.dem), it = S.gfcItens.find(i => i.id === modalCtx.it), et = dem.etapas[modalCtx.k];
+    const st = fd.get('st'), padrao = et.exec === 'gfc' ? respGfc(dem) : (it.responsavel || ''), resp = (fd.get('resp') || '').trim();
+    const dias = fd.get('dias') === '' ? null : Math.max(0, Math.round(Number(fd.get('dias'))));
+    const patch = {
+      st, resp: resp && resp !== padrao ? resp : null, dias: dias === et.dias ? null : dias, obs: txt(fd.get('obs')),
+      enviado_em: et.exec === 'terceiro' ? (fd.get('enviado_em') || (st === 'solicitado' ? HOJE : null)) : null,
+      concluido_em: st === 'concluido' ? (fd.get('concluido_em') || HOJE) : null
+    };
+    salvar(() => salvarPasso(it, et.id, patch), 'Atualizado');
+  },
+  gfcItem(f, fd) { salvar(() => API.atualizar('gfc_itens', modalCtx.id, { responsavel: txt(fd.get('responsavel')), obs: txt(fd.get('obs')) }), 'Atualizado'); },
+  gfcSite(f, fd) {
+    const nome = fd.get('nome').trim();
+    if (S.gfcSites.some(x => x.id !== modalCtx.id && semAcento(x.nome) === semAcento(nome))) { toast('Já existe um site com esse nome.'); return; }
+    const row = { nome, ativo: modalCtx.id ? fd.get('ativo') === 'on' : true };
+    salvar(() => modalCtx.id ? API.atualizar('gfc_sites', modalCtx.id, row) : API.inserir('gfc_sites', row), 'Site salvo');
+  },
+  gfcFrota(f, fd) {
+    const row = { site_id: fd.get('site_id'), nome: fd.get('nome').trim(), responsavel: txt(fd.get('responsavel')), ativo: modalCtx.id ? fd.get('ativo') === 'on' : true };
+    if (!row.site_id) { toast('Cadastre um site antes.'); return; }
+    if (S.gfcFrotas.some(x => x.id !== modalCtx.id && x.site_id === row.site_id && semAcento(x.nome) === semAcento(row.nome))) { toast('Essa frota já está cadastrada neste site.'); return; }
+    salvar(() => modalCtx.id ? API.atualizar('gfc_frotas', modalCtx.id, row) : API.inserir('gfc_frotas', row), 'Frota salva');
+  },
+  gfcResp(f, fd) {
+    const row = { nome: fd.get('nome').trim(), funcao: txt(fd.get('funcao')) };
+    salvar(() => modalCtx.id ? API.atualizar('gfc_responsaveis', modalCtx.id, row) : API.inserir('gfc_responsaveis', row), 'Responsável salvo');
+  },
   async perfil(f, fd) {
     const s = fd.get('senha');
     if (!s) { fecharModal(); return; }
@@ -1905,7 +2349,7 @@ function abrirAg(t, id, d) {
   if (t === 'item') return modalItem(S.itens.find(x => x.id === id));
 }
 const ACT = {
-  ir(el) { fecharModal(); S.view = el.dataset.v; ls.set('hub-view', S.view === 'projeto' ? 'projetos' : S.view); render(); window.scrollTo(0, 0); },
+  ir(el) { fecharModal(); S.view = el.dataset.v; if (S.view === 'gfc') S.gfcAberta = null; ls.set('hub-view', S.view === 'projeto' ? 'projetos' : S.view); render(); window.scrollTo(0, 0); },
   mes(el) {
     let m = S.m + Number(el.dataset.d), y = S.y; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } S.m = m; S.y = y;
     if (S.modo === 'online' && iso(new Date(y, m, 1)) < S.execDesde) recarregar(); else render();
@@ -1976,6 +2420,58 @@ const ACT = {
     salvar(() => API.atualizar('itens', i.id, { status: st, progresso: st === 'feito' ? 100 : i.progresso, concluido_em: st === 'feito' ? (i.concluido_em || HOJE) : null }));
   },
   excluirItem() { const id = modalCtx.id; confirmar('Excluir este item?', () => salvar(() => API.excluir('itens', id), 'Item excluído')); },
+  // comentários
+  async rmComent(el) {
+    if (!el.dataset.ok) { el.dataset.ok = '1'; el.textContent = 'confirmar exclusão'; el.style.color = 'var(--bad)'; return; }
+    try {
+      await API.excluir('paralela_comentarios', el.dataset.id);
+      S.comentarios = S.comentarios.filter(c => c.id !== el.dataset.id);
+      const l = document.getElementById('feed-lista'); if (l) l.innerHTML = feedLista(modalCtx.id);
+    } catch (e) { toast(msgErro(e)); }
+  },
+  // demandas GFC
+  gfcTela(el) { S.gfcTela = el.dataset.v; render(); },
+  gfcFiltro(el) { S.gfcFiltro = el.dataset.v; render(); },
+  gfcSit(el) { S.gfcSit = el.dataset.v; render(); },
+  abrirDem(el) { S.view = 'gfc'; S.gfcAberta = el.dataset.id; S.gfcSite = ''; S.gfcSit = 'todas'; render(); window.scrollTo(0, 0); },
+  gfcVoltar() { S.gfcAberta = null; render(); window.scrollTo(0, 0); },
+  novaDem: () => modalGfcDem(null),
+  editarDem() { modalGfcDem(demAberta()); },
+  gfcExcluirDem() { const id = modalCtx.id; confirmar('Excluir esta demanda com todo o acompanhamento dos sites e frotas?', () => salvar(async () => { await API.excluir('gfc_demandas', id); S.gfcAberta = null; }, 'Demanda excluída')); },
+  gfcDuplicar() {
+    const dem = demAberta();
+    confirmar(`Criar uma nova demanda a partir de “${dem.titulo}”, com os mesmos sites, frotas, responsáveis e etapas, e o acompanhamento zerado?`, () => salvar(async () => {
+      const n = await API.inserir('gfc_demandas', { titulo: dem.titulo + ' (nova)', descricao: dem.descricao || null, inicio: HOJE, responsavel_gfc: dem.responsavel_gfc || null, etapas: dem.etapas.map(e => ({ ...e })), criado_por: S.me.id });
+      await API.inserirLote('gfc_itens', itensDem(dem.id).map(i => ({ demanda_id: n.id, site_id: i.site_id, site_nome: i.site_nome, frota_id: i.frota_id, frota_nome: i.frota_nome, responsavel: i.responsavel, passos: {} })));
+      S.gfcAberta = n.id;
+    }, 'Nova demanda criada'));
+  },
+  gfcAddEtapa() { modalCtx.etapas = lerGfcEtapas(); modalCtx.etapas.push({ id: uid(), titulo: '', exec: 'gfc', dias: 2 }); desenharGfcEtapas(); const ins = document.querySelectorAll('#gfc-etapas [data-f="titulo"]'); if (ins.length) ins[ins.length - 1].focus(); },
+  gfcRmEtapa(el) { modalCtx.etapas = lerGfcEtapas(); if (modalCtx.etapas.length < 2) return; modalCtx.etapas.splice(Number(el.dataset.i), 1); desenharGfcEtapas(); },
+  gfcChk(el) {
+    const { dem, it, k } = ctxCel(el), x = celula(dem, it, k);
+    const patch = x.st === 'concluido' ? { st: x.et.exec === 'terceiro' && x.c.enviado_em ? 'solicitado' : 'pendente', concluido_em: null } : { st: 'concluido', concluido_em: HOJE };
+    salvar(() => salvarPasso(it, x.et.id, patch), x.st === 'concluido' ? null : 'Concluído');
+  },
+  gfcSolicitar(el) { const { dem, it, k } = ctxCel(el); salvar(() => salvarPasso(it, dem.etapas[k].id, { st: 'solicitado', enviado_em: HOJE }), 'Solicitação registrada hoje'); },
+  gfcSolicitarTodas(el) {
+    const dem = demAberta(), k = Number(el.dataset.k), et = dem.etapas[k];
+    const alvo = itensDem(dem.id).filter(it => { const x = celula(dem, it, k); return x.acao && et.exec === 'terceiro'; });
+    confirmar(`Registrar hoje (${fmtD(HOJE)}) a solicitação de “${et.titulo}” para ${alvo.length} ${alvo.length === 1 ? 'site/frota' : 'sites/frotas'}? O prazo de cada um passa a contar a partir de hoje.`,
+      () => salvar(async () => { for (const it of alvo) await salvarPasso(it, et.id, { st: 'solicitado', enviado_em: HOJE }); }, 'Solicitações registradas'));
+  },
+  gfcCel(el) { const { dem, it, k } = ctxCel(el); modalGfcCel(dem, it, k); },
+  gfcItem(el) { modalGfcItem(S.gfcItens.find(i => i.id === el.dataset.id)); },
+  gfcRmItem() { const id = modalCtx.id; confirmar('Remover este site/frota da demanda? O acompanhamento dele nesta demanda será apagado.', () => salvar(() => API.excluir('gfc_itens', id), 'Removido da demanda')); },
+  gfcNovoSite: () => modalGfcSite(null),
+  gfcEditSite(el) { modalGfcSite(siteDe(el.dataset.id)); },
+  gfcExcluirSite() { const id = modalCtx.id; confirmar('Excluir o site e as frotas cadastradas nele? As demandas já criadas mantêm os nomes. Para só tirar das próximas demandas, desmarque "Ativo".', () => salvar(() => API.excluir('gfc_sites', id), 'Site excluído')); },
+  gfcNovaFrota(el) { modalGfcFrota(null, el.dataset.site); },
+  gfcEditFrota(el) { modalGfcFrota(frotaDe(el.dataset.id)); },
+  gfcExcluirFrota() { const id = modalCtx.id; confirmar('Excluir a frota do cadastro? As demandas já criadas mantêm o nome dela.', () => salvar(() => API.excluir('gfc_frotas', id), 'Frota excluída')); },
+  gfcNovoResp: () => modalGfcResp(null),
+  gfcEditResp(el) { modalGfcResp(S.gfcResp.find(r => r.id === el.dataset.id)); },
+  gfcExcluirResp() { const id = modalCtx.id; confirmar('Excluir este responsável do cadastro? Os nomes já usados nas demandas continuam lá.', () => salvar(() => API.excluir('gfc_responsaveis', id), 'Responsável excluído')); },
   // painel
   baixarPptx: () => baixarApresentacao(),
   imprimir() { if (EMBED) { toast('A impressão funciona no app publicado (GitHub Pages).'); return; } window.print(); },
@@ -2002,6 +2498,21 @@ const CHG = {
   portItens(el) { S.portItens = el.checked; render(); },
   portConcl(el) { S.portConcl = el.checked; render(); },
   itemStatus(el) { const st = el.value, i = S.itens.find(x => x.id === el.dataset.id); salvar(() => API.atualizar('itens', i.id, { status: st, progresso: st === 'feito' ? 100 : i.progresso, concluido_em: st === 'feito' ? (i.concluido_em || HOJE) : null })); },
+  gfcSite(el) { S.gfcSite = el.value; render(); },
+  gfcPickSite(el) { document.querySelectorAll(`.pf input[data-site="${el.dataset.site}"]`).forEach(i => i.checked = el.checked); },
+  gfcStSel(el) {
+    const w = document.getElementById('w-concl'); if (w) w.hidden = el.value !== 'concluido';
+    const env = document.getElementById('f-enviado_em'); if (env && el.value === 'solicitado' && !env.value) { env.value = HOJE; CHG.gfcPrazo(); }
+  },
+  gfcPrazo() {
+    const out = document.getElementById('f-limite'); if (!out) return;
+    const env = document.getElementById('f-enviado_em'), base = modalCtx.terc ? (env && env.value) : modalCtx.base;
+    const d = document.getElementById('f-dias').value;
+    if (!base) { out.textContent = 'definida quando a contagem começar'; return; }
+    if (d === '') { out.textContent = 'sem prazo'; return; }
+    const lim = addUteis(String(base).slice(0, 10), Math.max(0, Math.round(Number(d))));
+    out.textContent = `${fmtDA(lim)} (${DIAS[dt(lim).getDay()]})`;
+  },
   freqRot(el) { document.getElementById('w-sem').hidden = el.value !== 'semanal'; document.getElementById('w-mes').hidden = el.value !== 'mensal'; },
   donoRot(el) { document.getElementById('w-hprev').hidden = !isFrota(P(el.value)); },
   etapaResp() { modalCtx.etapas = lerEtapas(); desenharEtapas(); },
@@ -2023,6 +2534,7 @@ let buscaT;
 document.addEventListener('input', e => {
   const c = e.target.dataset && e.target.dataset.chg;
   if (c === 'rangeProg') CHG.rangeProg(e.target);
+  if (c === 'gfcPrazo') CHG.gfcPrazo();
   if (c === 'parBusca') { clearTimeout(buscaT); const el = e.target; buscaT = setTimeout(() => CHG.parBusca(el), 300); }
 });
 document.addEventListener('submit', e => { const f = e.target; if (f.dataset.form && FORM[f.dataset.form]) { e.preventDefault(); FORM[f.dataset.form](f, new FormData(f)); } });
@@ -2150,7 +2662,27 @@ function seedDemo() {
     { id: uid(), dono_id: 'p_bruno', titulo: 'Particularidades de Salobo', texto: 'Apontamentos do turno C chegam com atraso — conferir no dia seguinte.', fixada: true, data: null, atualizado_em: agora },
     { id: uid(), dono_id: 'p_hen', titulo: 'Pauta 1:1', texto: 'Carga de horas da frota está alta este mês.', fixada: true, data: null, atualizado_em: agora }
   ];
-  return { pessoas, rotinas, rotina_exec, paralelas, etapas, notas, projetos, sprints, itens, versao: 2 };
+  // demandas GFC (exemplo fictício, só no modo teste)
+  const gfc_sites = [['gs_a', 'Site A'], ['gs_b', 'Site B'], ['gs_c', 'Site C']].map(([id, nome]) => ({ id, nome, ativo: true }));
+  const gfc_frotas = [['gf1', 'gs_a', '797F', 'Contato A'], ['gf2', 'gs_a', '794AC', 'Contato A'], ['gf3', 'gs_b', 'D11', 'Contato B'], ['gf4', 'gs_b', '350', 'Contato B'], ['gf5', 'gs_c', '988', 'Contato C']]
+    .map(([id, site_id, nome, responsavel]) => ({ id, site_id, nome, responsavel, ativo: true }));
+  const gfc_responsaveis = [['gr1', 'Contato A', 'CSP do Site A'], ['gr2', 'Contato B', 'CSP do Site B'], ['gr3', 'Contato C', 'Consultor do Site C']].map(([id, nome, funcao]) => ({ id, nome, funcao }));
+  const gfc_demandas = [
+    { id: 'gd1', titulo: 'Atualização de horímetro', descricao: 'Exemplo: cada site envia o horímetro atualizado das frotas.', inicio: D(-10), responsavel_gfc: 'p_vit', etapas: [{ id: 'ge1', titulo: 'Atualizar horímetro', exec: 'terceiro', dias: 5 }], criado_por: 'p_vit', criado_em: ca(-10) },
+    { id: 'gd2', titulo: 'Fechamento mensal das frotas', descricao: 'Exemplo com etapas em sequência.', inicio: D(-4), responsavel_gfc: 'p_gab', etapas: [{ id: 'ge2', titulo: 'Horímetro', exec: 'terceiro', dias: 3 }, { id: 'ge3', titulo: 'Atualizar ROM', exec: 'gfc', dias: 2 }, { id: 'ge4', titulo: 'Vida útil e forecast', exec: 'terceiro', dias: 5 }], criado_por: 'p_vit', criado_em: ca(-4) }
+  ];
+  const gi = (id, demanda_id, fid, passos) => { const f = gfc_frotas.find(x => x.id === fid), st = gfc_sites.find(x => x.id === f.site_id); return { id, demanda_id, site_id: st.id, site_nome: st.nome, frota_id: f.id, frota_nome: f.nome, responsavel: f.responsavel, obs: null, passos, criado_em: ca(-10) }; };
+  const ok = (env, fim) => ({ st: 'concluido', enviado_em: D(env), concluido_em: D(fim) });
+  const gfc_itens = [
+    gi('gi1', 'gd1', 'gf1', { ge1: ok(-10, -8) }), gi('gi2', 'gd1', 'gf2', { ge1: ok(-10, -6) }),
+    gi('gi3', 'gd1', 'gf3', { ge1: { st: 'solicitado', enviado_em: D(-10) } }), gi('gi4', 'gd1', 'gf4', { ge1: { st: 'solicitado', enviado_em: D(-2) } }),
+    gi('gi5', 'gd1', 'gf5', { ge1: ok(-10, -7) }),
+    gi('gi6', 'gd2', 'gf1', { ge2: ok(-4, -2) }), gi('gi7', 'gd2', 'gf2', { ge2: ok(-4, -3), ge3: { st: 'concluido', concluido_em: D(-1) }, ge4: { st: 'solicitado', enviado_em: D(-1) } }),
+    gi('gi8', 'gd2', 'gf3', { ge2: { st: 'solicitado', enviado_em: D(-4) } }), gi('gi9', 'gd2', 'gf4', {}),
+    gi('gi10', 'gd2', 'gf5', { ge2: ok(-4, -3), ge3: { st: 'aguardando', obs: 'Falta a planilha de componentes do consultor' } })
+  ];
+  const paralela_comentarios = [{ id: uid(), paralela_id: 'a3', autor_id: 'p_vit', texto: 'Slides de vida útil prontos. Falta a revisão técnica.', criado_em: ca(-1) }];
+  return { pessoas, rotinas, rotina_exec, paralelas, etapas, notas, projetos, sprints, itens, paralela_comentarios, gfc_sites, gfc_frotas, gfc_responsaveis, gfc_demandas, gfc_itens, versao: 2 };
 }
 
 // =====================================================================
@@ -2174,6 +2706,7 @@ function seedDemo() {
     S.modo = 'teste';
     DEMO = ls.get(DEMO_KEY, null);
     if (!DEMO || !DEMO.pessoas || DEMO.versao !== 2) { DEMO = seedDemo(); salvarDemo(); }
+    if (TABELAS_OPC.some(t => !DEMO[t])) { const n = seedDemo(); TABELAS_OPC.forEach(t => DEMO[t] = DEMO[t] || n[t]); salvarDemo(); }
     await recarregar();
   }
   if (!EMBED && location.protocol === 'https:') {
