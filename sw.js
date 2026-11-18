@@ -1,5 +1,5 @@
 // Guarda a "casca" do app para abrir rápido. Os dados vêm sempre do banco online.
-const CACHE = 'hub-equipe-v1';
+const CACHE = 'hub-equipe-v3';
 const ARQ = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQ))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });

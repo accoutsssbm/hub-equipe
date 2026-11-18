@@ -117,3 +117,19 @@ begin
     execute format('create policy gfc_acesso on public.%I for all to authenticated using (public.hub_pode_gfc()) with check (public.hub_pode_gfc())', t);
   end loop;
 end $$;
+
+
+-- 5) Evoluções v3: Frequências personalizadas de rotina, Notas vinculadas e Responsáveis GFC (CSP / Consultor de Performance)
+alter table public.rotinas drop constraint if exists rotinas_frequencia_check;
+alter table public.rotinas add column if not exists intervalo_dias int;
+alter table public.rotinas add column if not exists dias_semana text;
+alter table public.rotinas add column if not exists apenas_uteis boolean not null default false;
+
+alter table public.notas add column if not exists vinculo_tipo text;
+alter table public.notas add column if not exists vinculo_id text;
+
+alter table public.gfc_frotas add column if not exists responsavel_csp text;
+alter table public.gfc_frotas add column if not exists responsavel_consultor text;
+alter table public.gfc_demandas add column if not exists tipo_responsavel text default 'csp';
+alter table public.gfc_itens add column if not exists responsavel_csp text;
+alter table public.gfc_itens add column if not exists responsavel_consultor text;

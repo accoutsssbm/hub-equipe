@@ -6,7 +6,59 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Hub da Equipe">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}
+/* --- Melhorias v3: checks de status, hierarquia de etapas, notificações, notas vinculadas e GFC --- */
+.par-wrap{border-top:1px solid var(--line2)}
+.par-wrap:first-child{border-top:0}
+.par-wrap>.par{border-top:0}
+.par-etapas{background:var(--surface2);border-top:1px dashed var(--line);padding:6px 16px 10px 42px;display:flex;flex-direction:column;gap:6px}
+.par-etapa{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--surface);border:1px solid var(--line2);border-radius:7px;flex-wrap:wrap}
+.par-etapa .t{flex:1;min-width:160px}
+.par-etapa .t b{font-weight:600;font-size:12.5px}
+.par-exp{padding:2px 8px;font-size:11.5px;border-radius:14px;gap:4px}
+.par-exp svg{width:13px;height:13px;transition:transform .15s}
+.par-exp.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.st-checks{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center}
+.st-chk{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .12s}
+.st-chk:hover{background:var(--surface2);color:var(--fg);border-color:var(--faint)}
+.st-chk .st-box{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--faint);display:inline-grid;place-items:center;flex:none}
+.st-chk .st-box svg{width:10px;height:10px;opacity:0}
+.st-chk.on{color:var(--fg);border-color:var(--fg);background:var(--surface2)}
+.st-chk.on .st-box{background:currentColor;border-color:currentColor;color:#fff}
+.st-chk.on .st-box svg{opacity:1;stroke:var(--surface)}
+.st-chk.on.a_fazer,.st-chk.on.pendente{color:var(--info);border-color:color-mix(in srgb,var(--info) 55%,var(--line));background:color-mix(in srgb,var(--info) 11%,var(--surface))}
+.st-chk.on.andamento,.st-chk.on.fazendo,.st-chk.on.solicitado{color:var(--warn);border-color:color-mix(in srgb,var(--accent) 70%,var(--line));background:var(--accent-soft)}
+.st-chk.on.revisao,.st-chk.on.aguardando{color:var(--a-dev);border-color:color-mix(in srgb,var(--a-dev) 55%,var(--line));background:color-mix(in srgb,var(--a-dev) 12%,var(--surface))}
+.st-chk.on.concluida,.st-chk.on.feito,.st-chk.on.concluido{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 55%,var(--line));background:color-mix(in srgb,var(--ok) 12%,var(--surface))}
+.kpi.clk{cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .12s;position:relative}
+.kpi.clk:hover{border-color:var(--accent);transform:translateY(-1px)}
+.kpi .kpi-go{font-size:11px;color:var(--info);font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:4px}
+.notif-btn{position:relative}
+.notif-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.notif-pop{position:fixed;top:62px;right:max(18px,env(safe-area-inset-right,0px));width:min(410px,calc(100vw - 24px));max-height:calc(100vh - 90px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 36px rgba(0,0,0,.22);z-index:95;overflow:hidden}
+.notif-pop-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.notif-pop-h b{margin-right:auto;font-size:13.5px}
+.notif-pop-b{overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;max-height:420px}
+.notif-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:7px;border:1px solid var(--line2);background:var(--surface);cursor:pointer;text-align:left;width:100%}
+.notif-item:hover{background:var(--surface2);border-color:var(--faint)}
+.notif-item.unread{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.notif-item.late{border-left:3px solid var(--bad)}
+.notif-item .t{flex:1;min-width:0}
+.notif-item .t b{display:block;font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+.notif-item .t small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.notif-pop-f{padding:8px 12px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:space-between;align-items:center;background:var(--surface2);font-size:12px}
+.nota-vinc{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--surface2);color:var(--info);border:1px solid var(--line);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nota-vinc:hover{border-color:var(--info)}
+.inline-notas{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.inline-nota{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:2px 8px;border-radius:5px;background:var(--accent-soft);color:var(--fg);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));cursor:pointer}
+@keyframes modalPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+.modal.pulse{animation:modalPulse .22s ease-in-out;border-color:var(--accent)}
+.dias-sem-checks{display:flex;gap:6px;flex-wrap:wrap}
+.dias-sem-checks label{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;cursor:pointer;background:var(--surface)}
+.dias-sem-checks input:checked+span{font-weight:700;color:var(--ok)}
+.resp-dual{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
+.resp-dual span b{color:var(--fg);font-weight:600}
+</style>
 </head>
 <body>
 <title>Hub da Equipe</title>
@@ -443,7 +495,7 @@ textarea.inp{min-height:76px;resize:vertical}
 <div id="app"></div>
 <div id="modal"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <script>
 /* =====================================================================
    CONFIGURAÇÃO — preencha com os dados do seu projeto Supabase
@@ -476,7 +528,15 @@ const PRIOR = { baixa: 'Baixa', media: 'Média', alta: 'Alta' };
 const ORIGENS = { cliente: 'Cliente', coordenacao: 'Coordenação', outra_area: 'Outra área', interna: 'Interna' };
 const ST_ITEM = { backlog: 'Backlog', a_fazer: 'A fazer', fazendo: 'Fazendo', revisao: 'Revisão', feito: 'Feito' };
 const ST_PROJ = { planejamento: 'Planejamento', andamento: 'Em andamento', pausado: 'Pausado', concluido: 'Concluído' };
-const FREQ = { diaria: 'Diária', semanal: 'Semanal', mensal: 'Mensal' };
+const FREQ = {
+  diaria: 'Diária (dias úteis)',
+  semanal: 'Semanal',
+  quinzenal: 'Quinzenal (a cada 14 dias)',
+  intervalo: 'Personalizada (a cada N dias)',
+  intermitente: 'Intermitente (dias da semana)',
+  mensal: 'Mensal',
+  anual: 'Anual'
+};
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const DIAS_LONGO = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -540,7 +600,12 @@ const ICON = {
   alvo: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
   gfc: '<path d="M10 6h10M10 12h10M10 18h10M3.5 6l1.3 1.3L7.5 4.6M3.5 12l1.3 1.3 2.7-2.7M3.5 18l1.3 1.3 2.7-2.7"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',
-  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>'
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>',
+  pin: '<path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/>',
+  up: '<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
+  chevD: '<path d="m6 9 6 6 6-6"/>',
+  chevR: '<path d="m9 18 6-6-6-6"/>'
 };
 const ic = (n, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]}</svg>`;
 
@@ -559,7 +624,12 @@ const S = {
   focoIdx: 0, foco: null,
   parFiltro: 'abertas', parBusca: '', parMinhas: false,
   projAberto: null, projTab: 'sprint', sprintSel: null,
-  projVis: ls.get('hub-projvis', 'cards'), portItens: false, portArea: 'todas', portConcl: false
+  projVis: ls.get('hub-projvis', 'cards'), portItens: false, portArea: 'todas', portConcl: false,
+  parExp: new Set(),
+  notifAberta: false,
+  notifJaMostrou: false,
+  notifLidas: new Set(ls.get('hub-notif-lidas', [])),
+  rascunhos: ls.get('hub-rascunhos', {})
 };
 const P = id => S.pessoas.find(p => p.id === id);
 const isGestao = p => !!p && (p.papel === 'coordenador' || p.papel === 'lider');
@@ -617,6 +687,119 @@ function unidades() {
 const TABELAS = ['pessoas', 'rotinas', 'rotina_exec', 'paralelas', 'etapas', 'notas', 'projetos', 'sprints', 'itens'];
 // tabelas novas: se ainda não existirem no banco, o restante do app continua funcionando
 const TABELAS_OPC = ['paralela_comentarios', 'gfc_sites', 'gfc_frotas', 'gfc_responsaveis', 'gfc_demandas', 'gfc_itens'];
+// Armazenamento seguro para autenticação (funciona mesmo em iframe/prévia com localStorage restrito)
+const memAuth = {};
+const safeAuthStorage = {
+  getItem(k) { try { const v = localStorage.getItem(k); if (v != null) return v; } catch (e) {} return memAuth[k] ?? null; },
+  setItem(k, v) { memAuth[k] = String(v); try { localStorage.setItem(k, String(v)); } catch (e) {} },
+  removeItem(k) { delete memAuth[k]; try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+// Cliente Supabase nativo via fetch (fallback caso o script da CDN seja bloqueado pela rede)
+function criarSupabaseNativo(url, key) {
+  let sessaoAtual = null;
+  try { const s = safeAuthStorage.getItem('hub-sb-session'); if (s) sessaoAtual = JSON.parse(s); } catch (e) {}
+  const listeners = [];
+  const notificar = (ev, s) => listeners.forEach(fn => { try { fn(ev, s); } catch (e) {} });
+  const headers = (extra = {}) => ({
+    apikey: key,
+    Authorization: 'Bearer ' + ((sessaoAtual && sessaoAtual.access_token) || key),
+    'Content-Type': 'application/json',
+    ...extra
+  });
+  function qb(tabela) {
+    const st = { method: 'GET', params: [], body: null, prefer: [], single: false };
+    const api = {
+      select(cols = '*') { if (st.method === 'GET') st.params.push('select=' + encodeURIComponent(cols)); else st.prefer.push('return=representation'); return api; },
+      range(a, b) { st.range = `${a}-${b}`; return api; },
+      gte(col, val) { st.params.push(`${encodeURIComponent(col)}=gte.${encodeURIComponent(val)}`); return api; },
+      eq(col, val) { st.params.push(`${encodeURIComponent(col)}=eq.${encodeURIComponent(val)}`); return api; },
+      insert(rows) { st.method = 'POST'; st.body = rows; st.prefer.push('return=representation'); return api; },
+      update(patch) { st.method = 'PATCH'; st.body = patch; st.prefer.push('return=representation'); return api; },
+      upsert(row, opts = {}) { st.method = 'POST'; st.body = row; st.prefer.push('return=representation', 'resolution=merge-duplicates'); if (opts.onConflict) st.params.push('on_conflict=' + encodeURIComponent(opts.onConflict)); return api; },
+      delete() { st.method = 'DELETE'; return api; },
+      single() { st.single = true; return api; },
+      async then(resolve, reject) {
+        try {
+          const qs = st.params.length ? '?' + st.params.join('&') : '';
+          const h = headers(st.prefer.length ? { Prefer: st.prefer.join(',') } : {});
+          if (st.range) h['Range-Unit'] = 'items', h['Range'] = st.range;
+          const u0 = url.replace(/^https?:\/\//, ''); const r = await fetch(`https://${u0}/rest/v1/${tabela}${qs}`, { method: st.method, headers: h, body: st.body != null ? JSON.stringify(st.body) : undefined });
+          const txt = await r.text();
+          const json = txt ? JSON.parse(txt) : null;
+          if (!r.ok) return resolve({ data: null, error: json || { message: r.statusText } });
+          const data = st.single ? (Array.isArray(json) ? json[0] : json) : json;
+          resolve({ data, error: null });
+        } catch (err) {
+          resolve({ data: null, error: { message: err.message || String(err) } });
+        }
+      }
+    };
+    return api;
+  }
+  return {
+    from: qb,
+    async rpc(fnName, args) {
+      try {
+        const u0 = url.replace(/^https?:\/\//, ''); const r = await fetch(`https://${u0}/rest/v1/rpc/${fnName}`, { method: 'POST', headers: headers(), body: JSON.stringify(args || {}) });
+        if (!r.ok) { const j = await r.json().catch(() => ({})); return { error: j }; }
+        return { data: await r.json().catch(() => null), error: null };
+      } catch (e) { return { error: e }; }
+    },
+    auth: {
+      async getSession() { return { data: { session: sessaoAtual }, error: null }; },
+      onAuthStateChange(fn) { listeners.push(fn); return { data: { subscription: { unsubscribe() {} } } }; },
+      async signInWithPassword({ email, password }) {
+        try {
+          const u0 = url.replace(/^https?:\/\//, ''); const r = await fetch(`https://${u0}/auth/v1/token?grant_type=password`, {
+            method: 'POST',
+            headers: { apikey: key, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) return { data: null, error: { message: j.error_description || j.msg || j.message || 'Invalid login credentials' } };
+          sessaoAtual = j;
+          safeAuthStorage.setItem('hub-sb-session', JSON.stringify(j));
+          notificar('SIGNED_IN', sessaoAtual);
+          return { data: { session: sessaoAtual, user: j.user }, error: null };
+        } catch (e) { return { data: null, error: { message: e.message || String(e) } }; }
+      },
+      async signOut() {
+        sessaoAtual = null;
+        safeAuthStorage.removeItem('hub-sb-session');
+        notificar('SIGNED_OUT', null);
+        return { error: null };
+      },
+      async updateUser({ password }) {
+        try {
+          const u0 = url.replace(/^https?:\/\//, ''); const r = await fetch(`https://${u0}/auth/v1/user`, { method: 'PUT', headers: headers(), body: JSON.stringify({ password }) });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) return { error: { message: j.msg || j.message || 'Erro ao atualizar senha' } };
+          return { data: j, error: null };
+        } catch (e) { return { error: e }; }
+      },
+      async signUp({ email, password }) {
+        try {
+          const u0 = url.replace(/^https?:\/\//, ''); const r = await fetch(`https://${u0}/auth/v1/signup`, { method: 'POST', headers: { apikey: key, 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) return { error: { message: j.msg || j.message || 'Erro ao criar conta' } };
+          return { data: j, error: null };
+        } catch (e) { return { error: e }; }
+      }
+    }
+  };
+}
+function criarClienteSupabase(url, key, extraOpts = {}) {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    try {
+      return window.supabase.createClient(url, key, {
+        auth: { storage: safeAuthStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, ...(extraOpts.auth || {}) }
+      });
+    } catch (e) {}
+  }
+  return criarSupabaseNativo(url, key);
+}
+
 let sb = null;
 let DEMO = null;
 const DEMO_KEY = 'hub-equipe-demo-v2';
@@ -652,8 +835,15 @@ const API = {
   },
   async inserir(t, row) {
     if (S.modo === 'online') {
-      const { data, error } = await sb.from(t).insert(row).select().single();
-      if (error) throw error; return data;
+      let { data, error } = await sb.from(t).insert(row).select().single();
+      if (error && (t === 'rotinas' || t === 'notas' || t.startsWith('gfc_'))) {
+        const clean = limparRowBanco(t, row);
+        const retry = await sb.from(t).insert(clean).select().single();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+      if (error) throw error;
+      return data;
     }
     const r = { id: uid(), criado_em: new Date().toISOString(), ...row };
     DEMO[t].push(r); salvarDemo(); return r;
@@ -661,16 +851,30 @@ const API = {
   async inserirLote(t, rows) {
     if (!rows.length) return [];
     if (S.modo === 'online') {
-      const { data, error } = await sb.from(t).insert(rows).select();
-      if (error) throw error; return data;
+      let { data, error } = await sb.from(t).insert(rows).select();
+      if (error && (t === 'rotinas' || t === 'notas' || t.startsWith('gfc_'))) {
+        const clean = rows.map(r => limparRowBanco(t, r));
+        const retry = await sb.from(t).insert(clean).select();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+      if (error) throw error;
+      return data;
     }
     const out = rows.map(row => ({ id: uid(), criado_em: new Date().toISOString(), ...row }));
     DEMO[t].push(...out); salvarDemo(); return out;
   },
   async atualizar(t, id, patch) {
     if (S.modo === 'online') {
-      const { data, error } = await sb.from(t).update(patch).eq('id', id).select().single();
-      if (error) throw error; return data;
+      let { data, error } = await sb.from(t).update(patch).eq('id', id).select().single();
+      if (error && (t === 'rotinas' || t === 'notas' || t.startsWith('gfc_'))) {
+        const clean = limparRowBanco(t, patch);
+        const retry = await sb.from(t).update(clean).eq('id', id).select().single();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+      if (error) throw error;
+      return data;
     }
     const r = DEMO[t].find(x => x.id === id); Object.assign(r, patch); salvarDemo(); return r;
   },
@@ -715,7 +919,7 @@ const API = {
   },
   async criarAcesso(email, senha) {
     if (S.modo !== 'online') return;
-    const tmp = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY,
+    const tmp = criarClienteSupabase(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY,
       { auth: { persistSession: false, autoRefreshToken: false, storageKey: 'hub-tmp-signup' } });
     const { error } = await tmp.auth.signUp({ email, password: senha });
     if (error && !/already/i.test(error.message)) throw error;
@@ -723,25 +927,119 @@ const API = {
 };
 function salvarDemo() { ls.set(DEMO_KEY, DEMO); }
 
+// Helpers de compatibilidade de schema (funcionam mesmo antes de rodar ALTER TABLE no Supabase)
+const META_ROT_RE = /\n?<!--hub:freq=(\{.*?\})-->$/s;
+const META_NOTA_RE = /\n?<!--hub:vinc=(\{.*?\})-->$/s;
+function codificarDescRotina(desc, meta) {
+  const limpo = String(desc || '').replace(META_ROT_RE, '').trim();
+  if (!meta) return limpo || null;
+  return (limpo ? limpo + '\n' : '') + `<!--hub:freq=${JSON.stringify(meta)}-->`;
+}
+function decodificarRotina(r) {
+  const out = { ...r };
+  const m = String(out.descricao || '').match(META_ROT_RE);
+  if (m) {
+    try {
+      const meta = JSON.parse(m[1]);
+      if (meta.f) out.frequencia = meta.f;
+      if (meta.n != null && out.intervalo_dias == null) out.intervalo_dias = meta.n;
+      if (meta.ds != null && out.dias_semana == null) out.dias_semana = meta.ds;
+      if (meta.u != null && out.apenas_uteis == null) out.apenas_uteis = meta.u;
+    } catch (e) {}
+    out.descricao = String(out.descricao || '').replace(META_ROT_RE, '').trim() || null;
+  }
+  return out;
+}
+function codificarTextoNota(texto, vincTipo, vincId) {
+  const limpo = String(texto || '').replace(META_NOTA_RE, '').trim();
+  if (!vincTipo || !vincId) return limpo || null;
+  return (limpo ? limpo + '\n' : '') + `<!--hub:vinc=${JSON.stringify({ t: vincTipo, id: vincId })}-->`;
+}
+function decodificarNota(n) {
+  const out = { ...n };
+  const m = String(out.texto || '').match(META_NOTA_RE);
+  if (m) {
+    try {
+      const meta = JSON.parse(m[1]);
+      if (!out.vinculo_tipo && meta.t) out.vinculo_tipo = meta.t;
+      if (!out.vinculo_id && meta.id) out.vinculo_id = meta.id;
+    } catch (e) {}
+    out.texto = String(out.texto || '').replace(META_NOTA_RE, '').trim() || null;
+  }
+  return out;
+}
+function codificarRespDuplo(csp, cons, legado) {
+  csp = (csp || '').trim(); cons = (cons || '').trim();
+  if (csp && cons) return `CSP: ${csp} | Consultor: ${cons}`;
+  if (csp) return `CSP: ${csp}`;
+  if (cons) return `Consultor: ${cons}`;
+  return (legado || '').trim() || null;
+}
+function decodificarRespDuplo(obj) {
+  const out = { ...obj };
+  const raw = String(out.responsavel || '').trim();
+  if (out.responsavel_csp === undefined && out.responsavel_consultor === undefined) {
+    if (/CSP:|Consultor:/i.test(raw)) {
+      const mCsp = raw.match(/CSP:\s*([^|]+)/i);
+      const mCons = raw.match(/Consultor:\s*([^|]+)/i);
+      out.responsavel_csp = mCsp ? mCsp[1].trim() : null;
+      out.responsavel_consultor = mCons ? mCons[1].trim() : null;
+    } else {
+      out.responsavel_csp = raw || null;
+      out.responsavel_consultor = null;
+    }
+  }
+  return out;
+}
+function limparRowBanco(t, row) {
+  const c = { ...row };
+  if (t === 'rotinas') {
+    if (!['diaria', 'semanal', 'mensal'].includes(c.frequencia)) {
+      c.descricao = codificarDescRotina(c.descricao, { f: c.frequencia, n: c.intervalo_dias, ds: c.dias_semana, u: c.apenas_uteis });
+      c.frequencia = 'diaria';
+    }
+    delete c.intervalo_dias; delete c.dias_semana; delete c.apenas_uteis;
+  }
+  if (t === 'notas') {
+    if (c.vinculo_tipo && c.vinculo_id) c.texto = codificarTextoNota(c.texto, c.vinculo_tipo, c.vinculo_id);
+    delete c.vinculo_tipo; delete c.vinculo_id;
+  }
+  if (t === 'gfc_frotas' || t === 'gfc_itens') {
+    delete c.responsavel_csp; delete c.responsavel_consultor;
+  }
+  if (t === 'gfc_demandas') {
+    delete c.tipo_responsavel;
+  }
+  return c;
+}
+
 function aplicarDados(d, meDemo) {
+  const idsParAntes = new Set((S.paralelas || []).map(a => a.id));
   S.pessoas = d.pessoas.map(p => ({ ...p }));
   if (meDemo) S.me = S.pessoas.find(p => p.id === meDemo.id);
   else if (S.sessao) S.me = S.pessoas.find(p => (p.email || '').toLowerCase() === (S.sessao.user.email || '').toLowerCase() && p.ativo !== false) || null;
   const me = S.me;
-  S.rotinas = me ? d.rotinas.filter(r => verRotina(r, me)) : [];
+  S.rotinas = me ? d.rotinas.map(decodificarRotina).filter(r => verRotina(r, me)) : [];
   const rids = new Set(S.rotinas.map(r => r.id));
   S.exec = d.rotina_exec.filter(e => rids.has(e.rotina_id));
   S.paralelas = me ? d.paralelas.map(a => ({ ...a, responsaveis: a.responsaveis || [] })) : [];
   S.etapas = me ? d.etapas.map(e => ({ ...e })) : [];
-  S.notas = me ? d.notas.filter(n => n.dono_id === me.id) : [];
+  S.notas = me ? d.notas.map(decodificarNota).filter(n => n.dono_id === me.id) : [];
   S.projetos = d.projetos; S.sprints = d.sprints; S.itens = d.itens;
   S.comentarios = me ? (d.paralela_comentarios || []).slice() : [];
-  S.gfcSites = d.gfc_sites || []; S.gfcFrotas = d.gfc_frotas || []; S.gfcResp = d.gfc_responsaveis || [];
-  S.gfcDemandas = (d.gfc_demandas || []).map(x => ({ ...x, etapas: Array.isArray(x.etapas) ? x.etapas : [] }));
-  S.gfcItens = (d.gfc_itens || []).map(x => ({ ...x, passos: fmtPassos(x.passos) }));
+  S.gfcSites = d.gfc_sites || [];
+  S.gfcFrotas = (d.gfc_frotas || []).map(decodificarRespDuplo);
+  S.gfcResp = d.gfc_responsaveis || [];
+  S.gfcDemandas = (d.gfc_demandas || []).map(x => {
+    const ets = Array.isArray(x.etapas) ? x.etapas : [];
+    const tipo_responsavel = x.tipo_responsavel || (ets[0] && ets[0].tipo_resp_dem) || 'csp';
+    return { ...x, etapas: ets, tipo_responsavel };
+  });
+  S.gfcItens = (d.gfc_itens || []).map(x => decodificarRespDuplo({ ...x, passos: fmtPassos(x.passos) }));
   S.faltando = d.faltando || [];
   S.execMap = new Map(S.exec.map(e => [e.rotina_id + '|' + String(e.data).slice(0, 10), e]));
   if (me && (!S.escopo || !escopoOpcoes().some(o => o[0] === S.escopo))) S.escopo = escopoPadrao();
+  verificarNotificacoesAoCarregar(idsParAntes);
 }
 
 async function recarregar() {
@@ -762,15 +1060,73 @@ function msgErro(e) {
 // =====================================================================
 // Rotina: ocorrências do mês
 // =====================================================================
+function ajustarFimDeSemana(x, d, n) {
+  const g = x.getDay();
+  if (g === 6) x.setDate(d > 1 ? d - 1 : Math.min(n, d + 2));
+  if (g === 0) x.setDate(d > 2 ? d - 2 : Math.min(n, d + 1));
+  return x;
+}
 function ocorrencias(r, y, m) {
   if (r.ativo === false) return [];
   const out = [], n = diasMes(y, m);
+  const ini = r.inicio ? String(r.inicio).slice(0, 10) : iso(new Date(y, 0, 1));
+  const mesIni = iso(new Date(y, m, 1)), mesFim = iso(new Date(y, m, n));
   if (r.frequencia === 'mensal') {
     const d = Math.min(Number(r.dia_mes) || 1, n);
-    const x = new Date(y, m, d), g = x.getDay();
-    if (g === 6) x.setDate(d > 1 ? d - 1 : d + 2);
-    if (g === 0) x.setDate(d > 2 ? d - 2 : d + 1);
-    out.push(iso(x));
+    out.push(iso(ajustarFimDeSemana(new Date(y, m, d), d, n)));
+  } else if (r.frequencia === 'anual') {
+    const dIni = dt(ini), mesAlvo = dIni.getMonth();
+    if (m === mesAlvo) {
+      const d = Math.min(Number(r.dia_mes) || dIni.getDate() || 1, n);
+      out.push(iso(ajustarFimDeSemana(new Date(y, m, d), d, n)));
+    }
+  } else if (r.frequencia === 'quinzenal') {
+    let cur = ini;
+    const ds = r.dia_semana != null && r.dia_semana !== '' ? Number(r.dia_semana) : null;
+    if (ds != null) {
+      while (dt(cur).getDay() !== ds) cur = addDias(cur, 1);
+    }
+    if (cur > mesFim) return [];
+    const diff = diasEntre(cur, mesIni);
+    if (diff > 0) cur = addDias(cur, Math.floor(diff / 14) * 14);
+    while (cur <= mesFim) {
+      if (cur >= mesIni && cur >= ini) {
+        const dObj = dt(cur);
+        const aj = ajustarFimDeSemana(new Date(dObj.getFullYear(), dObj.getMonth(), dObj.getDate()), dObj.getDate(), n);
+        const sAj = iso(aj);
+        if (sAj >= mesIni && sAj <= mesFim && !out.includes(sAj)) out.push(sAj);
+      }
+      cur = addDias(cur, 14);
+    }
+  } else if (r.frequencia === 'intervalo') {
+    const passo = Math.max(1, Number(r.intervalo_dias) || 3);
+    if (r.apenas_uteis) {
+      let cur = ini;
+      while (!util(cur)) cur = addDias(cur, 1);
+      while (cur <= mesFim) {
+        if (cur >= mesIni && cur >= ini) out.push(cur);
+        cur = addUteis(cur, passo);
+      }
+    } else {
+      let cur = ini;
+      const diff = diasEntre(cur, mesIni);
+      if (diff > 0) cur = addDias(cur, Math.floor(diff / passo) * passo);
+      while (cur <= mesFim) {
+        if (cur >= mesIni && cur >= ini) {
+          const dObj = dt(cur);
+          const aj = ajustarFimDeSemana(new Date(dObj.getFullYear(), dObj.getMonth(), dObj.getDate()), dObj.getDate(), n);
+          const sAj = iso(aj);
+          if (sAj >= mesIni && sAj <= mesFim && !out.includes(sAj)) out.push(sAj);
+        }
+        cur = addDias(cur, passo);
+      }
+    }
+  } else if (r.frequencia === 'intermitente') {
+    const diasSet = new Set(String(r.dias_semana || '1,3,5').split(',').map(x => Number(x.trim())).filter(x => !isNaN(x)));
+    for (let d = 1; d <= n; d++) {
+      const x = new Date(y, m, d), g = x.getDay();
+      if (diasSet.has(g)) out.push(iso(x));
+    }
   } else {
     for (let d = 1; d <= n; d++) {
       const x = new Date(y, m, d), g = x.getDay();
@@ -778,12 +1134,25 @@ function ocorrencias(r, y, m) {
       if (r.frequencia === 'diaria' || (r.frequencia === 'semanal' && g === Number(r.dia_semana))) out.push(iso(x));
     }
   }
-  const ini = r.inicio ? String(r.inicio).slice(0, 10) : null;
-  return out.filter(s => !ini || s >= ini);
+  return out.filter(s => !r.inicio || s >= ini).sort();
 }
 const execDe = (rid, d) => S.execMap.get(rid + '|' + d);
 const estadoCel = (rid, d) => execDe(rid, d) ? 'done' : d < HOJE ? 'late' : d === HOJE ? 'today' : 'fut';
-const quandoRotina = r => (r.frequencia === 'diaria' ? 'Todo dia útil' : r.frequencia === 'semanal' ? 'Toda ' + DIAS_LONGO[r.dia_semana] : 'Todo dia ' + r.dia_mes) + (r.hora ? ' até ' + hm(r.hora) : '');
+function quandoRotina(r) {
+  let base = '';
+  if (r.frequencia === 'diaria') base = 'Todo dia útil';
+  else if (r.frequencia === 'semanal') base = 'Toda ' + (DIAS_LONGO[r.dia_semana] || 'segunda-feira');
+  else if (r.frequencia === 'quinzenal') base = 'Quinzenal (a cada 14 d)';
+  else if (r.frequencia === 'intervalo') base = `A cada ${Number(r.intervalo_dias) || 3} ${r.apenas_uteis ? 'dias úteis' : 'dias'}`;
+  else if (r.frequencia === 'intermitente') {
+    const ds = String(r.dias_semana || '1,3,5').split(',').map(Number).filter(k => DIAS[k]).map(k => DIAS[k]);
+    base = 'Intermitente (' + (ds.join(', ') || 'Seg, Qua, Sex') + ')';
+  } else if (r.frequencia === 'anual') {
+    const dIni = dt(r.inicio || HOJE);
+    base = `Anual · dia ${r.dia_mes || dIni.getDate()} de ${MESES[dIni.getMonth()]}`;
+  } else base = 'Todo dia ' + (r.dia_mes || 1);
+  return base + (r.hora ? ' até ' + hm(r.hora) : '');
+}
 
 // =====================================================================
 // Agenda pessoal (Dia / Mês / Foco)
@@ -959,6 +1328,126 @@ const frotaTxt = p => [p.site, p.frotas].filter(Boolean).join(' · ');
 // =====================================================================
 // Render geral
 // =====================================================================
+
+// =====================================================================
+// Notificações e Pop-up em Tempo Real (Sugestão 2)
+// =====================================================================
+function gerarNotificacoes() {
+  if (!S.me) return [];
+  const me = S.me, items = [];
+  // 1) Atividades paralelas direcionadas para você
+  S.paralelas.filter(a => a.status !== 'concluida' && (a.responsaveis || []).includes(me.id)).forEach(a => {
+    const deOutro = a.criado_por && a.criado_por !== me.id;
+    const criador = P(a.criado_por);
+    const late = vencido(a.prazo, a.prazo_hora);
+    items.push({
+      key: 'par:' + a.id + ':' + a.status,
+      cat: deOutro ? 'direcionada' : 'pendente',
+      late,
+      prio: late ? 0 : deOutro ? 1 : 2,
+      titulo: a.titulo,
+      sub: (deOutro ? `Direcionada por ${criador ? criador.nome.split(' ')[0] : 'colega'}` : 'Sua atividade paralela') + (a.prazo ? ` · prazo ${fmtD(a.prazo)}${a.prazo_hora ? ' ' + hm(a.prazo_hora) : ''}` : ''),
+      act: 'abrirAg', t: 'paralela', id: a.id, d: a.prazo || HOJE
+    });
+  });
+  // 2) Etapas de atividades paralelas direcionadas para você
+  S.etapas.filter(e => e.status !== 'concluida' && e.responsavel_id === me.id).forEach(e => {
+    const pai = parDe(e);
+    const late = vencido(e.fim, e.hora);
+    items.push({
+      key: 'et:' + e.id + ':' + e.status,
+      cat: 'direcionada',
+      late,
+      prio: late ? 0 : 1,
+      titulo: e.titulo,
+      sub: `Etapa em “${pai ? pai.titulo : 'Paralela'}”` + (e.fim ? ` · prazo ${fmtD(e.fim)}` : ''),
+      act: 'abrirAg', t: 'etapa', id: e.id, d: e.fim || HOJE
+    });
+  });
+  // 3) Itens de projeto atribuídos a você
+  S.itens.filter(i => i.status !== 'feito' && i.responsavel_id === me.id).forEach(i => {
+    const pj = S.projetos.find(p => p.id === i.projeto_id);
+    const late = itemAtrasado(i);
+    items.push({
+      key: 'it:' + i.id + ':' + i.status,
+      cat: 'direcionada',
+      late,
+      prio: late ? 0 : 2,
+      titulo: i.titulo,
+      sub: `Projeto ${pj ? pj.nome : ''}` + (i.fim ? ` · até ${fmtD(i.fim)}` : ''),
+      act: 'abrirAg', t: 'item', id: i.id, d: i.fim || HOJE
+    });
+  });
+  // 4) Rotinas pendentes de hoje ou atrasadas
+  const agHoje = agendaDia(me.id, HOJE).filter(x => x.tipo === 'rotina' && !x.feito);
+  agHoje.forEach(r => {
+    items.push({
+      key: 'rot:' + r.id + ':' + HOJE,
+      cat: 'pendente',
+      late: vencido(HOJE, r.hora),
+      prio: 1,
+      titulo: r.titulo,
+      sub: `Rotina de hoje${r.hora ? ' · até ' + hm(r.hora) : ''}`,
+      act: 'abrirAg', t: 'rotina', id: r.id, d: HOJE
+    });
+  });
+  return items.sort((a, b) => a.prio - b.prio || (b.late - a.late));
+}
+function verificarNotificacoesAoCarregar(idsParAntes) {
+  if (!S.me) return;
+  const todas = gerarNotificacoes();
+  const naoLidas = todas.filter(n => !S.notifLidas.has(n.key));
+  if (!S.notifJaMostrou && naoLidas.length > 0) {
+    S.notifJaMostrou = true;
+    S.notifAberta = true;
+  } else if (idsParAntes && idsParAntes.size > 0) {
+    const novasDir = S.paralelas.filter(a => !idsParAntes.has(a.id) && (a.responsaveis || []).includes(S.me.id));
+    if (novasDir.length) {
+      S.notifAberta = true;
+      dispararNotifNavegador(`Nova atividade direcionada: ${novasDir[0].titulo}`);
+    }
+  }
+}
+function dispararNotifNavegador(texto) {
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(CONFIG.NOME_APP, { body: texto, icon: 'icon-192.png' });
+    }
+  } catch (e) {}
+}
+function renderPopupNotif() {
+  if (!S.notifAberta || !S.me) return '';
+  const todas = gerarNotificacoes();
+  const dir = todas.filter(x => x.cat === 'direcionada');
+  const pend = todas.filter(x => x.cat === 'pendente');
+  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+  return `<aside class="notif-pop no-print" role="dialog" aria-label="Notificações">
+    <div class="notif-pop-h">
+      ${ic('bell', 'style="width:16px;height:16px;color:var(--accent)"')}
+      <b>Notificações (${todas.length})</b>
+      ${todas.length ? `<button class="linkbtn small muted" type="button" data-act="lerTodasNotif">Marcar lidas</button>` : ''}
+      <button class="iconbtn" type="button" data-act="fecharNotif" aria-label="Fechar notificações">${ic('x')}</button>
+    </div>
+    <div class="notif-pop-b">
+      ${!todas.length ? '<div class="empty">Tudo em dia! Nenhuma atividade pendente ou direcionada agora.</div>' : ''}
+      ${dir.length ? `<div class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 2px 2px">Direcionadas para você (${dir.length})</div>` +
+        dir.map(n => `<button type="button" class="notif-item ${!S.notifLidas.has(n.key) ? 'unread' : ''} ${n.late ? 'late' : ''}" data-act="clickNotif" data-key="${esc(n.key)}" data-t="${n.t}" data-id="${n.id}" data-d="${n.d}">
+          <div class="t"><b>${esc(n.titulo)}</b><small>${esc(n.sub)}</small></div>
+          ${n.late ? '<span class="pill bad nodot">Atrasada</span>' : '<span class="pill acc nodot">Abrir</span>'}
+        </button>`).join('') : ''}
+      ${pend.length ? `<div class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:6px 2px 2px">Pendentes de hoje (${pend.length})</div>` +
+        pend.map(n => `<button type="button" class="notif-item ${!S.notifLidas.has(n.key) ? 'unread' : ''} ${n.late ? 'late' : ''}" data-act="clickNotif" data-key="${esc(n.key)}" data-t="${n.t}" data-id="${n.id}" data-d="${n.d}">
+          <div class="t"><b>${esc(n.titulo)}</b><small>${esc(n.sub)}</small></div>
+          <span class="pill nodot">Ver</span>
+        </button>`).join('') : ''}
+    </div>
+    <div class="notif-pop-f">
+      ${perm === 'default' ? `<button class="linkbtn small" type="button" data-act="pedirPermNotif">Ativar alertas do navegador</button>` : perm === 'granted' ? '<span class="muted small">Alertas ativos neste navegador</span>' : '<span class="muted small">Central de avisos do Hub</span>'}
+      <button class="btn sm" type="button" data-act="fecharNotif">Fechar</button>
+    </div>
+  </aside>`;
+}
+
 const root = document.getElementById('app');
 const NAV = [['inicio', 'Início', 'home'], ['rotina', 'Rotina', 'rot'], ['paralelas', 'Paralelas', 'par'], ['projetos', 'Projetos', 'proj'], ['painel', 'Painel', 'painel']];
 const NAV2 = [['notas', 'Minhas notas', 'nota'], ['equipe', 'Equipe', 'equipe']];
@@ -989,10 +1478,12 @@ function render() {
       <header class="top">
         <h1>${titulo}</h1>
         ${comMes ? `<div class="month"><button class="iconbtn" data-act="mes" data-d="-1" aria-label="Mês anterior">${ic('left')}</button><span>${MESES[S.m]} ${S.y}</span><button class="iconbtn" data-act="mes" data-d="1" aria-label="Próximo mês">${ic('right')}</button></div>` : ''}
+        <button class="iconbtn notif-btn" data-act="togNotif" title="Notificações e pendências" aria-label="Notificações">${ic('bell')}${(() => { const nl = gerarNotificacoes().filter(n => !S.notifLidas.has(n.key)).length; return nl ? `<span class="notif-badge num">${nl > 99 ? '99+' : nl}</span>` : ''; })()}</button>
         <button class="iconbtn" data-act="recarregar" title="Atualizar dados" aria-label="Atualizar dados">${ic('ref')}</button>
         <button class="iconbtn" data-act="tema" title="Trocar tema" aria-label="Trocar tema">${ic(tema === 'dark' ? 'sun' : 'moon')}</button>
         <button class="who" data-act="perfil" title="Meu perfil">${av(S.me, false)}<span class="nm">${esc(S.me.nome.split(' ')[0])}</span></button>
       </header>
+      ${renderPopupNotif()}
       <div class="content">${viewAtual()}</div>
     </div>
     <nav class="bottom">${NAV.map(navBtn).join('')}</nav>
@@ -1019,7 +1510,8 @@ function viewAtual() {
 function barraDemo() {
   return `<div class="demo-bar"><b>Modo teste</b><span>Dados fictícios, guardados só neste navegador.</span>
     <label>Entrar como <select data-chg="demoMe" aria-label="Perfil de teste">${['frota', 'dev', 'gfc', 'gestao'].map(a => `<optgroup label="${AREAS[a].nome}">${S.pessoas.filter(p => p.area === a).map(p => `<option value="${p.id}" ${p.id === S.me.id ? 'selected' : ''}>${esc(p.nome)} — ${PAPEIS[p.papel]}${p.layout === 'diario' ? ' (diário)' : ''}</option>`).join('')}</optgroup>`).join('')}</select></label>
-    <button class="linkbtn" data-act="resetDemo">Restaurar dados de exemplo</button></div>`;
+    <button class="linkbtn" data-act="resetDemo">Restaurar dados de exemplo</button>
+    ${CONFIG.SUPABASE_URL ? '<button class="linkbtn" data-act="voltarLoginOnline" style="margin-left:auto">Fazer login online (Supabase)</button>' : ''}</div>`;
 }
 
 // =====================================================================
@@ -1067,7 +1559,7 @@ function inicioDia() {
   const feitos = lista.filter(x => x.feito).length;
   const d0 = dt(HOJE), I = indicadores([me.id], d0.getFullYear(), d0.getMonth()), x = I.pp[me.id];
   const ad = pct(x.feitas, x.esperadas);
-  const fixadas = S.notas.filter(n => n.fixada && !n.data).slice(0, 3);
+  const fixadas = S.notas.filter(n => n.fixada && !n.data).slice(0, 6);
   const diarioNota = S.notas.find(n => n.data === S.dia);
   return `<div class="grid2">
     <div class="stack">
@@ -1082,12 +1574,12 @@ function inicioDia() {
         <div class="card-b">
           <div class="hbar"><span>Aderência à rotina</span>${meter(ad, corPct(ad))}<b class="num">${ad == null ? '—' : ad + '%'}</b></div>
           <div class="kv"><span>Entregas concluídas</span><b class="num">${x.entregas}${x.entregas ? ` <span class="muted small">· ${pct(x.noPrazo, x.entregas)}% no prazo</span>` : ''}</b></div>
-          <div class="kv"><span>Em aberto</span><b class="num">${x.abertos}${x.atrasados ? ` <span style="color:var(--bad)">· ${x.atrasados} atrasadas</span>` : ''}</b></div>
+          <div class="kv clk" data-act="painelKpi" data-k="abertos" data-pid="${me.id}" title="Clique para ver suas atividades em aberto"><span>Em aberto <span class="small" style="color:var(--info)">(ver →)</span></span><b class="num">${x.abertos}${x.atrasados ? ` <span style="color:var(--bad)">· ${x.atrasados} atrasadas</span>` : ''}</b></div>
           ${isFrota(me) ? `<div class="kv"><span>Média por dia</span><b class="num" ${x.mediaDia > x.carga ? 'style="color:var(--bad)"' : ''}>${fmtH(x.mediaDia)} <span class="muted small">de ${fmtH(x.carga)}</span></b></div>
           <div class="kv"><span>Dias acima da jornada</span><b class="num" ${x.acima ? 'style="color:var(--bad)"' : ''}>${x.acima}</b></div>` : ''}
         </div></section>
-      <section class="card"><div class="card-h"><h2>Notas fixadas</h2>${lock()}<button class="btn sm" data-act="ir" data-v="notas">Abrir notas</button></div>
-        <div class="card-b"><div class="rows">${fixadas.length ? fixadas.map(n => `<div class="row clk" data-act="editarNota" data-id="${n.id}"><div class="t"><b>${esc(n.titulo || 'Sem título')}</b><span class="small muted">${esc((n.texto || '').slice(0, 90))}</span></div></div>`).join('') : '<div class="empty">Fixe uma nota para ela aparecer aqui.</div>'}</div></div></section>
+      <section class="card"><div class="card-h"><h2>Notas fixadas</h2>${lock()}<button class="btn sm" data-act="novaNota">${ic('plus')}Nota</button><button class="btn sm" data-act="ir" data-v="notas">Abrir notas</button></div>
+        <div class="card-b"><div class="rows">${fixadas.length ? fixadas.map(n => `<div class="row clk" data-act="editarNota" data-id="${n.id}"><div class="t"><b>${esc(n.titulo || 'Sem título')}</b><span class="small muted">${esc((n.texto || '').slice(0, 90))}</span>${badgeVinculoNota(n)}</div><button class="iconbtn" type="button" data-act="togFixNota" data-id="${n.id}" title="Desfixar nota" aria-label="Desfixar nota" style="color:var(--accent)">${ic('pin')}</button></div>`).join('') : '<div class="empty">As notas criadas já ficam fixadas automaticamente até você desfixar.</div>'}</div></div></section>
     </div></div>`;
 }
 function inicioMes() {
@@ -1195,7 +1687,7 @@ function vRotina() {
   const pessoas = ids.map(P).filter(Boolean).sort((a, b) => (a.area + a.nome).localeCompare(b.area + b.nome));
   let body = '';
   pessoas.forEach(p => {
-    const rs = S.rotinas.filter(r => r.dono_id === p.id && r.ativo !== false).sort((a, b) => ['diaria', 'semanal', 'mensal'].indexOf(a.frequencia) - ['diaria', 'semanal', 'mensal'].indexOf(b.frequencia));
+    const rs = S.rotinas.filter(r => r.dono_id === p.id && r.ativo !== false).sort((a, b) => Object.keys(FREQ).indexOf(a.frequencia) - Object.keys(FREQ).indexOf(b.frequencia));
     if (pessoas.length > 1) body += `<tr class="pessoa"><td colspan="${n + 2}"><span class="whoin">${av(p)} ${esc(p.nome)} <span class="muted small">· ${PAPEIS[p.papel]}${frotaTxt(p) ? ' · ' + esc(frotaTxt(p)) : ''}</span></span></td></tr>`;
     if (!rs.length) { body += `<tr><td colspan="${n + 2}" class="muted small" style="text-align:left;padding:8px 0">Sem rotinas cadastradas.</td></tr>`; return; }
     rs.forEach(r => {
@@ -1209,7 +1701,8 @@ function vRotina() {
         return `<td><button class="cell ${st}" data-act="cel" data-r="${r.id}" data-d="${d}" title="${fmtD(d)} — ${st === 'done' ? 'feito' : st === 'late' ? 'não realizado' : st === 'today' ? 'hoje' : 'previsto'}" aria-label="${esc(r.titulo)} ${fmtD(d)}"></button></td>`;
       }).join('');
       const v = pct(f, esp);
-      body += `<tr><th class="stick" scope="row"><span class="rt" data-act="editarRot" data-id="${r.id}">${esc(r.titulo)}</span><span class="rm">${quandoRotina(r)}${isFrota(p) ? ' · ' + fmtH(r.horas_prev) : ''}${r.privada ? ' · privada' : ''}</span></th>${cels}<td class="pct num" style="color:var(--${corPct(v) || 'faint'})">${v == null ? '—' : v + '%'}</td></tr>`;
+      const notasRot = S.notas.filter(n => n.fixada && n.vinculo_tipo === 'rotina' && n.vinculo_id === r.id);
+      body += `<tr><th class="stick" scope="row"><span class="rt" data-act="editarRot" data-id="${r.id}">${esc(r.titulo)}</span><span class="rm">${quandoRotina(r)}${isFrota(p) ? ' · ' + fmtH(r.horas_prev) : ''}${r.privada ? ' · privada' : ''}</span>${notasRot.length ? `<div class="inline-notas">${notasRot.map(n => `<button type="button" class="inline-nota" data-act="editarNota" data-id="${n.id}" title="${esc(n.texto || '')}">${ic('pin', 'style="width:11px;height:11px"')}<span>${esc(n.titulo || (n.texto || '').slice(0, 28))}</span></button>`).join('')}</div>` : ''}</th>${cels}<td class="pct num" style="color:var(--${corPct(v) || 'faint'})">${v == null ? '—' : v + '%'}</td></tr>`;
     });
   });
   const comGfc = abaRotinaGfc();
@@ -1226,17 +1719,53 @@ function vRotina() {
 // =====================================================================
 // Paralelas
 // =====================================================================
+function checksFase(opcoes, atual, act, extra = '') {
+  return `<div class="st-checks" role="group">${Object.entries(opcoes).map(([k, v]) => `<button type="button" class="st-chk ${atual === k ? 'on ' + k : ''}" data-act="${act}" data-st="${k}" ${extra} title="Marcar fase: ${esc(v)}"><i class="st-box">${atual === k ? ic('check') : ''}</i><span>${esc(v)}</span></button>`).join('')}</div>`;
+}
+function badgeVinculoNota(n) {
+  if (!n || !n.vinculo_tipo || !n.vinculo_id) return '';
+  if (n.vinculo_tipo === 'rotina') {
+    const r = S.rotinas.find(x => x.id === n.vinculo_id);
+    return r ? `<div><button type="button" class="nota-vinc" data-act="editarRot" data-id="${r.id}">${ic('rot', 'style="width:11px;height:11px"')}Rotina: ${esc(r.titulo)}</button></div>` : '';
+  }
+  if (n.vinculo_tipo === 'paralela') {
+    const a = S.paralelas.find(x => x.id === n.vinculo_id);
+    return a ? `<div><button type="button" class="nota-vinc" data-act="editarPar" data-id="${a.id}">${ic('par', 'style="width:11px;height:11px"')}Paralela: ${esc(a.titulo)}</button></div>` : '';
+  }
+  return '';
+}
 function linhaPar(a) {
   const ets = etapasDe(a.id), criador = P(a.criado_por);
   const feitas = ets.filter(e => e.status === 'concluida').length;
   const prox = ets.find(e => e.status !== 'concluida');
-  return `<div class="par" data-act="editarPar" data-id="${a.id}">
-    <div class="t"><b>${esc(a.titulo)}</b>
-      <div class="meta">${prazoTag(a.prazo, a.prazo_hora, a.status === 'concluida')}<span>${ORIGENS[a.origem] || ''}${a.solicitante ? ' · ' + esc(a.solicitante) : ''}</span>${criador ? `<span>por ${esc(criador.nome.split(' ')[0])}</span>` : ''}
-      ${ets.length ? `<span class="pill info nodot num">${feitas}/${ets.length} etapas</span>${prox ? `<span>Agora: ${esc(prox.titulo)}${prox.responsavel_id ? ' — ' + esc((P(prox.responsavel_id) || {}).nome || '').split(' ')[0] : ''}${prox.fim ? ' · ' + fmtD(prox.fim) : ''}</span>` : ''}` : ''}</div></div>
-    <span class="hide-m">${prioTag(a.prioridade)}</span>
-    ${avs(pessoasPar(a).length ? pessoasPar(a) : [a.criado_por])}
-    ${ets.length ? `<span class="hide-m">${pillSt(a.status)}</span>` : `<select class="sel hide-m" data-chg="parStatus" data-id="${a.id}" aria-label="Status">${opts(ST_PAR, a.status)}</select>`}
+  const exp = S.parExp.has(a.id);
+  const notasPar = S.notas.filter(n => n.fixada && n.vinculo_tipo === 'paralela' && n.vinculo_id === a.id);
+  return `<div class="par-wrap">
+    <div class="par ${a.status === 'concluida' ? 'done' : ''}" data-act="editarPar" data-id="${a.id}">
+      <div class="t">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="button" class="chk ${a.status === 'concluida' ? 'on' : ''}" data-act="togAg" data-t="paralela" data-id="${a.id}" data-d="${a.prazo || HOJE}" title="${a.status === 'concluida' ? 'Reabrir' : 'Concluir atividade'}">${ic('check')}</button>
+          <b style="flex:1">${esc(a.titulo)}</b>
+        </div>
+        <div class="meta" style="padding-left:28px">${prazoTag(a.prazo, a.prazo_hora, a.status === 'concluida')}<span>${ORIGENS[a.origem] || ''}${a.solicitante ? ' · ' + esc(a.solicitante) : ''}</span>${criador ? `<span>por ${esc(criador.nome.split(' ')[0])}</span>` : ''}
+        ${ets.length ? `<button type="button" class="btn sm par-exp ${exp ? 'on' : ''}" data-act="togParExp" data-id="${a.id}" title="Expandir/recolher etapas sem abrir o detalhe">${ic(exp ? 'chevD' : 'chevR')}<span class="num">${feitas}/${ets.length} etapas</span></button>${prox && !exp ? `<span>Agora: ${esc(prox.titulo)}${prox.responsavel_id ? ' — ' + esc((P(prox.responsavel_id) || {}).nome || '').split(' ')[0] : ''}${prox.fim ? ' · ' + fmtD(prox.fim) : ''}</span>` : ''}` : ''}
+        <button type="button" class="linkbtn small muted" data-act="novaNotaVinc" data-vt="paralela" data-vid="${a.id}" title="Fixar uma nota nesta atividade">+ nota</button></div>
+        ${notasPar.length ? `<div class="inline-notas" style="padding-left:28px">${notasPar.map(n => `<button type="button" class="inline-nota" data-act="editarNota" data-id="${n.id}" title="${esc(n.texto || '')}">${ic('pin', 'style="width:11px;height:11px"')}<span>${esc(n.titulo || (n.texto || '').slice(0, 40))}</span></button>`).join('')}</div>` : ''}
+      </div>
+      <span class="hide-m">${prioTag(a.prioridade)}</span>
+      ${avs(pessoasPar(a).length ? pessoasPar(a) : [a.criado_por])}
+      <div class="hide-m">${checksFase(ST_PAR, a.status, 'setParStatus', `data-id="${a.id}"`)}</div>
+    </div>
+    ${ets.length && exp ? `<div class="par-etapas">${ets.map((e, k) => {
+      const rp = P(e.responsavel_id);
+      return `<div class="par-etapa ${e.status === 'concluida' ? 'done' : ''}">
+        <button type="button" class="chk ${e.status === 'concluida' ? 'on' : ''}" data-act="togAg" data-t="etapa" data-id="${e.id}" data-d="${e.fim || HOJE}" aria-label="Concluir etapa">${ic('check')}</button>
+        <div class="t"><b>${k + 1}. ${esc(e.titulo)}</b><span class="small muted">${rp ? esc(rp.nome) : 'Sem responsável'}${e.inicio || e.fim ? ` · ${fmtD(e.inicio)} a ${fmtD(e.fim)}` : ''}${e.hora ? ` · até ${hm(e.hora)}` : ''}</span></div>
+        ${rp ? av(rp) : ''}
+        ${isFrota(rp) ? `<input class="inp hrs num" type="number" step="0.5" min="0" value="${e.horas_real ?? ''}" placeholder="h" data-chg="horasEtapaInline" data-id="${e.id}" title="Horas gastas na etapa">` : ''}
+        ${checksFase(ST_PAR, e.status || 'a_fazer', 'setEtapaStatus', `data-id="${e.id}"`)}
+      </div>`;
+    }).join('')}</div>` : ''}
   </div>`;
 }
 function filtrarParalelas() {
@@ -1273,7 +1802,7 @@ function vParalelas() {
     <div class="seg">${segs.map(([v, t]) => `<button class="${S.parFiltro === v ? 'on' : ''}" data-act="parFiltro" data-v="${v}">${t}</button>`).join('')}</div>
     <label class="cb" style="grid-column:auto"><input type="checkbox" id="parMinhas" data-chg="parMinhas" ${S.parMinhas ? 'checked' : ''}> Só comigo</label>
     <input class="inp" id="parBusca" type="search" placeholder="Buscar" value="${esc(S.parBusca)}" data-chg="parBusca" aria-label="Buscar paralelas">
-    <div class="grow"><button class="btn pri" data-act="novaPar">${ic('plus')}Nova paralela</button></div></div>
+    <div class="grow toolbar"><button class="btn" data-act="abrirImportarPlanner">${ic('up')}Importar Planner</button><button class="btn pri" data-act="novaPar">${ic('plus')}Nova paralela</button></div></div>
   ${S.parFiltro === 'semana' ? `<div class="small muted">Para a reunião semanal: tudo que vence até ${fmtD(addDias(semanaDe(HOJE), 6))}, o que está atrasado e o que foi concluído nesta semana.</div>` : ''}
   <section class="card">${corpo || '<div class="empty">Nenhuma atividade paralela com esses filtros.</div>'}</section>`;
 }
@@ -1284,7 +1813,7 @@ function vParalelas() {
 function vProjetos() {
   const ps = S.projetos.slice().sort((a, b) => (a.status === 'concluido') - (b.status === 'concluido') || (a.nome < b.nome ? -1 : 1));
   const vis = `<div class="seg">${[['cards', 'Cards'], ['gantt', 'Gantt']].map(([v, t]) => `<button class="${S.projVis === v ? 'on' : ''}" data-act="projVis" data-v="${v}">${t}</button>`).join('')}</div>`;
-  const topo = `<div class="toolbar">${vis}<span class="muted">Projetos são visíveis para toda a equipe.</span><div class="grow"><button class="btn pri" data-act="novoProj">${ic('plus')}Novo projeto</button></div></div>`;
+  const topo = `<div class="toolbar">${vis}<span class="muted">Projetos são visíveis para toda a equipe.</span><div class="grow toolbar"><button class="btn" data-act="abrirImportarPlanner">${ic('up')}Importar Planner</button><button class="btn pri" data-act="novoProj">${ic('plus')}Novo projeto</button></div></div>`;
   if (S.projVis === 'gantt') return topo + ganttPortfolio(ps);
   return `
   ${topo}
@@ -1375,7 +1904,7 @@ function vProjeto() {
     <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Item</th><th>Responsável</th><th>Status</th><th class="r">Pontos</th><th>Início</th><th>Fim</th><th>Progresso</th></tr></thead><tbody>
     ${grupos.map(g => `<tr class="grp"><td colspan="7">${g.s ? esc(g.s.nome) + ` <span style="font-weight:400">· ${fmtD(g.s.inicio)} a ${fmtD(g.s.fim)}${g.s.meta ? ' · ' + esc(g.s.meta) : ''}</span>` : 'Backlog do produto'}</td></tr>` +
       (g.l.length ? g.l.sort((a, b) => (a.inicio || '9') < (b.inicio || '9') ? -1 : 1).map(i => `<tr><td class="clk" data-act="abrirItem" data-id="${i.id}"><b>${esc(i.titulo)}</b></td><td>${i.responsavel_id ? av(P(i.responsavel_id)) + ' <span class="small">' + esc((P(i.responsavel_id) || {}).nome || '') + '</span>' : '<span class="muted small">—</span>'}</td>
-        <td><select class="sel" style="padding:3px 6px;font-size:12px" data-chg="itemStatus" data-id="${i.id}" aria-label="Status">${opts(ST_ITEM, i.status)}</select></td><td class="r num">${i.pontos ?? ''}</td>
+        <td>${checksFase(ST_ITEM, i.status, 'setItemStatus', `data-id="${i.id}"`)}</td><td class="r num">${i.pontos ?? ''}</td>
         <td class="num">${fmtD(i.inicio)}</td><td class="num" ${itemAtrasado(i) ? 'style="color:var(--bad);font-weight:600"' : ''}>${fmtD(i.fim)}</td><td><div class="minibar">${meter(i.status === 'feito' ? 100 : i.progresso, i.status === 'feito' ? 'ok' : '')}<span class="small num">${i.status === 'feito' ? 100 : (i.progresso || 0)}%</span></div></td></tr>`).join('') : '<tr><td colspan="7" class="muted small">Sem itens.</td></tr>')).join('')}
     </tbody></table></div></section>`;
   } else corpo = gantt(p, sps, its);
@@ -1433,21 +1962,60 @@ function graficoHoras(p, x, y, m) {
   const dias = uteisEntre(iso(new Date(y, m, 1)), ate).concat(Object.keys(x.horasDia).filter(d => !util(d) && d.slice(0, 7) === ate.slice(0, 7))).sort();
   if (!dias.length) return '<div class="empty">Sem dias no período.</div>';
   const vals = dias.map(d => x.horasDia[d] || { rot: 0, par: 0 });
-  const max = Math.max(x.carga * 1.25, ...vals.map(v => v.rot + v.par));
-  const topo = Math.ceil(max / 2) * 2;
-  const W = 340, H = 150, L = 22, B = 18, T = 14, bw = (W - L - 4) / dias.length;
+  const tots = vals.map(v => v.rot + v.par);
+  const max = Math.max(x.carga * 1.22, ...tots, 4);
+  const passoY = max > 12 ? 4 : 2;
+  const topo = Math.ceil(max / passoY) * passoY;
+  const W = 560, H = 200, L = 32, R = 14, B = 24, T = 18, plotW = W - L - R, bw = plotW / dias.length;
   const yy = v => H - B - (v / topo) * (H - B - T);
   let s = '';
-  for (let v = 0; v <= topo; v += 2) s += `<line x1="${L}" x2="${W}" y1="${yy(v)}" y2="${yy(v)}" stroke="var(--line2)"/><text x="${L - 5}" y="${yy(v) + 3.5}" text-anchor="end" font-size="10" fill="var(--faint)">${v}</text>`;
+  for (let v = 0; v <= topo; v += passoY) {
+    const yPos = yy(v).toFixed(1);
+    s += `<line x1="${L}" x2="${W - R}" y1="${yPos}" y2="${yPos}" stroke="var(--line2)" stroke-width="1"/>`;
+    s += `<text x="${L - 7}" y="${(Number(yPos) + 3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--faint)">${v}h</text>`;
+  }
+  const pts = [];
+  const stepLbl = dias.length > 20 ? 3 : dias.length > 12 ? 2 : 1;
   dias.forEach((d, k) => {
-    const v = vals[k], x0 = L + 2 + k * bw, w = Math.max(2, bw * 0.66), tot = v.rot + v.par, acima = tot > x.carga + 0.01;
-    const tip = `${fmtD(d)}: ${fmt1(tot)} h (rotina ${fmt1(v.rot)} h, paralelas ${fmt1(v.par)} h)`;
-    if (v.rot) s += `<rect x="${x0}" y="${yy(v.rot)}" width="${w}" height="${yy(0) - yy(v.rot)}" fill="${acima ? 'var(--bad)' : 'var(--info)'}"><title>${tip}</title></rect>`;
-    if (v.par) s += `<rect x="${x0}" y="${yy(tot)}" width="${w}" height="${yy(v.rot) - yy(tot)}" fill="var(--accent)"><title>${tip}</title></rect>`;
-    if (!tot) s += `<rect x="${x0}" y="${yy(0) - 2}" width="${w}" height="2" fill="var(--line)"><title>${fmtD(d)}: sem registro</title></rect>`;
-    if (k % 3 === 0 || dias.length <= 12) s += `<text x="${x0 + w / 2}" y="${H - 5}" text-anchor="middle" font-size="9.5" fill="var(--faint)">${dt(d).getDate()}</text>`;
+    const v = vals[k], w = Math.min(22, Math.max(5, bw * 0.62)), x0 = L + k * bw + (bw - w) / 2, cx = x0 + w / 2;
+    const tot = v.rot + v.par, acima = tot > x.carga + 0.01;
+    const tip = `${fmtD(d)}: ${fmt1(tot)} h no total (Rotina: ${fmt1(v.rot)} h · Paralelas: ${fmt1(v.par)} h)`;
+    if (v.rot > 0) {
+      const hRot = Math.max(1.5, yy(0) - yy(v.rot));
+      s += `<rect x="${x0.toFixed(1)}" y="${yy(v.rot).toFixed(1)}" width="${w.toFixed(1)}" height="${hRot.toFixed(1)}" rx="2.5" fill="${acima ? 'var(--bad)' : 'var(--info)'}" opacity="0.9"><title>${tip}</title></rect>`;
+    }
+    if (v.par > 0) {
+      const hPar = Math.max(1.5, yy(v.rot) - yy(tot));
+      s += `<rect x="${x0.toFixed(1)}" y="${yy(tot).toFixed(1)}" width="${w.toFixed(1)}" height="${hPar.toFixed(1)}" rx="2.5" fill="var(--accent)"><title>${tip}</title></rect>`;
+    }
+    if (!tot) {
+      s += `<rect x="${x0.toFixed(1)}" y="${(yy(0) - 1.5).toFixed(1)}" width="${w.toFixed(1)}" height="1.5" rx="1" fill="var(--line)"><title>${fmtD(d)}: sem registro</title></rect>`;
+    }
+    // Média móvel suave de até 3 dias registrados para a linha de tendência
+    const janela = tots.slice(Math.max(0, k - 2), k + 1).filter(z => z > 0);
+    if (janela.length) {
+      const med = janela.reduce((a, b) => a + b, 0) / janela.length;
+      pts.push({ x: cx, y: yy(med), tot, d, med });
+    }
+    if (k % stepLbl === 0 || k === dias.length - 1) {
+      s += `<text x="${cx.toFixed(1)}" y="${H - 7}" text-anchor="middle" font-size="10" fill="var(--muted)">${dt(d).getDate()}</text>`;
+    }
   });
-  s += `<line x1="${L}" x2="${W}" y1="${yy(x.carga)}" y2="${yy(x.carga)}" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="${W - 2}" y="${yy(x.carga) - 4}" text-anchor="end" font-size="10" fill="var(--bad)">jornada ${fmt1(x.carga)} h</text>`;
+  // Linha de tendência suave (curva Bézier discreta e limpa, sem números poluídos em todas as barras)
+  if (pts.length > 1) {
+    let dPath = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i], p1 = pts[i + 1], mx = ((p0.x + p1.x) / 2).toFixed(1);
+      dPath += ` C ${mx} ${p0.y.toFixed(1)}, ${mx} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+    }
+    s += `<path d="${dPath}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-opacity="0.45" stroke-linecap="round"/>`;
+    const ult = pts[pts.length - 1];
+    s += `<circle cx="${ult.x.toFixed(1)}" cy="${ult.y.toFixed(1)}" r="2.8" fill="var(--fg)" fill-opacity="0.65"><title>Tendência recente: ${fmt1(ult.med)} h/dia</title></circle>`;
+  }
+  const yJ = yy(x.carga).toFixed(1);
+  s += `<line x1="${L}" x2="${W - R}" y1="${yJ}" y2="${yJ}" stroke="var(--bad)" stroke-width="1.2" stroke-dasharray="5 4" opacity="0.75"/>`;
+  s += `<rect x="${W - R - 78}" y="${(Number(yJ) - 15).toFixed(1)}" width="76" height="14" rx="4" fill="var(--surface)" opacity="0.88"/>`;
+  s += `<text x="${W - R - 4}" y="${(Number(yJ) - 5).toFixed(1)}" text-anchor="end" font-size="9.5" font-weight="600" fill="var(--bad)">meta ${fmt1(x.carga)} h</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Horas por dia de ${esc(p.nome)}">${s}</svg>`;
 }
 function vPainel() {
@@ -1472,10 +2040,10 @@ function vPainel() {
   <div class="toolbar no-print">${selEscopo(false)}<span class="muted small">Dias até hoje; o dia de hoje só conta o que já foi feito.</span>
     ${podeBaixar ? `<div class="grow toolbar"><button class="btn" data-act="imprimir">${ic('print')}Imprimir / PDF</button><button class="btn pri" data-act="baixarPptx">${ic('down')}Baixar apresentação</button></div>` : ''}</div>
   <div class="kpis">
-    <div class="card kpi"><div class="l">Produção do mês</div><div class="v num">${prod}</div><div class="s num">${t.feitas} rotinas executadas · ${t.entregas} entregas</div></div>
-    <div class="card kpi"><div class="l">Aderência à rotina</div><div class="v num">${ad == null ? '—' : ad + '%'}</div><div class="s num">${t.naoReal} não realizadas</div>${meter(ad, corPct(ad))}</div>
-    <div class="card kpi"><div class="l">Entregas no prazo</div><div class="v num">${t.entregas ? pct(t.noPrazo, t.entregas) + '%' : '—'}</div><div class="s num">${t.noPrazo} de ${t.entregas} concluídas</div>${meter(pct(t.noPrazo, t.entregas), corPct(pct(t.noPrazo, t.entregas)))}</div>
-    <div class="card kpi"><div class="l">Em aberto</div><div class="v num">${t.abertos}</div><div class="s num">${t.atrasados ? `<b style="color:var(--bad)">${t.atrasados} atrasadas</b> · média de ${plDias(Math.round(t.diasAberto / t.atrasados))}` : 'nenhuma atrasada'}</div></div>
+    <div class="card kpi clk" data-act="painelKpi" data-k="producao" title="Clique para ver as entregas e rotinas concluídas no mês"><div class="l">Produção do mês</div><div class="v num">${prod}</div><div class="s num">${t.feitas} rotinas executadas · ${t.entregas} entregas</div><span class="kpi-go">Ver concluídas →</span></div>
+    <div class="card kpi clk" data-act="painelKpi" data-k="aderencia" title="Clique para ver as rotinas e execuções não realizadas"><div class="l">Aderência à rotina</div><div class="v num">${ad == null ? '—' : ad + '%'}</div><div class="s num">${t.naoReal} não realizadas</div>${meter(ad, corPct(ad))}<span class="kpi-go">Ver rotinas →</span></div>
+    <div class="card kpi clk" data-act="painelKpi" data-k="prazo" title="Clique para ver as entregas concluídas no mês"><div class="l">Entregas no prazo</div><div class="v num">${t.entregas ? pct(t.noPrazo, t.entregas) + '%' : '—'}</div><div class="s num">${t.noPrazo} de ${t.entregas} concluídas</div>${meter(pct(t.noPrazo, t.entregas), corPct(pct(t.noPrazo, t.entregas)))}<span class="kpi-go">Ver entregas →</span></div>
+    <div class="card kpi clk" data-act="painelKpi" data-k="abertos" title="Clique para ver todas as atividades em aberto e atrasadas"><div class="l">Em aberto</div><div class="v num">${t.abertos}</div><div class="s num">${t.atrasados ? `<b style="color:var(--bad)">${t.atrasados} atrasadas</b> · média de ${plDias(Math.round(t.diasAberto / t.atrasados))}` : 'nenhuma atrasada'}</div><span class="kpi-go">Ver atividades em aberto →</span></div>
   </div>
   ${frota.length ? `<section class="card"><div class="card-h"><h2>Performance de Frota — horas por dia</h2><div class="legend"><span><i class="sw" style="background:var(--info)"></i>Rotina</span><span><i class="sw" style="background:var(--accent)"></i>Paralelas</span><span><i class="sw" style="background:var(--bad)"></i>Rotina em dia acima da jornada</span></div></div>
     <div class="card-b"><div class="hgrid">${frota.map(p => { const x = I.pp[p.id]; return `<div class="hcard"><div class="toolbar" style="gap:8px">${av(p)}<div style="min-width:0"><b>${esc(p.nome)}</b><div class="small muted">${PAPEIS[p.papel]}${frotaTxt(p) ? ' · ' + esc(frotaTxt(p)) : ''}</div></div></div>
@@ -1493,7 +2061,7 @@ function vPainel() {
   <section class="card"><div class="card-h"><h2>Por pessoa</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Pessoa</th><th>Aderência</th><th class="r">Rotinas</th><th class="r">Entregas</th><th class="r">No prazo</th><th class="r">Em aberto</th><th class="r">Atrasadas</th><th class="r">Média h/dia</th><th class="r">Dias acima</th></tr></thead><tbody>
     ${pessoas.map(p => { const x = I.pp[p.id], v = pct(x.feitas, x.esperadas), f = isFrota(p); return `<tr><td><span style="display:inline-flex;gap:8px;align-items:center">${av(p)}<span><b>${esc(p.nome)}</b><br><span class="small muted">${AREAS[p.area].curto} · ${PAPEIS[p.papel]}${frotaTxt(p) ? ' · ' + esc(frotaTxt(p)) : ''}</span></span></span></td>
       <td><div class="minibar">${meter(v, corPct(v))}<span class="num small">${v == null ? '—' : v + '%'}</span></div></td><td class="r num">${x.feitas}<span class="muted small">/${x.esperadas}</span></td><td class="r num">${x.entregas}</td><td class="r num">${x.entregas ? pct(x.noPrazo, x.entregas) + '%' : '—'}</td>
-      <td class="r num">${x.abertos}</td><td class="r num" ${x.atrasados ? 'style="color:var(--bad);font-weight:600"' : ''}>${x.atrasados}</td><td class="r num" ${f && x.mediaDia > x.carga ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? fmtH(x.mediaDia) : '<span class="muted">—</span>'}</td><td class="r num" ${f && x.acima ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? x.acima : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
+      <td class="r num clk" data-act="painelKpi" data-k="abertos" data-pid="${p.id}" title="Ver atividades em aberto de ${esc(p.nome)}" style="text-decoration:underline">${x.abertos}</td><td class="r num clk" data-act="painelKpi" data-k="atrasados" data-pid="${p.id}" title="Ver atividades atrasadas de ${esc(p.nome)}" ${x.atrasados ? 'style="color:var(--bad);font-weight:600;text-decoration:underline"' : ''}>${x.atrasados}</td><td class="r num" ${f && x.mediaDia > x.carga ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? fmtH(x.mediaDia) : '<span class="muted">—</span>'}</td><td class="r num" ${f && x.acima ? 'style="color:var(--bad);font-weight:600"' : ''}>${f ? x.acima : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
   </tbody></table></div><div class="card-b small muted" style="padding-top:8px">Horas contam só para Performance de Frota. Nas outras áreas o acompanhamento é por data de entrega.</div></section>
   ${cardGfcPainel(ids)}
   <section class="card"><div class="card-h"><h2>Projetos em andamento</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Projeto</th><th>Área</th><th>Progresso</th><th>Sprint atual</th><th class="r">Itens atrasados</th><th>Fim previsto</th></tr></thead><tbody>
@@ -1603,14 +2171,22 @@ function vNotas() {
   const ns = S.notas.filter(n => !n.data).sort((a, b) => (b.fixada - a.fixada) || (String(b.atualizado_em) > String(a.atualizado_em) ? 1 : -1));
   const diarios = S.notas.filter(n => n.data).sort((a, b) => a.data < b.data ? 1 : -1);
   return `
-  <div class="toolbar"><span class="lock" style="font-size:13px">${ic('lock')}Só você vê estas notas. Nem a coordenação tem acesso.</span><div class="grow"><button class="btn pri" data-act="novaNota">${ic('plus')}Nova nota</button></div></div>
-  ${ns.length ? `<div class="ngrid">${ns.map(n => `<article class="card nota ${n.fixada ? 'fix' : ''}" data-act="editarNota" data-id="${n.id}"><div class="toolbar" style="gap:6px"><h3 style="margin-right:auto">${esc(n.titulo || 'Sem título')}</h3>${n.fixada ? '<span class="pill acc nodot">Fixada</span>' : ''}</div><p>${esc(n.texto || '')}</p><small>${n.atualizado_em ? new Date(n.atualizado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}</small></article>`).join('')}</div>` : '<section class="card"><div class="empty">Nenhuma nota ainda. Use para lembretes, ideias e pendências que são só suas.</div></section>'}
+  <div class="toolbar"><span class="lock" style="font-size:13px">${ic('lock')}Só você vê estas notas. Novas notas já ficam fixadas automaticamente até você desfixar.</span><div class="grow"><button class="btn pri" data-act="novaNota">${ic('plus')}Nova nota</button></div></div>
+  ${ns.length ? `<div class="ngrid">${ns.map(n => `<article class="card nota ${n.fixada ? 'fix' : ''}" data-act="editarNota" data-id="${n.id}">
+    <div class="toolbar" style="gap:6px">
+      <h3 style="margin-right:auto">${esc(n.titulo || 'Sem título')}</h3>
+      <button type="button" class="btn sm ${n.fixada ? 'pri' : ''}" data-act="togFixNota" data-id="${n.id}" title="${n.fixada ? 'Clique para desfixar' : 'Clique para fixar'}">${ic('pin')}<span>${n.fixada ? 'Fixada' : 'Fixar'}</span></button>
+    </div>
+    ${badgeVinculoNota(n)}
+    <p>${esc(n.texto || '')}</p>
+    <small>${n.atualizado_em ? new Date(n.atualizado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}</small>
+  </article>`).join('')}</div>` : '<section class="card"><div class="empty">Nenhuma nota ainda. Use para lembretes, ideias e pendências (gerais ou atreladas a uma rotina/paralela).</div></section>'}
   ${diarios.length ? `<h2 style="margin-top:6px">Diário escrito</h2><div class="ngrid">${diarios.map(n => `<article class="card nota" data-act="abrirDia" data-d="${n.data}"><h3>${DIAS[dt(n.data).getDay()]}, ${fmtD(n.data)}</h3><p>${esc((n.texto || '').slice(0, 240))}</p></article>`).join('')}</div>` : ''}`;
 }
 function vEquipe() {
   const adm = S.me.admin;
   return `
-  <div class="toolbar"><span class="muted">${ativos().length} pessoas ativas</span><div class="grow">${adm ? `<button class="btn pri" data-act="novaPessoa">${ic('plus')}Cadastrar pessoa</button>` : ''}</div></div>
+  <div class="toolbar"><span class="muted">${ativos().length} pessoas ativas</span><div class="grow toolbar"><button class="btn" data-act="abrirImportarPlanner">${ic('up')}Importar Planner</button>${adm ? `<button class="btn pri" data-act="novaPessoa">${ic('plus')}Cadastrar pessoa</button>` : ''}</div></div>
   <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Nome</th><th>Papel</th><th>Site · frotas</th><th class="r">Jornada</th><th>Visão</th><th>E-mail</th>${adm ? '<th></th>' : ''}</tr></thead><tbody>
   ${Object.keys(AREAS).map(a => { const ps = S.pessoas.filter(p => p.area === a); if (!ps.length) return ''; return `<tr class="grp"><td colspan="${adm ? 7 : 6}">${AREAS[a].nome}</td></tr>` + ps.map(p => `<tr ${p.ativo === false ? 'style="opacity:.5"' : ''}><td><span style="display:inline-flex;gap:8px;align-items:center">${av(p)}<b>${esc(p.nome)}</b>${p.admin ? '<span class="pill nodot">admin</span>' : ''}</span></td><td>${PAPEIS[p.papel]}</td><td>${esc(frotaTxt(p) || '—')}</td><td class="r num">${fmtH(carga(p))}</td><td>${p.layout === 'diario' ? 'Diário de bordo' : 'Padrão'}</td><td class="small">${esc(p.email)}</td>${adm ? `<td class="r"><button class="btn sm" data-act="editarPessoa" data-id="${p.id}">Editar</button></td>` : ''}</tr>`).join(''); }).join('')}
   </tbody></table></div></section>
@@ -1674,6 +2250,49 @@ function planoMes(dem, y = S.y, m = S.m) {
 }
 const nomeMes = () => `${MESES[S.m]} de ${S.y}`;
 
+
+const TIPO_RESP_GFC = { csp: 'CSP da frota', consultor: 'Consultor de Performance', ambos: 'CSP e Consultor de Performance' };
+const EXEC_ETAPA_GFC = {
+  terceiro: 'Terceiro (segue padrão da demanda)',
+  terceiro_csp: 'Terceiro — CSP da frota',
+  terceiro_consultor: 'Terceiro — Consultor de Performance',
+  gfc: 'GFC executa'
+};
+const isTerceiroExec = ex => ex === 'terceiro' || ex === 'terceiro_csp' || ex === 'terceiro_consultor';
+function cspDe(obj) {
+  if (!obj) return '';
+  if (obj.responsavel_csp != null) return obj.responsavel_csp;
+  const d = decodificarRespDuplo(obj);
+  return d.responsavel_csp || '';
+}
+function consultorDe(obj) {
+  if (!obj) return '';
+  if (obj.responsavel_consultor != null) return obj.responsavel_consultor;
+  const d = decodificarRespDuplo(obj);
+  return d.responsavel_consultor || '';
+}
+function respPadraoItem(it, tipo = 'csp') {
+  const fr = it.frota_id ? frotaDe(it.frota_id) : null;
+  const csp = cspDe(it) || cspDe(fr) || '';
+  const cons = consultorDe(it) || consultorDe(fr) || '';
+  if (tipo === 'csp') return csp || cons || it.responsavel || '';
+  if (tipo === 'consultor') return cons || csp || it.responsavel || '';
+  if (tipo === 'ambos') return [csp ? `CSP: ${csp}` : '', cons ? `Consultor: ${cons}` : ''].filter(Boolean).join(' · ') || it.responsavel || '';
+  return it.responsavel || csp || cons || '';
+}
+function respItemParaEtapa(dem, it, et) {
+  if (et && et.exec === 'terceiro_csp') return respPadraoItem(it, 'csp');
+  if (et && et.exec === 'terceiro_consultor') return respPadraoItem(it, 'consultor');
+  return respPadraoItem(it, dem.tipo_responsavel || 'csp');
+}
+function htmlRespFrota(obj) {
+  const csp = cspDe(obj), cons = consultorDe(obj);
+  if (csp && cons) return `<span class="resp-dual"><span><b>CSP:</b> ${esc(csp)}</span><span><b>Consultor:</b> ${esc(cons)}</span></span>`;
+  if (csp) return `<span class="small muted"><b>CSP:</b> ${esc(csp)}</span>`;
+  if (cons) return `<span class="small muted"><b>Consultor:</b> ${esc(cons)}</span>`;
+  return `<span class="small muted">${esc(obj.responsavel || 'sem responsável')}</span>`;
+}
+
 // situação calculada de uma solicitação (site/frota × etapa)
 function celula(dem, it, k) {
   const ets = dem.etapas, et = ets[k], pp = passosDe(it, dem), c = pp[et.id] || {};
@@ -1684,14 +2303,16 @@ function celula(dem, it, k) {
   const liberada = !prev || prevSt === 'concluido';
   const aberta = st !== 'concluido' && st !== 'na';
   // a contagem do prazo: terceiro conta da data da solicitação; GFC conta da conclusão da etapa anterior (ou do início da demanda)
-  const base = et.exec === 'terceiro' ? (c.enviado_em || null) : (prev ? (prevSt === 'concluido' ? prev.c.concluido_em || null : null) : dem.inicio);
+  const terc = isTerceiroExec(et.exec);
+  const base = terc ? (c.enviado_em || null) : (prev ? (prevSt === 'concluido' ? prev.c.concluido_em || null : null) : dem.inicio);
   const dias = c.dias ?? et.dias;
   const limite = dem.recorrente ? planoMes(dem)[k].fim : (base && dias != null && dias !== '' ? addUteis(String(base).slice(0, 10), Number(dias)) : null);
   const vencida = aberta && !!limite && limite < HOJE;
-  const impactada = et.exec === 'gfc' && aberta && (st === 'aguardando' || (!liberada && prev.et.exec === 'terceiro' && prevSt === 'solicitado'));
-  const terceiros = et.exec === 'terceiro' && st === 'solicitado';
+  const impactada = et.exec === 'gfc' && aberta && (st === 'aguardando' || (!liberada && isTerceiroExec(prev.et.exec) && prevSt === 'solicitado'));
+  const terceiros = terc && st === 'solicitado';
   const acao = aberta && liberada && st === 'pendente';
-  const resp = c.resp || (et.exec === 'gfc' ? respGfc(dem) : it.responsavel) || '';
+  const respIt = respItemParaEtapa(dem, it, et);
+  const resp = c.resp || (et.exec === 'gfc' ? respGfc(dem) : respIt) || '';
   return { et, c, st, liberada, aberta, base, dias, limite, vencida, impactada, terceiros, acao, resp };
 }
 function statsDem(dem) {
@@ -1706,7 +2327,7 @@ function statsDem(dem) {
       if (x.terceiros) o.terceiros++;
       if (x.vencida) o.vencidas++; else if (x.limite) o.noPrazo++;
       if (x.impactada) o.impactadas++;
-      if (x.acao) { o.acao++; if (et.exec === 'terceiro') o.porEtapa[k].solicitar++; }
+      if (x.acao) { o.acao++; if (isTerceiroExec(et.exec)) o.porEtapa[k].solicitar++; }
     });
   });
   o.pct = pct(o.concl, o.total);
@@ -1765,11 +2386,11 @@ function celHtml(dem, it, k) {
   else if (x.st === 'aguardando') rot = 'Falta info. externa';
   else if (!x.liberada) { cls = x.impactada ? 'aguardando bloq' : 'bloq'; rot = x.impactada ? 'Aguardando terceiro' : 'Após etapa anterior'; }
   else if (x.st === 'solicitado') { rot = 'Aguardando retorno'; sub = x.c.enviado_em ? 'enviado ' + fmtD(x.c.enviado_em) : ''; }
-  else { rot = et.exec === 'terceiro' ? 'A solicitar' : 'A fazer'; cls = 'acao'; }
+  else { rot = isTerceiroExec(et.exec) ? 'A solicitar' : 'A fazer'; cls = 'acao'; }
   if (x.limite && x.aberta) sub = (sub ? sub + ' · ' : '') + (x.vencida ? 'venceu ' : 'prazo ') + fmtD(x.limite);
   if (x.vencida) cls += ' vencida';
   const pode = x.liberada && x.st !== 'na';
-  const solicitar = et.exec === 'terceiro' && x.st === 'pendente' && x.liberada;
+  const solicitar = isTerceiroExec(et.exec) && x.st === 'pendente' && x.liberada;
   const dica = [x.resp ? 'Responsável: ' + x.resp : '', x.c.obs || ''].filter(Boolean).join(' · ');
   return `<div class="gc ${cls}" ${dica ? `title="${esc(dica)}"` : ''}>
     <button class="chk ${x.st === 'concluido' ? 'on' : ''}" data-act="gfcChk" data-it="${it.id}" data-k="${k}" ${pode ? '' : 'disabled'} aria-label="${x.st === 'concluido' ? 'Desmarcar' : 'Marcar como concluído'}">${ic('check')}</button>
@@ -1790,8 +2411,9 @@ function vGfcDemanda(dem) {
   const estagios = ets.map((et, k) => {
     const e = o.porEtapa[k], p = pct(e.concl, e.total);
     const pl = plano && plano[k];
-    return `<div class="estagio"><span class="small muted">Etapa ${k + 1} · ${et.exec === 'gfc' ? 'GFC executa' : 'terceiro executa'} · ${plUteis(et.dias)}</span><b>${esc(et.titulo)}</b>
-      ${pl ? `<span class="small num">${k === 0 && et.exec === 'terceiro' ? 'Cobrança ' + fmtD(pl.ini) + ' · retorno até ' + fmtD(pl.fim) : fmtD(pl.ini) + ' a ' + fmtD(pl.fim)}${pl.curta ? ` <span style="color:var(--warn)">· só ${plUteis(pl.uteis)} no mês</span>` : ''}</span>` : ''}
+    const rotExec = et.exec === 'gfc' ? 'GFC executa' : et.exec === 'terceiro_csp' ? 'CSP executa' : et.exec === 'terceiro_consultor' ? 'Consultor Perf. executa' : `terceiro (${TIPO_RESP_GFC[dem.tipo_responsavel || 'csp']})`;
+    return `<div class="estagio"><span class="small muted">Etapa ${k + 1} · ${rotExec} · ${plUteis(et.dias)}</span><b>${esc(et.titulo)}</b>
+      ${pl ? `<span class="small num">${k === 0 && isTerceiroExec(et.exec) ? 'Cobrança ' + fmtD(pl.ini) + ' · retorno até ' + fmtD(pl.fim) : fmtD(pl.ini) + ' a ' + fmtD(pl.fim)}${pl.curta ? ` <span style="color:var(--warn)">· só ${plUteis(pl.uteis)} no mês</span>` : ''}</span>` : ''}
       <div class="minibar">${meter(p, p === 100 ? 'ok' : '')}<span class="num small">${pctTxt(p)}</span></div><span class="small muted num">${e.concl} de ${e.total} concluídas</span>
       ${e.solicitar ? `<button class="btn sm" data-act="gfcSolicitarTodas" data-k="${k}">Registrar ${e.solicitar} ${e.solicitar === 1 ? 'solicitação' : 'solicitações'} hoje</button>` : ''}</div>`;
   }).join('');
@@ -1801,7 +2423,7 @@ function vGfcDemanda(dem) {
     const t = its.filter(i => chaveSite(i) === sk).reduce((a, i) => ({ total: a.total + o.porItem[i.id].total, concl: a.concl + o.porItem[i.id].concl }), { total: 0, concl: 0 });
     corpo += `<tr class="grp"><td class="stick">${esc(sn)}</td><td colspan="${ets.length + 1}"><span class="num muted">${t.concl} de ${t.total} · ${pctTxt(pct(t.concl, t.total))}</span></td></tr>`;
     corpo += doSite.map(it => { const pi = o.porItem[it.id], p = pct(pi.concl, pi.total);
-      return `<tr><td class="stick"><button class="linkbtn" data-act="gfcItem" data-id="${it.id}" style="font-weight:600;text-decoration:none">${esc(nomeFrota(it))}</button><span class="small muted" style="display:block">${esc(it.responsavel || 'sem responsável')}</span></td>
+      return `<tr><td class="stick"><button class="linkbtn" data-act="gfcItem" data-id="${it.id}" style="font-weight:600;text-decoration:none">${esc(nomeFrota(it))}</button><div style="margin-top:2px">${htmlRespFrota(it)}</div></td>
         ${ets.map((_, k) => `<td>${celHtml(dem, it, k)}</td>`).join('')}<td class="r num" style="font-weight:600;color:var(--${p === 100 ? 'ok' : 'fg'})">${pctTxt(p)}</td></tr>`; }).join('');
   });
   return `
@@ -1814,7 +2436,7 @@ function vGfcDemanda(dem) {
     <div class="estagios">${estagios}</div></div></div></section>
   ${its.length ? `<div class="toolbar"><select class="sel" data-chg="gfcSite" aria-label="Site"><option value="">Todos os sites</option>${sites.map(([k, n]) => `<option value="${esc(k)}" ${k === S.gfcSite ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>
     <div class="seg">${GFC_SIT.map(([v, t]) => `<button class="${S.gfcSit === v ? 'on' : ''}" data-act="gfcSit" data-v="${v}">${t}</button>`).join('')}</div></div>
-  <section class="card"><div class="scroll-x" data-key="gfc"><table class="gfc-tbl"><thead><tr><th class="stick">Site / frota</th>${ets.map((et, k) => `<th>${k + 1}. ${esc(et.titulo)}<small>${et.exec === 'gfc' ? 'GFC' : 'Terceiro'} · ${plUteis(et.dias)}</small></th>`).join('')}<th class="r">Item</th></tr></thead>
+  <section class="card"><div class="scroll-x" data-key="gfc"><table class="gfc-tbl"><thead><tr><th class="stick">Site / frota</th>${ets.map((et, k) => `<th>${k + 1}. ${esc(et.titulo)}<small>${et.exec === 'gfc' ? 'GFC' : et.exec === 'terceiro_csp' ? 'CSP' : et.exec === 'terceiro_consultor' ? 'Consultor Perf.' : TIPO_RESP_GFC[dem.tipo_responsavel || 'csp']} · ${plUteis(et.dias)}</small></th>`).join('')}<th class="r">Item</th></tr></thead>
     <tbody>${corpo || `<tr><td colspan="${ets.length + 2}" class="muted" style="text-align:center;padding:18px">Nenhum site/frota com esse filtro.</td></tr>`}</tbody></table></div></section>
   <div class="legend"><span>O quadradinho marca a conclusão. Clique na situação para registrar data da solicitação, prazo, responsável ou observação.</span><span>Cada site/frota segue as etapas em ordem, sem depender dos outros.</span>${dem.recorrente ? '<span>Demanda mensal: troque o mês no topo para ver ou registrar outro ciclo.</span>' : ''}</div>`
   : `<section class="card"><div class="empty">Nenhum site ou frota nesta demanda. <button class="linkbtn" data-act="editarDem">Incluir sites e frotas</button></div></section>`}`;
@@ -1826,7 +2448,7 @@ function vGfcCadastros() {
     <section class="card"><div class="card-h"><h2>Sites e frotas</h2><button class="btn sm pri" data-act="gfcNovoSite">${ic('plus')}Site</button></div><div class="card-b">
       ${sites.length ? sites.map(s => { const fs = S.gfcFrotas.filter(f => f.site_id === s.id).sort(porNome);
         return `<div class="cad-site" ${s.ativo === false ? 'style="opacity:.55"' : ''}><div class="toolbar" style="gap:8px"><b style="margin-right:auto">${esc(s.nome)}</b>${s.ativo === false ? '<span class="pill nodot">inativo</span>' : ''}<button class="btn sm" data-act="gfcNovaFrota" data-site="${s.id}">${ic('plus')}Frota</button><button class="iconbtn" data-act="gfcEditSite" data-id="${s.id}" aria-label="Editar site ${esc(s.nome)}" title="Editar site">${ic('edit')}</button></div>
-          <div class="chips" style="margin-top:6px">${fs.length ? fs.map(f => `<button class="fr-chip" data-act="gfcEditFrota" data-id="${f.id}" ${f.ativo === false ? 'style="opacity:.55"' : ''}><b>${esc(f.nome)}</b>${f.responsavel ? `<span class="muted">${esc(f.responsavel)}</span>` : ''}</button>`).join('') : '<span class="small muted">Nenhuma frota. Sem frotas, o site entra nas demandas como um item só.</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre o primeiro site.</div>'}
+          <div class="chips" style="margin-top:6px">${fs.length ? fs.map(f => { const c1 = cspDe(f), c2 = consultorDe(f); return `<button class="fr-chip" data-act="gfcEditFrota" data-id="${f.id}" ${f.ativo === false ? 'style="opacity:.55"' : ''}><b>${esc(f.nome)}</b>${c1 ? `<span class="muted">CSP: ${esc(c1)}</span>` : ''}${c2 ? `<span class="muted">· Perf.: ${esc(c2)}</span>` : ''}${!c1 && !c2 && f.responsavel ? `<span class="muted">${esc(f.responsavel)}</span>` : ''}</button>`; }).join('') : '<span class="small muted">Nenhuma frota. Sem frotas, o site entra nas demandas como um item só.</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre o primeiro site.</div>'}
     </div></section>
     <section class="card"><div class="card-h"><h2>Responsáveis</h2><button class="btn sm pri" data-act="gfcNovoResp">${ic('plus')}Responsável</button></div><div class="card-b">
       <div class="small muted" style="margin-bottom:6px">Pessoas de fora da equipe (CSP, consultor, contato do site). Basta o nome. Quem é da equipe já aparece nas sugestões.</div>
@@ -1851,10 +2473,18 @@ function cardGfcPainel(ids) {
 // =====================================================================
 function telaLogin() {
   return `<div class="login"><div class="card"><div class="brand" style="padding:0"><div class="brand-mark">ET</div><div><b>${esc(CONFIG.NOME_APP)}</b><small class="muted">${esc(CONFIG.SUBTITULO)}</small></div></div>
-    <form data-form="login"><div class="fld"><label for="lg-email">E-mail</label><input class="inp" id="lg-email" name="email" type="email" required autocomplete="username"></div>
-    <div class="fld"><label for="lg-senha">Senha</label><input class="inp" id="lg-senha" name="senha" type="password" required autocomplete="current-password"></div>
-    <button class="btn pri" type="submit" style="justify-content:center">Entrar</button>
-    <span class="small muted">O acesso é criado pelo administrador da equipe.</span></form></div></div>`;
+    <form data-form="login">
+      <div class="fld"><label for="lg-email">E-mail</label><input class="inp" id="lg-email" name="email" type="email" required autocomplete="username" placeholder="seu.nome@sotreq.com.br"></div>
+      <div class="fld">
+        <div style="display:flex;justify-content:space-between;align-items:center"><label for="lg-senha">Senha</label><button type="button" class="linkbtn small muted" data-act="togVerSenha">Mostrar senha</button></div>
+        <input class="inp" id="lg-senha" name="senha" type="password" required autocomplete="current-password" placeholder="Digite sua senha">
+      </div>
+      <button class="btn pri" type="submit" id="btn-login-submit" style="justify-content:center">Entrar</button>
+      <div style="border-top:1px solid var(--line2);padding-top:10px;margin-top:4px;display:flex;flex-direction:column;gap:6px">
+        <button class="btn" type="button" data-act="entrarModoDemo" style="justify-content:center">Entrar no Modo Demonstração (sem senha)</button>
+        <span class="small muted" style="text-align:center">Use seu login da equipe ou clique acima para testar todas as funções na prévia.</span>
+      </div>
+    </form></div></div>`;
 }
 function telaSemPerfil() {
   return `<div class="login"><div class="card"><h2>Acesso ainda não liberado</h2><p class="muted">Seu login funcionou, mas seu perfil não está cadastrado na equipe. Peça ao administrador para cadastrar o e-mail <b>${esc(S.sessao ? S.sessao.user.email : '')}</b>.</p><button class="btn" data-act="sair">${ic('sair')}Sair</button></div></div>`;
@@ -1890,21 +2520,29 @@ function modalExec(rid, d) {
     <div class="actions">${e ? '<button class="btn danger left" type="button" data-act="desmarcarExec">Desmarcar</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">${e ? 'Salvar' : 'Marcar como feito'}</button></div></form>`, { rid, d });
 }
 function modalRotina(r) {
-  const novo = !r || !r.id; r = { dono_id: S.me.id, frequencia: 'diaria', dia_semana: 1, dia_mes: 5, horas_prev: 1, privada: false, ativo: true, inicio: iso(new Date(S.y, S.m, 1)), ...(r || {}) };
+  const novo = !r || !r.id;
+  const rasc = novo && (!r || !r.titulo) ? (S.rascunhos.rotina || {}) : {};
+  r = { dono_id: S.me.id, frequencia: 'diaria', dia_semana: 1, dia_mes: 5, intervalo_dias: 3, dias_semana: '1,3,5', apenas_uteis: false, horas_prev: 1, privada: false, ativo: true, inicio: iso(new Date(S.y, S.m, 1)), ...rasc, ...(r || {}) };
   const donos = ativos().filter(p => podeVerPessoa(p.id));
-  abrirModal(novo ? 'Nova rotina' : 'Editar rotina', `<form data-form="rotina">
+  const dsSet = new Set(String(r.dias_semana || '1,3,5').split(',').map(Number));
+  const notasRot = !novo ? S.notas.filter(n => n.vinculo_tipo === 'rotina' && n.vinculo_id === r.id) : [];
+  abrirModal(novo ? 'Nova rotina' : 'Editar rotina', `<form data-form="rotina" data-draft="rotina">
+    ${novo && Object.keys(rasc).length ? `<div class="fld full small muted" style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);padding:6px 10px;border-radius:6px"><span>Rascunho anterior restaurado automaticamente.</span><button type="button" class="linkbtn small" data-act="limparRascunhoRot">Limpar campos</button></div>` : ''}
     ${fldI('titulo', 'O que é feito', r.titulo, 'text', 'required maxlength="140"', true)}
     <div class="fld full">${lbl('descricao', 'Como fazer (opcional)')}<textarea class="inp" id="f-descricao" name="descricao" placeholder="Passo a passo, sistema usado, particularidades do site">${esc(r.descricao || '')}</textarea></div>
     <div class="fld">${lbl('dono_id', 'Responsável')}<select class="sel" id="f-dono_id" name="dono_id" data-chg="donoRot">${optsPessoas(donos, r.dono_id)}</select></div>
     <div class="fld">${lbl('frequencia', 'Frequência')}<select class="sel" id="f-frequencia" name="frequencia" data-chg="freqRot">${opts(FREQ, r.frequencia)}</select></div>
-    <div class="fld" id="w-sem" ${r.frequencia !== 'semanal' ? 'hidden' : ''}>${lbl('dia_semana', 'Dia da semana')}<select class="sel" id="f-dia_semana" name="dia_semana">${[1, 2, 3, 4, 5].map(k => `<option value="${k}" ${Number(r.dia_semana) === k ? 'selected' : ''}>${DIAS_LONGO[k]}</option>`).join('')}</select></div>
-    <div class="fld" id="w-mes" ${r.frequencia !== 'mensal' ? 'hidden' : ''}>${lbl('dia_mes', 'Dia do mês')}${inp('dia_mes', r.dia_mes, 'number', 'min="1" max="31"')}</div>
+    <div class="fld" id="w-sem" ${!['semanal', 'quinzenal'].includes(r.frequencia) ? 'hidden' : ''}>${lbl('dia_semana', 'Dia da semana')}<select class="sel" id="f-dia_semana" name="dia_semana">${[1, 2, 3, 4, 5, 6].map(k => `<option value="${k}" ${Number(r.dia_semana) === k ? 'selected' : ''}>${DIAS_LONGO[k]}</option>`).join('')}</select></div>
+    <div class="fld" id="w-int" ${r.frequencia !== 'intervalo' ? 'hidden' : ''}>${lbl('intervalo_dias', 'Repetir a cada quantos dias')}<div style="display:flex;gap:8px;align-items:center">${inp('intervalo_dias', r.intervalo_dias ?? 3, 'number', 'min="1" max="180" step="1" style="width:90px"')}<label class="small" style="display:inline-flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" name="apenas_uteis" ${r.apenas_uteis ? 'checked' : ''}> contar só dias úteis</label></div></div>
+    <div class="fld full" id="w-interm" ${r.frequencia !== 'intermitente' ? 'hidden' : ''}><label>Dias da semana em que ocorre</label><div class="dias-sem-checks">${[1, 2, 3, 4, 5, 6].map(k => `<label><input type="checkbox" name="dias_sem_chk" value="${k}" ${dsSet.has(k) ? 'checked' : ''}><span>${DIAS[k]}</span></label>`).join('')}</div></div>
+    <div class="fld" id="w-mes" ${!['mensal', 'anual'].includes(r.frequencia) ? 'hidden' : ''}>${lbl('dia_mes', 'Dia do mês')}${inp('dia_mes', r.dia_mes, 'number', 'min="1" max="31"')}</div>
     ${fldI('hora', 'Concluir até (opcional)', hm(r.hora), 'time')}
     <div class="fld" id="w-hprev" ${isFrota(P(r.dono_id)) ? '' : 'hidden'}>${lbl('horas_prev', 'Horas previstas por vez')}${inp('horas_prev', r.horas_prev, 'number', 'step="0.25" min="0"')}</div>
     ${fldI('inicio', 'Vale a partir de', String(r.inicio || '').slice(0, 10), 'date', 'required')}
     <label class="cb"><input type="checkbox" id="f-privada" name="privada" ${r.privada ? 'checked' : ''}> Privada — só o responsável vê (vale só para rotinas suas)</label>
     <label class="cb"><input type="checkbox" id="f-ativo" name="ativo" ${r.ativo !== false ? 'checked' : ''}> Ativa</label>
-    <div class="actions">${!novo ? '<button class="btn danger left" type="button" data-act="excluirRot">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`, { id: novo ? null : r.id });
+    ${!novo ? `<div class="fld full" style="border-top:1px solid var(--line2);padding-top:8px"><div class="toolbar"><span class="small muted">Notas fixadas associadas a esta rotina (${notasRot.length})</span><button type="button" class="btn sm" data-act="novaNotaVinc" data-vt="rotina" data-vid="${r.id}">${ic('pin')}Nova nota nesta rotina</button></div>${notasRot.length ? `<div class="inline-notas">${notasRot.map(n => `<button type="button" class="inline-nota" data-act="editarNota" data-id="${n.id}">${ic('pin', 'style="width:11px;height:11px"')}<b>${esc(n.titulo || 'Nota')}:</b> <span>${esc((n.texto || '').slice(0, 60))}</span></button>`).join('')}</div>` : ''}</div>` : ''}
+    <div class="actions">${!novo ? '<button class="btn danger left" type="button" data-act="excluirRot">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`, { id: novo ? null : r.id, protecaoCliqueFora: true });
 }
 
 // --- paralela com etapas ---
@@ -1920,7 +2558,7 @@ function modalParalela(a) {
     ${fldI('solicitante', 'Quem pediu', a.solicitante, 'text', 'placeholder="Ex.: gerência do site, cliente Vale"')}
     <div class="fld">${lbl('origem', 'Origem da demanda')}<select class="sel" id="f-origem" name="origem">${opts(ORIGENS, a.origem)}</select></div>
     <div class="fld">${lbl('prioridade', 'Prioridade')}<select class="sel" id="f-prioridade" name="prioridade">${opts(PRIOR, a.prioridade)}</select></div>
-    <div class="fld" id="w-status">${lbl('status', 'Status')}<select class="sel" id="f-status" name="status">${opts(ST_PAR, a.status)}</select></div>
+    <div class="fld full" id="w-status"><label>Status da atividade</label><input type="hidden" id="f-status" name="status" value="${esc(a.status)}">${checksFase(ST_PAR, a.status, 'setFormStatus', 'data-target="f-status"')}</div>
     ${fldI('prazo', 'Prazo final', a.prazo, 'date')}
     ${fldI('prazo_hora', 'Até que horas (opcional)', hm(a.prazo_hora), 'time')}
     <div class="fld full" id="w-horas" ${temFrota(a.responsaveis) && !ets.length ? '' : 'hidden'}><label>Horas (Performance de Frota)</label><div style="display:flex;gap:8px">${inp('horas_prev', a.horas_prev, 'number', 'step="0.5" min="0" placeholder="Previstas" aria-label="Horas previstas"')}${inp('horas_real', a.horas_real, 'number', 'step="0.5" min="0" placeholder="Gastas" aria-label="Horas gastas"')}</div></div>
@@ -1939,7 +2577,7 @@ function lerEtapas() {
 function desenharEtapas() {
   const box = document.getElementById('etapas'); if (!box) return;
   const ets = modalCtx.etapas;
-  const w = document.getElementById('w-status'); if (w) { w.querySelector('select').disabled = ets.length > 0; w.title = ets.length ? 'Com etapas, o status segue as etapas' : ''; }
+  const w = document.getElementById('w-status'); if (w) { w.style.opacity = ets.length > 0 ? '.55' : '1'; w.title = ets.length ? 'Com etapas, o status geral acompanha as etapas' : ''; }
   const wh = document.getElementById('w-horas'); if (wh && ets.length) wh.hidden = true;
   box.innerHTML = ets.length ? ets.map((e, k) => `<div class="etapa" data-i="${k}">
     <input class="inp" data-f="titulo" value="${esc(e.titulo || '')}" placeholder="Nome da etapa" aria-label="Nome da etapa">
@@ -1947,7 +2585,7 @@ function desenharEtapas() {
     <input class="inp" type="date" data-f="inicio" value="${e.inicio || ''}" aria-label="Início" title="Início">
     <input class="inp" type="date" data-f="fim" value="${e.fim || ''}" aria-label="Fim" title="Fim">
     <input class="inp" type="time" data-f="hora" value="${hm(e.hora)}" aria-label="Até que horas" title="Até que horas (opcional)">
-    <select class="sel" data-f="status" aria-label="Status da etapa">${opts(ST_PAR, e.status || 'a_fazer')}</select>
+    <div><input type="hidden" data-f="status" value="${esc(e.status || 'a_fazer')}">${checksFase(ST_PAR, e.status || 'a_fazer', 'setModalEtapaStatus', `data-i="${k}"`)}</div>
     ${isFrota(P(e.responsavel_id)) ? `<input class="inp hrs" type="number" step="0.5" min="0" data-f="horas" value="${e.horas_real ?? ''}" placeholder="h" aria-label="Horas gastas" title="Horas gastas">` : '<span></span>'}
     <button class="iconbtn" type="button" data-act="rmEtapa" data-i="${k}" aria-label="Remover etapa">${ic('x')}</button></div>`).join('') + '<div class="small muted">Com etapas, o status da atividade passa a seguir as etapas e cada pessoa vê a sua parte na própria agenda.</div>' : '<div class="small muted">Sem etapas. Divida a atividade quando partes dela forem feitas por pessoas diferentes ou em períodos diferentes.</div>';
 }
@@ -1997,7 +2635,7 @@ function modalProjeto(p) {
     <div class="fld full">${lbl('objetivo', 'Objetivo / visão do produto')}<textarea class="inp" id="f-objetivo" name="objetivo">${esc(p.objetivo || '')}</textarea></div>
     <div class="fld">${lbl('area', 'Área')}<select class="sel" id="f-area" name="area">${opts(Object.fromEntries(Object.entries(AREAS).map(([k, v]) => [k, v.nome])), p.area)}</select></div>
     <div class="fld">${lbl('dono_id', 'Product Owner')}<select class="sel" id="f-dono_id" name="dono_id">${optsPessoas(ativos(), p.dono_id)}</select></div>
-    <div class="fld">${lbl('status', 'Status')}<select class="sel" id="f-status" name="status">${opts(ST_PROJ, p.status)}</select></div><div class="fld"></div>
+    <div class="fld full"><label>Status do projeto</label><input type="hidden" id="f-status" name="status" value="${esc(p.status)}">${checksFase(ST_PROJ, p.status, 'setFormStatus', 'data-target="f-status"')}</div>
     ${fldI('inicio', 'Início', p.inicio, 'date', 'required')}${fldI('fim', 'Fim previsto', p.fim, 'date', 'required')}
     <div class="actions">${!novo && (p.criado_por === S.me.id || isGestao(S.me) || S.me.admin) ? '<button class="btn danger left" type="button" data-act="excluirProj">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`, { id: novo ? null : p.id });
 }
@@ -2025,19 +2663,25 @@ function modalItem(i, sprintId) {
     <div class="fld full">${lbl('descricao', 'Critério de pronto')}<textarea class="inp" id="f-descricao" name="descricao" placeholder="Quando este item pode ser considerado feito?">${esc(i.descricao || '')}</textarea></div>
     <div class="fld">${lbl('responsavel_id', 'Responsável')}<select class="sel" id="f-responsavel_id" name="responsavel_id">${optsPessoas(ativos(), i.responsavel_id, 'Sem responsável')}</select></div>
     <div class="fld">${lbl('sprint_id', 'Sprint')}<select class="sel" id="f-sprint_id" name="sprint_id"><option value="">Backlog do produto</option>${sps.map(s => `<option value="${s.id}" ${s.id === i.sprint_id ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}</select></div>
-    <div class="fld">${lbl('status', 'Status')}<select class="sel" id="f-status" name="status">${opts(ST_ITEM, i.status)}</select></div>
+    <div class="fld full"><label>Status do item</label><input type="hidden" id="f-status" name="status" value="${esc(i.status)}">${checksFase(ST_ITEM, i.status, 'setFormStatus', 'data-target="f-status"')}</div>
     ${fldI('pontos', 'Pontos (esforço)', i.pontos, 'number', 'min="0" max="100"')}
     ${fldI('inicio', 'Início', i.inicio, 'date')}${fldI('fim', 'Fim', i.fim, 'date')}
     <div class="fld">${lbl('progresso', 'Progresso: <span id="pv">' + (i.progresso || 0) + '%</span>')}<input id="f-progresso" name="progresso" type="range" min="0" max="100" step="5" value="${i.progresso || 0}" data-chg="rangeProg"></div>
     <div class="fld">${lbl('depende_de', 'Depende de')}<select class="sel" id="f-depende_de" name="depende_de"><option value="">Nenhum</option>${outros.map(o => `<option value="${o.id}" ${o.id === i.depende_de ? 'selected' : ''}>${esc(o.titulo)}</option>`).join('')}</select></div>
     <div class="actions">${!novo ? '<button class="btn danger left" type="button" data-act="excluirItem">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`, { id: novo ? null : i.id, pid });
 }
-function modalNota(n) {
-  const novo = !n; n = n || {};
-  abrirModal(novo ? 'Nova nota' : 'Nota', `<form data-form="nota"><div class="fld full small"><span class="lock">${ic('lock')}Só você vê</span></div>
-    ${fldI('titulo', 'Título', n.titulo, 'text', 'maxlength="120"', true)}
-    <div class="fld full">${lbl('texto', 'Anotação')}<textarea class="inp" id="f-texto" name="texto" style="min-height:150px">${esc(n.texto || '')}</textarea></div>
-    <label class="cb"><input type="checkbox" id="f-fixada" name="fixada" ${n.fixada ? 'checked' : ''}> Fixar no início</label>
+function modalNota(n, vincPadrao) {
+  const novo = !n || !n.id;
+  n = { fixada: true, vinculo_tipo: '', vinculo_id: '', ...(vincPadrao || {}), ...(n || {}) };
+  const minhasRot = S.rotinas.filter(r => r.dono_id === S.me.id || podeVerPessoa(r.dono_id));
+  const minhasPar = S.paralelas.slice().sort((a, b) => (a.status === 'concluida') - (b.status === 'concluida') || String(a.titulo).localeCompare(b.titulo, 'pt-BR'));
+  abrirModal(novo ? 'Nova nota' : 'Nota', `<form data-form="nota"><div class="fld full small"><span class="lock">${ic('lock')}Só você vê · As notas ficam fixadas até você desmarcar</span></div>
+    ${fldI('titulo', 'Título', n.titulo, 'text', 'maxlength="120" placeholder="Ex.: Lembrete de validação"', true)}
+    <div class="fld full">${lbl('texto', 'Anotação')}<textarea class="inp" id="f-texto" name="texto" style="min-height:140px">${esc(n.texto || '')}</textarea></div>
+    <div class="fld">${lbl('vinculo_tipo', 'Atrelar nota a (opcional)')}<select class="sel" id="f-vinculo_tipo" name="vinculo_tipo" data-chg="notaVincTipo">${opts({ '': 'Nenhuma tarefa (nota geral)', rotina: 'Uma atividade de Rotina', paralela: 'Uma Atividade Paralela' }, n.vinculo_tipo || '')}</select></div>
+    <div class="fld" id="w-vinc-rot" ${n.vinculo_tipo === 'rotina' ? '' : 'hidden'}>${lbl('vinculo_rot', 'Rotina vinculada')}<select class="sel" id="f-vinculo_rot" name="vinculo_rot">${minhasRot.map(r => `<option value="${r.id}" ${r.id === n.vinculo_id ? 'selected' : ''}>${esc(r.titulo)}</option>`).join('') || '<option value="">Sem rotinas</option>'}</select></div>
+    <div class="fld" id="w-vinc-par" ${n.vinculo_tipo === 'paralela' ? '' : 'hidden'}>${lbl('vinculo_par', 'Atividade paralela vinculada')}<select class="sel" id="f-vinculo_par" name="vinculo_par">${minhasPar.map(a => `<option value="${a.id}" ${a.id === n.vinculo_id ? 'selected' : ''}>${esc(a.titulo)}</option>`).join('') || '<option value="">Sem paralelas</option>'}</select></div>
+    <label class="cb"><input type="checkbox" id="f-fixada" name="fixada" ${n.fixada !== false ? 'checked' : ''}> Manter nota fixada (desmarque apenas quando não quiser mais que apareça fixada)</label>
     <div class="actions">${!novo ? '<button class="btn danger left" type="button" data-act="excluirNota">Excluir</button>' : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`, { id: novo ? null : n.id });
 }
 function modalPessoa(p) {
@@ -2087,7 +2731,14 @@ function feedHtml(aid) {
 }
 
 // --- demandas GFC ---
-const datalistResp = () => `<datalist id="dl-resp">${[...new Set([...S.gfcResp.map(r => r.nome), ...ativos().map(p => p.nome)])].sort().map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>`;
+const datalistResp = () => {
+  const todos = [...new Set([...S.gfcResp.map(r => r.nome), ...ativos().map(p => p.nome)])].sort();
+  const csps = [...new Set([...S.gfcResp.filter(r => /csp/i.test(r.funcao || '')).map(r => r.nome), ...todos])];
+  const cons = [...new Set([...S.gfcResp.filter(r => /consultor|perf/i.test(r.funcao || '')).map(r => r.nome), ...todos])];
+  return `<datalist id="dl-resp">${todos.map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>
+    <datalist id="dl-resp-csp">${csps.map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>
+    <datalist id="dl-resp-cons">${cons.map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>`;
+};
 const botoesModal = (excluir) => `<div class="actions">${excluir ? `<button class="btn danger left" type="button" data-act="${excluir}">Excluir</button>` : ''}<button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div>`;
 function pickerHtml(sel, chaves) {
   const sites = S.gfcSites.filter(s => s.ativo !== false || sel.has('s:' + s.id) || S.gfcFrotas.some(f => f.site_id === s.id && sel.has('f:' + f.id))).sort(porNome);
@@ -2097,12 +2748,16 @@ function pickerHtml(sel, chaves) {
     if (!fs.length) { chaves.add('s:' + s.id); return `<div class="ps"><label><input type="checkbox" name="pick" value="s:${s.id}" ${sel.has('s:' + s.id) ? 'checked' : ''}><b>${esc(s.nome)}</b><span class="muted small">sem frotas — acompanha o site todo</span></label></div>`; }
     fs.forEach(f => chaves.add('f:' + f.id));
     return `<div class="ps"><label><input type="checkbox" data-chg="gfcPickSite" data-site="${s.id}" ${fs.every(f => sel.has('f:' + f.id)) ? 'checked' : ''}><b>${esc(s.nome)}</b><span class="muted small">${fs.length === 1 ? 'marcar a frota' : `marcar as ${fs.length} frotas`}</span></label>
-      <div class="pf">${fs.map(f => `<label><input type="checkbox" name="pick" value="f:${f.id}" data-site="${s.id}" ${sel.has('f:' + f.id) ? 'checked' : ''}>${esc(f.nome)}${f.responsavel ? `<span class="muted small">· ${esc(f.responsavel)}</span>` : ''}</label>`).join('')}</div></div>`;
+      <div class="pf">${fs.map(f => {
+        const c1 = cspDe(f), c2 = consultorDe(f);
+        const info = [c1 ? `CSP: ${c1}` : '', c2 ? `Consultor: ${c2}` : ''].filter(Boolean).join(' · ') || f.responsavel || '';
+        return `<label><input type="checkbox" name="pick" value="f:${f.id}" data-site="${s.id}" data-tem-csp="${c1 ? '1' : ''}" data-tem-cons="${c2 ? '1' : ''}" ${sel.has('f:' + f.id) ? 'checked' : ''}><b>${esc(f.nome)}</b>${info ? `<span class="muted small">· ${esc(info)}</span>` : ''}</label>`;
+      }).join('')}</div></div>`;
   }).join('')}</div>`;
 }
 function modalGfcDem(dem) {
   const novo = !dem;
-  dem = dem || { titulo: '', descricao: '', inicio: iso(new Date(S.y, S.m, 1)), recorrente: true, dia_util: 15, ativo: true, responsavel_gfc: S.me.area === 'gfc' ? S.me.id : null, etapas: [{ id: uid(), titulo: 'Retorno dos sites', exec: 'terceiro', dias: 5 }, { id: uid(), titulo: 'Atualização no sistema', exec: 'gfc', dias: 10 }] };
+  dem = dem || { titulo: '', descricao: '', inicio: iso(new Date(S.y, S.m, 1)), recorrente: true, dia_util: 15, ativo: true, tipo_responsavel: 'csp', responsavel_gfc: S.me.area === 'gfc' ? S.me.id : null, etapas: [{ id: uid(), titulo: 'Retorno dos sites', exec: 'terceiro', dias: 5 }, { id: uid(), titulo: 'Atualização no sistema', exec: 'gfc', dias: 10 }] };
   const sel = new Set(novo ? [] : itensDem(dem.id).map(chaveItem)), chaves = new Set();
   const picker = pickerHtml(sel, chaves);
   const gfcPessoas = ativos().filter(p => p.area === 'gfc' || isGestao(p));
@@ -2115,17 +2770,27 @@ function modalGfcDem(dem) {
     ${!novo && dem.recorrente ? `<label class="cb"><input type="checkbox" name="ativo" ${dem.ativo !== false ? 'checked' : ''}> Ativa — desmarque para parar de repetir</label>` : ''}
     <div class="fld full small" id="f-prev" style="background:var(--surface2);border-radius:7px;padding:8px 10px" ${dem.recorrente ? '' : 'hidden'}></div>
     <div class="fld">${lbl('responsavel_gfc', 'Responsável no GFC')}<select class="sel" id="f-responsavel_gfc" name="responsavel_gfc">${optsPessoas(gfcPessoas, dem.responsavel_gfc, 'Sem responsável')}</select></div>
-    <div class="fld full"><div style="display:flex;align-items:center;gap:8px"><label style="margin-right:auto">Etapas — cada site/frota passa por elas nesta ordem</label><button class="btn sm" type="button" data-act="gfcAddEtapa">${ic('plus')}Etapa</button></div><div id="gfc-etapas" class="etapas"></div></div>
-    <div class="fld full"><label>Sites e frotas envolvidos</label>${picker}</div>
+    <div class="fld">${lbl('tipo_responsavel', 'Responsável pela frota nesta demanda')}<select class="sel" id="f-tipo_responsavel" name="tipo_responsavel">${opts(TIPO_RESP_GFC, dem.tipo_responsavel || 'csp')}</select></div>
+    <div class="fld full"><div style="display:flex;align-items:center;gap:8px"><label style="margin-right:auto">Etapas — cada site/frota passa por elas nesta ordem (você pode escolher CSP ou Consultor por etapa)</label><button class="btn sm" type="button" data-act="gfcAddEtapa">${ic('plus')}Etapa</button></div><div id="gfc-etapas" class="etapas"></div></div>
+    <div class="fld full">
+      <div class="toolbar" style="margin-bottom:4px"><label style="margin-right:auto">Sites e frotas envolvidos</label>
+        <button type="button" class="btn sm" data-act="gfcMarcarPorTipo" data-tipo="csp">Marcar com CSP</button>
+        <button type="button" class="btn sm" data-act="gfcMarcarPorTipo" data-tipo="cons">Marcar com Consultor</button>
+        <button type="button" class="btn sm" data-act="gfcMarcarPorTipo" data-tipo="todas">Todas</button>
+      </div>
+      ${picker}
+    </div>
     ${!novo ? '<div class="fld full small muted">Frotas desmarcadas saem da demanda junto com o acompanhamento delas.</div>' : ''}
     ${botoesModal(!novo && 'gfcExcluirDem')}</form>`,
     { id: novo ? null : dem.id, etapas: dem.etapas.map(e => ({ ...e })), chaves, mount: () => { desenharGfcEtapas(); CHG.gfcRec(); } }, true);
 }
 function lerGfcEtapas() {
   const box = document.getElementById('gfc-etapas'); if (!box) return modalCtx.etapas;
-  return [...box.querySelectorAll('.et-row')].map(el => {
+  const trEl = document.getElementById('f-tipo_responsavel');
+  const tipo_resp_dem = trEl ? trEl.value : 'csp';
+  return [...box.querySelectorAll('.et-row')].map((el, idx) => {
     const e = modalCtx.etapas[Number(el.dataset.i)], v = n => el.querySelector(`[data-f="${n}"]`).value;
-    return { id: e.id, titulo: v('titulo').trim(), exec: v('exec'), dias: v('dias') === '' ? null : Math.max(0, Math.round(Number(v('dias')))) };
+    return { id: e.id, titulo: v('titulo').trim(), exec: v('exec'), dias: v('dias') === '' ? null : Math.max(0, Math.round(Number(v('dias')))), ...(idx === 0 ? { tipo_resp_dem } : {}) };
   });
 }
 function desenharGfcEtapas() {
@@ -2133,19 +2798,20 @@ function desenharGfcEtapas() {
   const ets = modalCtx.etapas;
   box.innerHTML = ets.map((e, k) => `<div class="et-row" data-i="${k}">
     <input class="inp" data-f="titulo" value="${esc(e.titulo || '')}" placeholder="Etapa ${k + 1} — ex.: Solicitar horímetro" aria-label="Nome da etapa ${k + 1}" maxlength="80">
-    <select class="sel" data-f="exec" aria-label="Quem executa a etapa ${k + 1}">${opts({ terceiro: 'Terceiro executa', gfc: 'GFC executa' }, e.exec)}</select>
+    <select class="sel" data-f="exec" aria-label="Quem executa a etapa ${k + 1}">${opts(EXEC_ETAPA_GFC, e.exec)}</select>
     <input class="inp" type="number" min="0" max="120" step="1" data-f="dias" value="${e.dias ?? ''}" placeholder="dias úteis" aria-label="Prazo da etapa ${k + 1} em dias úteis" title="Prazo em dias úteis">
     <button class="iconbtn" type="button" data-act="gfcRmEtapa" data-i="${k}" aria-label="Remover etapa ${k + 1}" ${ets.length < 2 ? 'disabled' : ''}>${ic('x')}</button></div>`).join('')
-    + '<div class="small muted">Prazo em dias úteis (segunda a sexta). Na demanda mensal, cada etapa começa no dia útil seguinte ao fim da anterior e nenhuma passa do último dia útil do mês. Na avulsa, a etapa de terceiro conta da data da solicitação e a do GFC, da conclusão da anterior.</div>';
+    + '<div class="small muted">Prazo em dias úteis (segunda a sexta). Você pode definir se a etapa externa cobra o CSP, o Consultor de Performance ou segue o padrão escolhido para a demanda.</div>';
 }
 function modalGfcCel(dem, it, k) {
-  const x = celula(dem, it, k), et = x.et, c = x.c, terc = et.exec === 'terceiro';
+  const x = celula(dem, it, k), et = x.et, c = x.c, terc = isTerceiroExec(et.exec);
   const sts = terc ? ['pendente', 'solicitado', 'concluido', 'na'] : ['pendente', 'aguardando', 'concluido', 'na'];
   const rotSt = { pendente: terc ? 'A solicitar' : 'A fazer', solicitado: 'Solicitado — aguardando retorno', aguardando: 'Parada — falta informação externa', concluido: 'Concluído', na: 'Não se aplica' };
+  const opcoesSt = Object.fromEntries(sts.map(v => [v, rotSt[v]]));
   abrirModal(`${nomeFrota(it)} — ${et.titulo}`, `<form data-form="gfcCel">
     <div class="fld full small muted">${esc(dem.titulo)} · ${esc(nomeSite(it))} · etapa ${k + 1}, executada por ${terc ? 'terceiro' : 'GFC'}${!x.liberada ? ' · a etapa anterior ainda não foi concluída' : ''}</div>
-    <div class="fld">${lbl('st', 'Situação')}<select class="sel" id="f-st" name="st" data-chg="gfcStSel">${sts.map(v => `<option value="${v}" ${v === x.st ? 'selected' : ''}>${rotSt[v]}</option>`).join('')}</select></div>
-    ${fldI('resp', 'Responsável', x.resp, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — não precisa ser da equipe"')}
+    <div class="fld full"><label>Situação</label><input type="hidden" id="f-st" name="st" value="${esc(x.st)}">${checksFase(opcoesSt, x.st, 'setFormStatus', 'data-target="f-st" data-gfc-st="1"')}</div>
+    ${fldI('resp', 'Responsável nesta etapa', x.resp, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — CSP, Consultor de Performance ou GFC"', true)}
     ${terc ? fldI('enviado_em', 'Data da solicitação', c.enviado_em || '', 'date', 'data-chg="gfcPrazo"') : dem.recorrente ? '' : `<div class="fld"><label>Contagem do prazo a partir de</label><div class="inp" style="background:var(--surface2)">${x.base ? fmtDA(x.base) : 'conclusão da etapa anterior'}</div></div>`}
     ${dem.recorrente ? `<div class="fld"><label>Data limite (calendário de ${MESES[S.m]})</label><div class="inp num" style="background:var(--surface2)">${fmtDA(x.limite)} (${DIAS[dt(x.limite).getDay()]})</div></div>`
       : `${fldI('dias', 'Prazo (dias úteis)', x.dias ?? '', 'number', 'min="0" max="120" step="1" data-chg="gfcPrazo"')}
@@ -2155,8 +2821,12 @@ function modalGfcCel(dem, it, k) {
     ${botoesModal()}</form>${datalistResp()}`, { dem: dem.id, it: it.id, k, base: x.base, terc, mount: () => CHG.gfcPrazo() });
 }
 function modalGfcItem(it) {
+  const fr = it.frota_id ? frotaDe(it.frota_id) : null;
+  const csp = cspDe(it) || cspDe(fr) || '';
+  const cons = consultorDe(it) || consultorDe(fr) || '';
   abrirModal(`${nomeSite(it)} — ${nomeFrota(it)}`, `<form data-form="gfcItem">
-    ${fldI('responsavel', 'Responsável pelo retorno (etapas de terceiros)', it.responsavel, 'text', 'list="dl-resp" maxlength="80" placeholder="Nome — não precisa ser da equipe"', true)}
+    ${fldI('responsavel_csp', 'CSP responsável pela frota', csp, 'text', 'list="dl-resp-csp" maxlength="80" placeholder="Nome do CSP"')}
+    ${fldI('responsavel_consultor', 'Consultor de Performance responsável', cons, 'text', 'list="dl-resp-cons" maxlength="80" placeholder="Nome do Consultor de Performance"')}
     <div class="fld full">${lbl('obs', 'Observação')}<textarea class="inp" id="f-obs" name="obs">${esc(it.obs || '')}</textarea></div>
     <div class="actions"><button class="btn danger left" type="button" data-act="gfcRmItem">Remover da demanda</button><button class="btn" type="button" data-act="fecharModal">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>${datalistResp()}`, { id: it.id });
 }
@@ -2169,10 +2839,12 @@ function modalGfcSite(s) {
 }
 function modalGfcFrota(f, siteId) {
   const novo = !f; f = f || { site_id: siteId, ativo: true };
+  const csp = cspDe(f), cons = consultorDe(f);
   abrirModal(novo ? 'Nova frota' : 'Editar frota', `<form data-form="gfcFrota">
     <div class="fld">${lbl('site_id', 'Site')}<select class="sel" id="f-site_id" name="site_id">${S.gfcSites.slice().sort(porNome).map(s => `<option value="${s.id}" ${s.id === f.site_id ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}</select></div>
     ${fldI('nome', 'Frota / modelo', f.nome, 'text', 'required maxlength="40" placeholder="Ex.: 797F"')}
-    ${fldI('responsavel', 'Responsável padrão (opcional)', f.responsavel, 'text', 'list="dl-resp" maxlength="80" placeholder="Sugerido ao incluir esta frota numa demanda"', true)}
+    ${fldI('responsavel_csp', 'CSP responsável pela frota (opcional)', csp, 'text', 'list="dl-resp-csp" maxlength="80" placeholder="Nome do CSP"')}
+    ${fldI('responsavel_consultor', 'Consultor de Performance (opcional)', cons, 'text', 'list="dl-resp-cons" maxlength="80" placeholder="Nome do Consultor de Performance"')}
     ${!novo ? `<label class="cb"><input type="checkbox" name="ativo" ${f.ativo !== false ? 'checked' : ''}> Ativa — desmarque para não aparecer em novas demandas</label>` : ''}
     ${botoesModal(!novo && 'gfcExcluirFrota')}</form>${datalistResp()}`, { id: novo ? null : f.id });
 }
@@ -2239,14 +2911,25 @@ function mencoesDoTexto(t) {
 }
 const FORM = {
   async login(f, fd) {
-    const { error } = await sb.auth.signInWithPassword({ email: fd.get('email').trim(), password: fd.get('senha') });
-    if (error) toast(/Invalid login/i.test(error.message) ? 'E-mail ou senha incorretos.' : error.message);
+    const btn = document.getElementById('btn-login-submit');
+    if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email: (fd.get('email') || '').trim(), password: fd.get('senha') || '' });
+      if (error) {
+        toast(/Invalid login/i.test(error.message) ? 'E-mail ou senha incorretos.' : ('Não foi possível entrar: ' + error.message));
+      } else if (data && data.session) {
+        S.sessao = data.session;
+        await recarregar();
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+    }
   },
   confirmar() { const fn = modalCtx.onConfirm; fecharModal(); fn && fn(); },
   captura(f, fd) {
     const t = (fd.get('texto') || '').trim(); if (!t) return;
     if (S.capTipo === 'rotina') { modalRotina({ titulo: t }); return; }
-    if (S.capTipo === 'nota') { salvar(() => API.inserir('notas', { dono_id: S.me.id, titulo: null, texto: t, fixada: false, atualizado_em: new Date().toISOString() }), 'Nota salva'); return; }
+    if (S.capTipo === 'nota') { salvar(() => API.inserir('notas', { dono_id: S.me.id, titulo: null, texto: t, fixada: true, atualizado_em: new Date().toISOString() }), 'Nota fixada salva'); return; }
     const { limpo, ids } = mencoesDoTexto(t);
     const data = fd.get('data') || HOJE, hora = fd.get('hora') || null;
     salvar(() => API.inserir('paralelas', { titulo: limpo || t, descricao: null, criado_por: S.me.id, responsaveis: ids.length ? ids : [S.me.id], origem: 'interna', prioridade: 'media', status: 'a_fazer', prazo: data, prazo_hora: hora }),
@@ -2259,15 +2942,20 @@ const FORM = {
     salvar(() => API.marcarExec(rid, d, h, txt(fd.get('obs'))), 'Registrado');
   },
   rotina(f, fd) {
-    const dono = fd.get('dono_id');
+    const dono = fd.get('dono_id'), freq = fd.get('frequencia');
+    const diasMarcados = fd.getAll('dias_sem_chk').join(',') || '1,3,5';
     const row = {
-      titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), dono_id: dono, frequencia: fd.get('frequencia'),
-      dia_semana: fd.get('frequencia') === 'semanal' ? Number(fd.get('dia_semana')) : null,
-      dia_mes: fd.get('frequencia') === 'mensal' ? Math.min(31, Math.max(1, Number(fd.get('dia_mes')) || 1)) : null,
+      titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), dono_id: dono, frequencia: freq,
+      dia_semana: ['semanal', 'quinzenal'].includes(freq) ? Number(fd.get('dia_semana')) : null,
+      dia_mes: ['mensal', 'anual'].includes(freq) ? Math.min(31, Math.max(1, Number(fd.get('dia_mes')) || 1)) : null,
+      intervalo_dias: freq === 'intervalo' ? Math.max(1, Number(fd.get('intervalo_dias')) || 3) : null,
+      dias_semana: freq === 'intermitente' ? diasMarcados : null,
+      apenas_uteis: freq === 'intervalo' ? fd.get('apenas_uteis') === 'on' : false,
       hora: fd.get('hora') || null,
       horas_prev: isFrota(P(dono)) ? (num(fd.get('horas_prev')) || 0) : 0, inicio: fd.get('inicio'),
       privada: fd.get('privada') === 'on' && dono === S.me.id, ativo: fd.get('ativo') === 'on'
     };
+    delete S.rascunhos.rotina; ls.set('hub-rascunhos', S.rascunhos);
     salvar(() => modalCtx.id ? API.atualizar('rotinas', modalCtx.id, row) : API.inserir('rotinas', row), 'Rotina salva');
   },
   paralela(f, fd) {
@@ -2331,7 +3019,16 @@ const FORM = {
     salvar(() => atual ? API.atualizar('itens', atual.id, row) : API.inserir('itens', { ...row, projeto_id: modalCtx.pid }), 'Item salvo');
   },
   nota(f, fd) {
-    const row = { titulo: txt(fd.get('titulo')), texto: txt(fd.get('texto')), fixada: fd.get('fixada') === 'on', atualizado_em: new Date().toISOString() };
+    const vt = fd.get('vinculo_tipo') || '';
+    const vid = vt === 'rotina' ? (fd.get('vinculo_rot') || '') : vt === 'paralela' ? (fd.get('vinculo_par') || '') : '';
+    const row = {
+      titulo: txt(fd.get('titulo')),
+      texto: txt(fd.get('texto')),
+      fixada: fd.get('fixada') === 'on',
+      vinculo_tipo: vt && vid ? vt : null,
+      vinculo_id: vt && vid ? vid : null,
+      atualizado_em: new Date().toISOString()
+    };
     if (!row.titulo && !row.texto) { toast('Escreva algo antes de salvar.'); return; }
     salvar(() => modalCtx.id ? API.atualizar('notas', modalCtx.id, row) : API.inserir('notas', { ...row, dono_id: S.me.id }), 'Nota salva');
   },
@@ -2354,8 +3051,9 @@ const FORM = {
   gfcDem(f, fd) {
     const ets = lerGfcEtapas().filter(e => e.titulo);
     if (!ets.length) { toast('Inclua pelo menos uma etapa com nome.'); return; }
-    const rec = fd.get('recorrente') === 'on';
-    const row = { titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), inicio: fd.get('inicio'), responsavel_gfc: fd.get('responsavel_gfc') || null, etapas: ets,
+    const rec = fd.get('recorrente') === 'on', tipoResp = fd.get('tipo_responsavel') || 'csp';
+    ets[0].tipo_resp_dem = tipoResp;
+    const row = { titulo: fd.get('titulo').trim(), descricao: txt(fd.get('descricao')), inicio: fd.get('inicio'), responsavel_gfc: fd.get('responsavel_gfc') || null, tipo_responsavel: tipoResp, etapas: ets,
       recorrente: rec, dia_util: rec ? Math.min(23, Math.max(1, Math.round(Number(fd.get('dia_util')) || 1))) : null, ativo: rec && modalCtx.id && f.querySelector('[name=ativo]') ? fd.get('ativo') === 'on' : true };
     const marcados = new Set(fd.getAll('pick')), id = modalCtx.id, mostrados = modalCtx.chaves;
     salvar(async () => {
@@ -2364,23 +3062,28 @@ const FORM = {
       for (const i of atuais) if (mostrados.has(chaveItem(i)) && !marcados.has(chaveItem(i))) await API.excluir('gfc_itens', i.id);
       await API.inserirLote('gfc_itens', [...marcados].filter(k => !tem.has(k)).map(k => {
         const [t, xid] = k.split(':'), fr = t === 'f' ? frotaDe(xid) : null, st = fr ? siteDe(fr.site_id) : siteDe(xid);
-        return { demanda_id: dem.id, site_id: st ? st.id : null, site_nome: st ? st.nome : null, frota_id: fr ? fr.id : null, frota_nome: fr ? fr.nome : null, responsavel: fr ? fr.responsavel || null : null, passos: {} };
+        const csp = fr ? cspDe(fr) : null, cons = fr ? consultorDe(fr) : null;
+        return { demanda_id: dem.id, site_id: st ? st.id : null, site_nome: st ? st.nome : null, frota_id: fr ? fr.id : null, frota_nome: fr ? fr.nome : null, responsavel_csp: csp, responsavel_consultor: cons, responsavel: codificarRespDuplo(csp, cons, fr ? fr.responsavel : null), passos: {} };
       }));
       S.gfcAberta = dem.id;
     }, 'Demanda salva');
   },
   gfcCel(f, fd) {
     const dem = S.gfcDemandas.find(d => d.id === modalCtx.dem), it = S.gfcItens.find(i => i.id === modalCtx.it), et = dem.etapas[modalCtx.k];
-    const st = fd.get('st'), padrao = et.exec === 'gfc' ? respGfc(dem) : (it.responsavel || ''), resp = (fd.get('resp') || '').trim();
+    const terc = isTerceiroExec(et.exec);
+    const st = fd.get('st'), padrao = et.exec === 'gfc' ? respGfc(dem) : respItemParaEtapa(dem, it, et), resp = (fd.get('resp') || '').trim();
     const dias = !fd.has('dias') || fd.get('dias') === '' ? null : Math.max(0, Math.round(Number(fd.get('dias'))));
     const patch = {
       st, resp: resp && resp !== padrao ? resp : null, dias: dias === et.dias ? null : dias, obs: txt(fd.get('obs')),
-      enviado_em: et.exec === 'terceiro' ? (fd.get('enviado_em') || (st === 'solicitado' ? HOJE : null)) : null,
+      enviado_em: terc ? (fd.get('enviado_em') || (st === 'solicitado' ? HOJE : null)) : null,
       concluido_em: st === 'concluido' ? (fd.get('concluido_em') || HOJE) : null
     };
     salvar(() => salvarPasso(it, dem, et.id, patch), 'Atualizado');
   },
-  gfcItem(f, fd) { salvar(() => API.atualizar('gfc_itens', modalCtx.id, { responsavel: txt(fd.get('responsavel')), obs: txt(fd.get('obs')) }), 'Atualizado'); },
+  gfcItem(f, fd) {
+    const csp = txt(fd.get('responsavel_csp')), cons = txt(fd.get('responsavel_consultor'));
+    salvar(() => API.atualizar('gfc_itens', modalCtx.id, { responsavel_csp: csp, responsavel_consultor: cons, responsavel: codificarRespDuplo(csp, cons), obs: txt(fd.get('obs')) }), 'Atualizado');
+  },
   gfcSite(f, fd) {
     const nome = fd.get('nome').trim();
     if (S.gfcSites.some(x => x.id !== modalCtx.id && semAcento(x.nome) === semAcento(nome))) { toast('Já existe um site com esse nome.'); return; }
@@ -2388,7 +3091,8 @@ const FORM = {
     salvar(() => modalCtx.id ? API.atualizar('gfc_sites', modalCtx.id, row) : API.inserir('gfc_sites', row), 'Site salvo');
   },
   gfcFrota(f, fd) {
-    const row = { site_id: fd.get('site_id'), nome: fd.get('nome').trim(), responsavel: txt(fd.get('responsavel')), ativo: modalCtx.id ? fd.get('ativo') === 'on' : true };
+    const csp = txt(fd.get('responsavel_csp')), cons = txt(fd.get('responsavel_consultor'));
+    const row = { site_id: fd.get('site_id'), nome: fd.get('nome').trim(), responsavel_csp: csp, responsavel_consultor: cons, responsavel: codificarRespDuplo(csp, cons), ativo: modalCtx.id ? fd.get('ativo') === 'on' : true };
     if (!row.site_id) { toast('Cadastre um site antes.'); return; }
     if (S.gfcFrotas.some(x => x.id !== modalCtx.id && x.site_id === row.site_id && semAcento(x.nome) === semAcento(row.nome))) { toast('Essa frota já está cadastrada neste site.'); return; }
     salvar(() => modalCtx.id ? API.atualizar('gfc_frotas', modalCtx.id, row) : API.inserir('gfc_frotas', row), 'Frota salva');
@@ -2402,6 +3106,110 @@ const FORM = {
     if (!s) { fecharModal(); return; }
     const { error } = await sb.auth.updateUser({ password: s });
     if (error) toast('Não foi possível trocar a senha: ' + error.message); else { fecharModal(); toast('Senha alterada'); }
+  },
+  async importarPlanner(f, fd) {
+    if (!plannerPreview) return;
+    const btn = document.getElementById('btn-exec-planner');
+    if (btn) { btn.disabled = true; btn.textContent = 'Importando…'; }
+    const pularDup = fd.get('pular_duplicadas') === 'on';
+    const criarPessoas = fd.get('criar_pessoas') === 'on';
+    const { paralelas, projetos, usuarios } = plannerPreview;
+    salvar(async () => {
+      // 1) Criar pessoas faltantes se autorizado
+      if (criarPessoas) {
+        for (const [nomeNorm, email] of Object.entries(usuarios)) {
+          if (!resolverPessoaPlanner(nomeNorm, usuarios)) {
+            const partes = email.split('@')[0].split('.').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+            const nova = await API.inserir('pessoas', { nome: partes, email, area: 'frota', papel: 'analista', layout: 'padrao', admin: false, ativo: true });
+            S.pessoas.push(nova);
+          }
+        }
+      }
+      const idPessoa = nome => {
+        const p = resolverPessoaPlanner(nome, usuarios);
+        return p ? p.id : S.me.id;
+      };
+      // 2) Importar Atividades Paralelas e Etapas
+      let impPar = 0, impEt = 0;
+      const titParExist = new Set(S.paralelas.map(a => semAcento(a.titulo) + '|' + String(a.criado_em || '').slice(0, 10)));
+      for (const p of paralelas) {
+        const chave = semAcento(p.titulo) + '|' + String(p.criado_em || '').slice(0, 10);
+        if (pularDup && titParExist.has(chave)) continue;
+        const resps = [...new Set(p.atribNomes.map(idPessoa).filter(Boolean))];
+        const criadoPor = idPessoa(p.criadoNome);
+        const novaPar = await API.inserir('paralelas', {
+          titulo: p.titulo,
+          descricao: p.descricao,
+          responsaveis: resps.length ? resps : [criadoPor],
+          criado_por: criadoPor,
+          solicitante: p.solicitante,
+          origem: p.origem,
+          prioridade: p.prioridade,
+          status: p.status,
+          prazo: p.prazo,
+          prazo_hora: null,
+          concluida_em: p.concluida_em,
+          criado_em: p.criado_em
+        });
+        impPar++;
+        if (p.etapas.length) {
+          const rowsEt = p.etapas.map(e => ({
+            paralela_id: novaPar.id,
+            titulo: e.titulo,
+            responsavel_id: idPessoa(e.respNome),
+            inicio: e.inicio,
+            fim: e.fim,
+            hora: null,
+            status: e.status,
+            concluida_em: e.concluida_em,
+            ordem: e.ordem
+          }));
+          await API.inserirLote('etapas', rowsEt);
+          impEt += rowsEt.length;
+        }
+      }
+      // 3) Importar Projetos e Itens
+      let impProj = 0, impIt = 0;
+      for (const pj of Object.values(projetos)) {
+        let projDb = S.projetos.find(x => semAcento(x.nome) === semAcento(pj.nome));
+        if (!projDb) {
+          const todosConcl = pj.itens.length > 0 && pj.itens.every(i => i.status === 'feito');
+          projDb = await API.inserir('projetos', {
+            nome: pj.nome.slice(0, 140),
+            objetivo: `Importado do Planner (${pj.itens.length} ${pj.itens.length === 1 ? 'item' : 'itens'})`,
+            area: pj.area,
+            dono_id: idPessoa(pj.donoNome),
+            status: todosConcl ? 'concluido' : 'andamento',
+            inicio: pj.inicio || HOJE,
+            fim: pj.fim && pj.fim >= (pj.inicio || HOJE) ? pj.fim : addDias(pj.inicio || HOJE, 30),
+            criado_por: S.me.id
+          });
+          S.projetos.push(projDb);
+          impProj++;
+        }
+        const titItExist = new Set(S.itens.filter(i => i.projeto_id === projDb.id).map(i => semAcento(i.titulo)));
+        const novosItens = pj.itens.filter(i => !(pularDup && titItExist.has(semAcento(i.titulo)))).map(i => ({
+          projeto_id: projDb.id,
+          sprint_id: null,
+          titulo: i.titulo,
+          descricao: i.descricao,
+          responsavel_id: idPessoa(i.respNome),
+          status: i.status,
+          inicio: i.inicio,
+          fim: i.fim && i.fim >= i.inicio ? i.fim : i.inicio,
+          progresso: i.progresso,
+          pontos: i.pontos,
+          depende_de: null,
+          concluido_em: i.concluido_em
+        }));
+        if (novosItens.length) {
+          await API.inserirLote('itens', novosItens);
+          impIt += novosItens.length;
+        }
+      }
+      plannerPreview = null;
+      toast(`Importado: ${impPar} paralelas (${impEt} etapas) e ${impIt} itens em ${impProj} novos projetos!`);
+    });
   }
 };
 
@@ -2452,7 +3260,17 @@ const ACT = {
   removerFoto() { salvarFoto(null); },
   async sair() { fecharModal(); if (sb) await sb.auth.signOut(); S.sessao = null; S.me = null; render(); },
   resetDemo() { confirmar('Apagar tudo o que foi alterado no modo teste e voltar aos dados de exemplo?', () => { DEMO = seedDemo(); salvarDemo(); recarregar(); toast('Dados de exemplo restaurados'); }); },
-  ovClick(el, e) { if (e.target === el) fecharModal(); },
+  ovClick(el, e) {
+    if (e.target !== el) return;
+    const form = modalRoot.querySelector('form[data-form]');
+    // Sugestão 7: janelas de abertura de rotinas e formulários não fecham sozinhas ao clicar fora
+    if (form && form.dataset.form !== 'confirmar') {
+      const m = modalRoot.querySelector('.modal');
+      if (m) { m.classList.remove('pulse'); void m.offsetWidth; m.classList.add('pulse'); }
+      return;
+    }
+    fecharModal();
+  },
   fecharModal: () => fecharModal(),
   // início
   inicioTab(el) { S.inicioTab = el.dataset.v; if (S.inicioTab !== 'mes' && S.inicioTab !== 'dia') S.dia = HOJE; render(); },
@@ -2474,7 +3292,7 @@ const ACT = {
   excluirRot() { const id = modalCtx.id; confirmar('Excluir esta rotina e todo o histórico de execuções dela? Para só parar de usar, desmarque "Ativa".', () => salvar(() => API.excluir('rotinas', id), 'Rotina excluída')); },
   // paralelas
   novaPar: () => modalParalela(null),
-  editarPar(el, e) { if (e.target.closest('select')) return; modalParalela(S.paralelas.find(a => a.id === el.dataset.id)); },
+  editarPar(el, e) { if (e.target.closest('select,button,input,.st-checks,.par-exp,.inline-nota')) return; modalParalela(S.paralelas.find(a => a.id === el.dataset.id)); },
   excluirPar() { const id = modalCtx.id; confirmar('Excluir esta atividade paralela e as etapas dela?', () => salvar(() => API.excluir('paralelas', id), 'Atividade excluída')); },
   parFiltro(el) { S.parFiltro = el.dataset.v; render(); },
   addEtapa() {
@@ -2540,13 +3358,13 @@ const ACT = {
   gfcRmEtapa(el) { modalCtx.etapas = lerGfcEtapas(); if (modalCtx.etapas.length < 2) return; modalCtx.etapas.splice(Number(el.dataset.i), 1); desenharGfcEtapas(); CHG.gfcRec(); },
   gfcChk(el) {
     const { dem, it, k } = ctxCel(el), x = celula(dem, it, k);
-    const patch = x.st === 'concluido' ? { st: x.et.exec === 'terceiro' && x.c.enviado_em ? 'solicitado' : 'pendente', concluido_em: null } : { st: 'concluido', concluido_em: HOJE };
+    const patch = x.st === 'concluido' ? { st: isTerceiroExec(x.et.exec) && x.c.enviado_em ? 'solicitado' : 'pendente', concluido_em: null } : { st: 'concluido', concluido_em: HOJE };
     salvar(() => salvarPasso(it, dem, x.et.id, patch), x.st === 'concluido' ? null : 'Concluído');
   },
   gfcSolicitar(el) { const { dem, it, k } = ctxCel(el); salvar(() => salvarPasso(it, dem, dem.etapas[k].id, { st: 'solicitado', enviado_em: HOJE }), 'Solicitação registrada hoje'); },
   gfcSolicitarTodas(el) {
     const dem = demAberta(), k = Number(el.dataset.k), et = dem.etapas[k];
-    const alvo = itensDem(dem.id).filter(it => { const x = celula(dem, it, k); return x.acao && et.exec === 'terceiro'; });
+    const alvo = itensDem(dem.id).filter(it => { const x = celula(dem, it, k); return x.acao && isTerceiroExec(et.exec); });
     confirmar(`Registrar hoje (${fmtD(HOJE)}) a solicitação de “${et.titulo}” para ${alvo.length} ${alvo.length === 1 ? 'site/frota' : 'sites/frotas'}? O prazo de cada um passa a contar a partir de hoje.`,
       () => salvar(async () => { for (const it of alvo) await salvarPasso(it, dem, et.id, { st: 'solicitado', enviado_em: HOJE }); }, 'Solicitações registradas'));
   },
@@ -2570,7 +3388,139 @@ const ACT = {
   editarNota(el) { modalNota(S.notas.find(n => n.id === el.dataset.id)); },
   excluirNota() { const id = modalCtx.id; confirmar('Excluir esta nota?', () => salvar(() => API.excluir('notas', id), 'Nota excluída')); },
   novaPessoa: () => modalPessoa(null),
-  editarPessoa(el) { modalPessoa(S.pessoas.find(p => p.id === el.dataset.id)); }
+  editarPessoa(el) { modalPessoa(S.pessoas.find(p => p.id === el.dataset.id)); },
+  // Sugestão 2: Notificações
+  togNotif() { S.notifAberta = !S.notifAberta; render(); },
+  fecharNotif() { S.notifAberta = false; render(); },
+  lerTodasNotif() { gerarNotificacoes().forEach(n => S.notifLidas.add(n.key)); ls.set('hub-notif-lidas', [...S.notifLidas]); render(); },
+  clickNotif(el) {
+    S.notifLidas.add(el.dataset.key); ls.set('hub-notif-lidas', [...S.notifLidas]);
+    S.notifAberta = false; render();
+    abrirAg(el.dataset.t, el.dataset.id, el.dataset.d);
+  },
+  async pedirPermNotif() {
+    if (!('Notification' in window)) { toast('Este navegador não suporta alertas nativos.'); return; }
+    const p = await Notification.requestPermission();
+    if (p === 'granted') { dispararNotifNavegador('Notificações ativadas com sucesso no Hub da Equipe!'); toast('Alertas do navegador ativados!'); }
+    render();
+  },
+  // Sugestão 3: Expansão de etapas e checks de status
+  togParExp(el, e) {
+    e && e.stopPropagation();
+    const id = el.dataset.id;
+    if (S.parExp.has(id)) S.parExp.delete(id); else S.parExp.add(id);
+    render();
+  },
+  setParStatus(el, e) {
+    e && e.stopPropagation();
+    const a = S.paralelas.find(x => x.id === el.dataset.id), st = el.dataset.st;
+    if (!a) return;
+    const ets = etapasDe(a.id);
+    if (ets.length) {
+      S.parExp.add(a.id);
+      render();
+      toast('Marque o status de cada etapa abaixo.');
+      return;
+    }
+    if (st === 'concluida' && a.status !== 'concluida' && a.responsaveis.some(r => isFrota(P(r)))) return modalConcluirHoras('paralela', a.id);
+    salvar(() => API.atualizar('paralelas', a.id, { status: st, concluida_em: st === 'concluida' ? (a.concluida_em || HOJE) : null }), st === 'concluida' ? 'Concluída' : 'Status atualizado');
+  },
+  setEtapaStatus(el, e) {
+    e && e.stopPropagation();
+    const et = S.etapas.find(x => x.id === el.dataset.id), st = el.dataset.st;
+    if (!et) return;
+    if (st === 'concluida' && et.status !== 'concluida' && isFrota(P(et.responsavel_id))) return modalConcluirHoras('etapa', et.id);
+    salvar(async () => {
+      const patch = { status: st, concluida_em: st === 'concluida' ? (et.concluida_em || HOJE) : null };
+      await API.atualizar('etapas', et.id, patch);
+      Object.assign(et, patch);
+      await sincronizarParalela(et.paralela_id);
+    }, st === 'concluida' ? 'Etapa concluída' : 'Etapa atualizada');
+  },
+  setItemStatus(el, e) {
+    e && e.stopPropagation();
+    const i = S.itens.find(x => x.id === el.dataset.id), st = el.dataset.st;
+    if (!i) return;
+    salvar(() => API.atualizar('itens', i.id, { status: st, progresso: st === 'feito' ? 100 : i.progresso, concluido_em: st === 'feito' ? (i.concluido_em || HOJE) : null }), 'Status atualizado');
+  },
+  setFormStatus(el) {
+    const inp = document.getElementById(el.dataset.target);
+    if (!inp) return;
+    inp.value = el.dataset.st;
+    const box = el.closest('.st-checks');
+    if (box) box.querySelectorAll('.st-chk').forEach(b => {
+      const on = b.dataset.st === el.dataset.st;
+      b.className = 'st-chk' + (on ? ' on ' + b.dataset.st : '');
+      const sb = b.querySelector('.st-box'); if (sb) sb.innerHTML = on ? ic('check') : '';
+    });
+    if (el.dataset.gfcSt) CHG.gfcStSel({ value: el.dataset.st });
+  },
+  setModalEtapaStatus(el) {
+    const row = el.closest('.etapa'); if (!row) return;
+    const inp = row.querySelector('[data-f="status"]'); if (!inp) return;
+    inp.value = el.dataset.st;
+    row.querySelectorAll('.st-chk').forEach(b => {
+      const on = b.dataset.st === el.dataset.st;
+      b.className = 'st-chk' + (on ? ' on ' + b.dataset.st : '');
+      const sb = b.querySelector('.st-box'); if (sb) sb.innerHTML = on ? ic('check') : '';
+    });
+  },
+  // Sugestão 5: Cards do Painel clicáveis
+  painelKpi(el) { modalPainelKpi(el.dataset.k, el.dataset.pid || null); },
+  irParalelasEscopo(el) {
+    const esc = el.dataset.esc || S.escopo || 'all', flt = el.dataset.flt || 'abertas';
+    fecharModal(); S.view = 'paralelas'; S.escopoPar = esc; S.parFiltro = flt; S.parMinhas = false; render(); window.scrollTo(0, 0);
+  },
+  irRotinaEscopo(el) {
+    const esc = el.dataset.esc || S.escopo || 'all';
+    fecharModal(); S.view = 'rotina'; S.escopo = esc; render(); window.scrollTo(0, 0);
+  },
+  // Sugestão 6: Fixar/desfixar nota rápido e criar nota vinculada
+  togFixNota(el, e) {
+    e && e.stopPropagation();
+    const n = S.notas.find(x => x.id === el.dataset.id); if (!n) return;
+    salvar(() => API.atualizar('notas', n.id, { fixada: !n.fixada, atualizado_em: new Date().toISOString() }), !n.fixada ? 'Nota fixada' : 'Nota desfixada');
+  },
+  novaNotaVinc(el, e) {
+    e && e.stopPropagation();
+    modalNota(null, { vinculo_tipo: el.dataset.vt, vinculo_id: el.dataset.vid, fixada: true });
+  },
+  // Sugestão 7: Limpar rascunho da rotina
+  limparRascunhoRot() {
+    delete S.rascunhos.rotina; ls.set('hub-rascunhos', S.rascunhos);
+    modalRotina(null);
+  },
+  // Sugestão 8: Marcar frotas por CSP ou Consultor na demanda GFC
+  gfcMarcarPorTipo(el) {
+    const tipo = el.dataset.tipo;
+    document.querySelectorAll('.picker input[name="pick"]').forEach(chk => {
+      if (tipo === 'todas') chk.checked = true;
+      else if (tipo === 'csp') chk.checked = chk.dataset.temCsp === '1';
+      else if (tipo === 'cons') chk.checked = chk.dataset.temCons === '1';
+    });
+  },
+  // Importador do Planner
+  abrirImportarPlanner: () => modalImportarPlanner(),
+  togVerSenha(el) {
+    const inp = document.getElementById('lg-senha');
+    if (!inp) return;
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    el.textContent = inp.type === 'password' ? 'Mostrar senha' : 'Ocultar senha';
+    inp.focus();
+  },
+  async entrarModoDemo() {
+    S.modo = 'teste';
+    DEMO = ls.get(DEMO_KEY, null);
+    if (!DEMO || !DEMO.pessoas || DEMO.versao !== 2) { DEMO = seedDemo(); salvarDemo(); }
+    if (TABELAS_OPC.some(t => !DEMO[t])) { const n = seedDemo(); TABELAS_OPC.forEach(t => DEMO[t] = DEMO[t] || n[t]); salvarDemo(); }
+    await recarregar();
+    toast('Modo demonstração ativado');
+  },
+  voltarLoginOnline() {
+    S.modo = 'online';
+    if (!sb) sb = criarClienteSupabase(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    render();
+  }
 };
 const CHG = {
   escopo(el) { S.escopo = el.value; render(); },
@@ -2606,7 +3556,7 @@ const CHG = {
     const meses = [0, 1, 2].map(k => [new Date(y0, m0 + k, 1).getFullYear(), new Date(y0, m0 + k, 1).getMonth()]);
     prev.innerHTML = '<b>Como fica no calendário</b>' + meses.map(([y, m]) => {
       const pl = planoMes({ dia_util: n, etapas: ets }, y, m);
-      return `<div class="num" style="margin-top:4px"><span style="text-transform:capitalize">${MESES[m]}</span>: ${pl.map((j, k) => `${esc(ets[k].titulo)} ${k === 0 && ets[k].exec === 'terceiro' ? 'cobrança ' + fmtD(j.ini) + ', retorno até ' + fmtD(j.fim) : fmtD(j.ini) + ' a ' + fmtD(j.fim)}${j.curta ? ` <span style="color:var(--warn)">(só ${plUteis(j.uteis)})</span>` : ''}`).join(' · ')}</div>`;
+      return `<div class="num" style="margin-top:4px"><span style="text-transform:capitalize">${MESES[m]}</span>: ${pl.map((j, k) => `${esc(ets[k].titulo)} ${k === 0 && isTerceiroExec(ets[k].exec) ? 'cobrança ' + fmtD(j.ini) + ', retorno até ' + fmtD(j.fim) : fmtD(j.ini) + ' a ' + fmtD(j.fim)}${j.curta ? ` <span style="color:var(--warn)">(só ${plUteis(j.uteis)})</span>` : ''}`).join(' · ')}</div>`;
     }).join('');
   },
   gfcPrazo() {
@@ -2618,7 +3568,23 @@ const CHG = {
     const lim = addUteis(String(base).slice(0, 10), Math.max(0, Math.round(Number(d))));
     out.textContent = `${fmtDA(lim)} (${DIAS[dt(lim).getDay()]})`;
   },
-  freqRot(el) { document.getElementById('w-sem').hidden = el.value !== 'semanal'; document.getElementById('w-mes').hidden = el.value !== 'mensal'; },
+  freqRot(el) {
+    const v = el.value;
+    const ws = document.getElementById('w-sem'); if (ws) ws.hidden = !['semanal', 'quinzenal'].includes(v);
+    const wm = document.getElementById('w-mes'); if (wm) wm.hidden = !['mensal', 'anual'].includes(v);
+    const wi = document.getElementById('w-int'); if (wi) wi.hidden = v !== 'intervalo';
+    const wim = document.getElementById('w-interm'); if (wim) wim.hidden = v !== 'intermitente';
+  },
+  notaVincTipo(el) {
+    const v = el.value;
+    const wr = document.getElementById('w-vinc-rot'); if (wr) wr.hidden = v !== 'rotina';
+    const wp = document.getElementById('w-vinc-par'); if (wp) wp.hidden = v !== 'paralela';
+  },
+  horasEtapaInline(el) {
+    const et = S.etapas.find(x => x.id === el.dataset.id); if (!et) return;
+    salvar(() => API.atualizar('etapas', et.id, { horas_real: num(el.value) }), 'Horas da etapa salvas');
+  },
+  arqPlanner(el) { lerArquivosPlanner(el.files); },
   donoRot(el) { document.getElementById('w-hprev').hidden = !isFrota(P(el.value)); },
   etapaResp() { modalCtx.etapas = lerEtapas(); desenharEtapas(); },
   rangeProg(el) { document.getElementById('pv').textContent = el.value + '%'; },
@@ -2642,9 +3608,32 @@ document.addEventListener('input', e => {
   if (c === 'gfcPrazo') CHG.gfcPrazo();
   if (c === 'gfcRec' || e.target.closest('#gfc-etapas')) CHG.gfcRec();
   if (c === 'parBusca') { clearTimeout(buscaT); const el = e.target; buscaT = setTimeout(() => CHG.parBusca(el), 300); }
+  const fRot = e.target.closest('form[data-draft="rotina"]');
+  if (fRot && !modalCtx.id) {
+    const fd = new FormData(fRot);
+    S.rascunhos.rotina = {
+      titulo: fd.get('titulo') || '',
+      descricao: fd.get('descricao') || '',
+      dono_id: fd.get('dono_id') || S.me.id,
+      frequencia: fd.get('frequencia') || 'diaria',
+      dia_semana: Number(fd.get('dia_semana')) || 1,
+      dia_mes: Number(fd.get('dia_mes')) || 5,
+      intervalo_dias: Number(fd.get('intervalo_dias')) || 3,
+      dias_semana: fd.getAll('dias_sem_chk').join(',') || '1,3,5',
+      hora: fd.get('hora') || '',
+      horas_prev: fd.get('horas_prev') || 1,
+      inicio: fd.get('inicio') || HOJE
+    };
+    ls.set('hub-rascunhos', S.rascunhos);
+  }
 });
 document.addEventListener('submit', e => { const f = e.target; if (f.dataset.form && FORM[f.dataset.form]) { e.preventDefault(); FORM[f.dataset.form](f, new FormData(f)); } });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalRoot.innerHTML && !e.target.closest('.ment')) fecharModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modalRoot.innerHTML && !e.target.closest('.ment')) {
+    if (modalCtx && modalCtx.protecaoCliqueFora) return;
+    fecharModal();
+  }
+});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.modo === 'online' && S.me) recarregar(); });
 
 let toastT;
@@ -2652,6 +3641,367 @@ function toast(msg) {
   if (!msg) return;
   let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200);
+}
+
+
+// =====================================================================
+// Sugestão 5: Detalhamento interativo dos Cards do Painel
+// =====================================================================
+function modalPainelKpi(tipo, pidFiltro) {
+  const escopoAtual = pidFiltro ? 'p:' + pidFiltro : (S.escopo || 'all');
+  const ids = pidFiltro ? [pidFiltro] : idsEscopo(escopoAtual);
+  const set = new Set(ids);
+  const I = indicadores(ids, S.y, S.m);
+  const us = unidades().filter(u => set.has(u.pid));
+  const nomeEsc = pidFiltro ? (P(pidFiltro) ? P(pidFiltro).nome : 'Pessoa') : rotuloEscopo(escopoAtual);
+
+  if (tipo === 'abertos' || tipo === 'atrasados') {
+    const abertas = us.filter(u => !u.done && (!u.inicio || u.inicio <= I.mesFim));
+    const lista = (tipo === 'atrasados' ? abertas.filter(u => u.due && vencido(u.due, u.hora)) : abertas)
+      .sort((a, b) => ( (b.due && vencido(b.due, b.hora) ? 1 : 0) - (a.due && vencido(a.due, a.hora) ? 1 : 0) ) || ((a.due || '9999') < (b.due || '9999') ? -1 : 1));
+    const atr = lista.filter(u => u.due && vencido(u.due, u.hora));
+    const noPr = lista.filter(u => !u.due || !vencido(u.due, u.hora));
+    const renderItemU = u => {
+      const p = P(u.pid), late = u.due && vencido(u.due, u.hora);
+      return `<div class="row" style="gap:10px;flex-wrap:wrap">
+        <button type="button" class="chk ${u.done ? 'on' : ''}" data-act="togAg" data-t="${u.tipo}" data-id="${u.id}" data-d="${u.due || HOJE}" title="Concluir">${ic('check')}</button>
+        <div class="t clk" data-act="abrirAg" data-t="${u.tipo}" data-id="${u.id}" data-d="${u.due || HOJE}">
+          <b>${esc(u.titulo)}</b>
+          <span class="small muted">${TIPO[u.tipo].nome}${u.pai ? ' · ' + esc(u.pai) : ''} · Resp.: <b>${esc(p ? p.nome : '—')}</b></span>
+        </div>
+        ${p ? av(p) : ''}
+        ${prazoTag(u.due, u.hora, u.done)}
+        ${u.tipo === 'paralela' ? checksFase(ST_PAR, (S.paralelas.find(a => a.id === u.id) || {}).status || 'a_fazer', 'setParStatus', `data-id="${u.id}"`) :
+          u.tipo === 'etapa' ? checksFase(ST_PAR, (S.etapas.find(e => e.id === u.id) || {}).status || 'a_fazer', 'setEtapaStatus', `data-id="${u.id}"`) :
+          checksFase(ST_ITEM, (S.itens.find(i => i.id === u.id) || {}).status || 'a_fazer', 'setItemStatus', `data-id="${u.id}"`)}
+      </div>`;
+    };
+    abrirModal(`${tipo === 'atrasados' ? 'Atividades atrasadas' : 'Atividades em aberto'} — ${nomeEsc}`, `
+      <div style="padding:4px 18px 18px;display:flex;flex-direction:column;gap:12px">
+        <div class="toolbar">
+          <span class="muted small">${lista.length} ${lista.length === 1 ? 'atividade encontrada' : 'atividades encontradas'} (${atr.length} atrasada${atr.length === 1 ? '' : 's'})</span>
+          <div class="grow toolbar">
+            <button type="button" class="btn sm" data-act="irParalelasEscopo" data-esc="${esc(escopoAtual)}" data-flt="atrasadas">Ver atrasadas em Paralelas</button>
+            <button type="button" class="btn sm pri" data-act="irParalelasEscopo" data-esc="${esc(escopoAtual)}" data-flt="abertas">Abrir na aba Paralelas →</button>
+          </div>
+        </div>
+        ${!lista.length ? '<div class="empty">Nenhuma atividade em aberto para este filtro.</div>' : ''}
+        ${atr.length ? `<div><div class="grp-h" style="color:var(--bad);border-radius:6px">Atrasadas (${atr.length})</div><div class="rows">${atr.map(renderItemU).join('')}</div></div>` : ''}
+        ${noPr.length ? `<div><div class="grp-h" style="border-radius:6px">No prazo / sem prazo (${noPr.length})</div><div class="rows">${noPr.map(renderItemU).join('')}</div></div>` : ''}
+      </div>`, {}, true);
+    return;
+  }
+
+  if (tipo === 'aderencia') {
+    const naoReal = [];
+    S.rotinas.filter(r => set.has(r.dono_id)).forEach(r => {
+      ocorrencias(r, S.y, S.m).forEach(d => {
+        if (d < HOJE && !execDe(r.id, d)) naoReal.push({ r, d, p: P(r.dono_id) });
+      });
+    });
+    naoReal.sort((a, b) => a.d < b.d ? 1 : -1);
+    abrirModal(`Aderência à rotina — ${nomeEsc}`, `
+      <div style="padding:4px 18px 18px;display:flex;flex-direction:column;gap:12px">
+        <div class="toolbar">
+          <span class="muted small">${I.tot.feitas} executadas de ${I.tot.esperadas} previstas · ${naoReal.length} não realizadas até ontem</span>
+          <div class="grow"><button type="button" class="btn sm pri" data-act="irRotinaEscopo" data-esc="${esc(escopoAtual)}">Abrir calendário de Rotina →</button></div>
+        </div>
+        ${naoReal.length ? `<div class="rows">${naoReal.map(({ r, d, p }) => `<div class="row">
+          <button type="button" class="chk" data-act="togAg" data-t="rotina" data-id="${r.id}" data-d="${d}" title="Marcar como feito">${ic('check')}</button>
+          <div class="t clk" data-act="abrirAg" data-t="rotina" data-id="${r.id}" data-d="${d}"><b>${esc(r.titulo)}</b><span class="small muted">${esc(p ? p.nome : '')} · previsto em ${fmtD(d)}</span></div>
+          ${p ? av(p) : ''}<span class="pill bad nodot">${fmtD(d)}</span>
+        </div>`).join('')}</div>` : '<div class="empty">Todas as rotinas previstas até ontem foram realizadas!</div>'}
+      </div>`, {}, true);
+    return;
+  }
+
+  // producao ou prazo: mostra entregas concluídas no mês
+  const concl = us.filter(u => u.done && u.concl >= I.mesIni && u.concl <= I.mesFim).sort((a, b) => a.concl < b.concl ? 1 : -1);
+  abrirModal(`Entregas concluídas em ${MESES[S.m]} — ${nomeEsc}`, `
+    <div style="padding:4px 18px 18px;display:flex;flex-direction:column;gap:12px">
+      <div class="toolbar">
+        <span class="muted small">${concl.length} entregas concluídas no mês · ${I.tot.feitas} execuções de rotina</span>
+        <div class="grow"><button type="button" class="btn sm pri" data-act="irParalelasEscopo" data-esc="${esc(escopoAtual)}" data-flt="concluidas">Abrir concluídas em Paralelas →</button></div>
+      </div>
+      ${concl.length ? `<div class="rows">${concl.map(u => {
+        const p = P(u.pid), noPr = !u.due || u.concl <= u.due;
+        return `<div class="row clk" data-act="abrirAg" data-t="${u.tipo}" data-id="${u.id}" data-d="${u.concl}">
+          <div class="t"><b>${esc(u.titulo)}</b><span class="small muted">${TIPO[u.tipo].nome}${u.pai ? ' · ' + esc(u.pai) : ''} · ${esc(p ? p.nome : '')} · concluída em ${fmtD(u.concl)}</span></div>
+          ${p ? av(p) : ''}<span class="pill ${noPr ? 'ok' : 'warn'} nodot">${noPr ? 'No prazo' : 'Após o prazo'}</span>
+        </div>`;
+      }).join('')}</div>` : '<div class="empty">Nenhuma entrega concluída registrada neste mês.</div>'}
+    </div>`, {}, true);
+}
+
+// =====================================================================
+// Importador Nativo do Microsoft Planner (.xlsx e .csv)
+// =====================================================================
+let plannerPreview = null;
+
+async function descompactarSlice(u8, method) {
+  if (method === 0) return new TextDecoder('utf-8').decode(u8);
+  if (typeof DecompressionStream !== 'undefined') {
+    const ds = new DecompressionStream('deflate-raw');
+    const writer = ds.writable.getWriter();
+    writer.write(u8); writer.close();
+    const buf = await new Response(ds.readable).arrayBuffer();
+    return new TextDecoder('utf-8').decode(buf);
+  }
+  throw new Error('Navegador sem suporte a descompactação nativa.');
+}
+
+async function lerXlsxBuffer(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  let eocd = u8.length - 22;
+  while (eocd >= 0 && dv.getUint32(eocd, true) !== 0x06054b50) eocd--;
+  if (eocd < 0) throw new Error('Arquivo não é um .xlsx válido.');
+  const cdTotal = dv.getUint16(eocd + 10, true), cdOffset = dv.getUint32(eocd + 16, true);
+  let pos = cdOffset;
+  const files = {};
+  for (let k = 0; k < cdTotal; k++) {
+    if (dv.getUint32(pos, true) !== 0x02014b50) break;
+    const method = dv.getUint16(pos + 10, true);
+    const compSize = dv.getUint32(pos + 20, true);
+    const nameLen = dv.getUint16(pos + 28, true);
+    const extraLen = dv.getUint16(pos + 30, true);
+    const commentLen = dv.getUint16(pos + 32, true);
+    const localOffset = dv.getUint32(pos + 42, true);
+    const name = new TextDecoder('utf-8').decode(u8.subarray(pos + 46, pos + 46 + nameLen));
+    const lNameLen = dv.getUint16(localOffset + 26, true);
+    const lExtraLen = dv.getUint16(localOffset + 28, true);
+    const start = localOffset + 30 + lNameLen + lExtraLen;
+    if (name.endsWith('.xml') || name.endsWith('.rels')) {
+      files[name] = await descompactarSlice(u8.subarray(start, start + compSize), method);
+    }
+    pos += 46 + nameLen + extraLen + commentLen;
+  }
+  const parser = new DOMParser();
+  const shared = [];
+  if (files['xl/sharedStrings.xml']) {
+    const sdoc = parser.parseFromString(files['xl/sharedStrings.xml'], 'application/xml');
+    sdoc.querySelectorAll('si').forEach(si => {
+      shared.push([...si.querySelectorAll('t')].map(t => t.textContent || '').join(''));
+    });
+  }
+  const colIdx = ref => {
+    const m = String(ref || '').match(/^[A-Z]+/);
+    if (!m) return 0;
+    let n = 0;
+    for (const ch of m[0]) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return n - 1;
+  };
+  const parseSheet = xml => {
+    if (!xml) return [];
+    const doc = parser.parseFromString(xml, 'application/xml');
+    const rows = [];
+    doc.querySelectorAll('sheetData > row').forEach(rEl => {
+      const row = [];
+      rEl.querySelectorAll('c').forEach(cEl => {
+        const idx = colIdx(cEl.getAttribute('r'));
+        const t = cEl.getAttribute('t');
+        let val = '';
+        if (t === 'inlineStr') val = [...cEl.querySelectorAll('is t')].map(x => x.textContent || '').join('');
+        else {
+          const vEl = cEl.querySelector('v');
+          val = vEl ? vEl.textContent || '' : '';
+          if (t === 's' && val !== '') val = shared[Number(val)] ?? val;
+        }
+        row[idx] = val;
+      });
+      if (row.some(x => x != null && String(x).trim() !== '')) rows.push(row);
+    });
+    return rows;
+  };
+  return {
+    plano: parseSheet(files['xl/worksheets/sheet1.xml']),
+    consolidado: parseSheet(files['xl/worksheets/sheet2.xml']),
+    usuarios: parseSheet(files['xl/worksheets/sheet6.xml'])
+  };
+}
+
+function dividirChecklist(str, qtdStr) {
+  if (!str) return { feitos: 0, itens: [] };
+  const m = String(qtdStr || '').match(/(\d+)\s*\/\s*(\d+)/);
+  const feitos = m ? Number(m[1]) : 0, totalEsp = m ? Number(m[2]) : 0;
+  const s = String(str).trim();
+  if (totalEsp === 1) return { feitos, itens: [s] };
+  // Divide por ';' fora de parênteses
+  const itens = [];
+  let cur = '', depth = 0;
+  for (const ch of s) {
+    if (ch === '(') depth++;
+    else if (ch === ')' && depth > 0) depth--;
+    if (ch === ';' && depth === 0) {
+      if (cur.trim()) itens.push(cur.trim());
+      cur = '';
+    } else cur += ch;
+  }
+  if (cur.trim()) itens.push(cur.trim());
+  return { feitos, itens };
+}
+
+function resolverPessoaPlanner(nomeOuEmail, mapaEmail) {
+  if (!nomeOuEmail) return null;
+  const limpo = String(nomeOuEmail).trim();
+  if (!limpo) return null;
+  const mail = (mapaEmail && mapaEmail[semAcento(limpo)]) || (limpo.includes('@') ? limpo.toLowerCase() : null);
+  if (mail) {
+    const porEmail = S.pessoas.find(p => (p.email || '').toLowerCase() === mail.toLowerCase());
+    if (porEmail) return porEmail;
+  }
+  const n = semAcento(limpo);
+  return S.pessoas.find(p => semAcento(p.nome) === n)
+    || S.pessoas.find(p => semAcento(p.nome).split(/\s+/)[0] === n.split(/\s+/)[0])
+    || null;
+}
+
+function areaPorCategoriaPlanner(cat, rotulos) {
+  const s = semAcento((cat || '') + ' ' + (rotulos || ''));
+  if (s.includes('gfc')) return 'gfc';
+  if (s.includes('desenvolvimento') || s.includes('power apps') || s.includes('power bi') || s.includes('python')) return 'dev';
+  if (s.includes('performance') || s.includes('perfomance') || s.includes('consultoria') || s.includes('cks') || s.includes('slb') || s.includes('s11d') || s.includes('sossego')) return 'frota';
+  return 'gestao';
+}
+
+async function lerArquivosPlanner(fileList) {
+  if (!fileList || !fileList.length) return;
+  const res = { paralelas: [], projetos: {}, usuarios: {}, erros: [] };
+  for (const file of fileList) {
+    try {
+      const buf = await file.arrayBuffer();
+      const parsed = await lerXlsxBuffer(buf);
+      const nomePlano = (parsed.plano[1] && parsed.plano[1][1]) || file.name;
+      const ehProj = /projeto/i.test(nomePlano) || /projeto/i.test(file.name);
+      (parsed.usuarios || []).slice(1).forEach(r => {
+        if (r[1] && r[2]) res.usuarios[semAcento(r[1])] = String(r[2]).trim().toLowerCase();
+      });
+      const rows = (parsed.consolidado || []).slice(1);
+      rows.forEach(r => {
+        const tituloBruto = String(r[1] || '').trim();
+        if (!tituloBruto) return;
+        const cat = String(r[2] || '').trim();
+        const stRaw = String(r[4] || '').trim();
+        const prioRaw = String(r[5] || '').trim();
+        const atribNomes = String(r[6] || '').split(';').map(x => x.trim()).filter(Boolean);
+        const criadoNome = String(r[7] || '').trim();
+        const criadoEm = String(r[8] || '').slice(0, 10) || HOJE;
+        const prazo = String(r[9] || '').slice(0, 10) || null;
+        const inicio = String(r[10] || '').slice(0, 10) || criadoEm;
+        const conclEm = String(r[13] || '').slice(0, 10) || (stRaw === 'Concluída' ? (prazo || criadoEm) : null);
+        const chkQtd = r[15], chkStr = r[16], rotulos = String(r[17] || '').trim(), notas = String(r[18] || '').trim();
+        const chk = dividirChecklist(chkStr, chkQtd);
+        if (ehProj) {
+          let nomeProj = 'Projetos MSR', itemTit = tituloBruto;
+          const idxHifen = tituloBruto.indexOf('-');
+          if (idxHifen > 2 && idxHifen < 42) {
+            nomeProj = tituloBruto.slice(0, idxHifen).trim();
+            itemTit = tituloBruto.slice(idxHifen + 1).trim() || tituloBruto;
+          } else {
+            nomeProj = tituloBruto;
+          }
+          if (!res.projetos[nomeProj]) {
+            res.projetos[nomeProj] = { nome: nomeProj, area: areaPorCategoriaPlanner(cat, rotulos), inicio: criadoEm, fim: prazo || addDias(criadoEm, 45), donoNome: criadoNome || atribNomes[0] || '', itens: [] };
+          }
+          const pj = res.projetos[nomeProj];
+          if (inicio && inicio < pj.inicio) pj.inicio = inicio;
+          if (prazo && prazo > pj.fim) pj.fim = prazo;
+          const stItem = stRaw === 'Concluída' ? 'feito' : (cat === 'Aprovação' || cat === 'Em Teste') ? 'revisao' : (cat === 'Em Andamento' || stRaw === 'Em andamento') ? 'fazendo' : 'backlog';
+          const descPartes = [];
+          if (notas) descPartes.push(notas);
+          if (rotulos) descPartes.push('Rótulos: ' + rotulos);
+          if (chk.itens.length) descPartes.push('Checklist:\n' + chk.itens.map((it, k) => `${k < chk.feitos || stItem === 'feito' ? '[x]' : '[ ]'} ${it}`).join('\n'));
+          pj.itens.push({
+            titulo: itemTit.slice(0, 160),
+            descricao: descPartes.join('\n\n') || null,
+            respNome: atribNomes[0] || criadoNome || '',
+            status: stItem,
+            inicio,
+            fim: prazo || addDias(inicio, 14),
+            progresso: stItem === 'feito' ? 100 : stItem === 'revisao' ? 80 : stItem === 'fazendo' ? 40 : 0,
+            pontos: Math.max(1, chk.itens.length || 2),
+            concluido_em: stItem === 'feito' ? conclEm : null
+          });
+        } else {
+          const stPar = stRaw === 'Concluída' ? 'concluida' : stRaw === 'Em andamento' ? 'andamento' : 'a_fazer';
+          const prioPar = (prioRaw === 'Urgente' || prioRaw === 'Importante') ? 'alta' : prioRaw === 'Baixa' ? 'baixa' : 'media';
+          const descPartes = [];
+          if (notas) descPartes.push(notas);
+          if (cat || rotulos) descPartes.push(['Bucket: ' + cat, rotulos ? 'Rótulos: ' + rotulos : ''].filter(Boolean).join(' · '));
+          const etapas = chk.itens.map((etTit, k) => {
+            const etConcl = stPar === 'concluida' || k < chk.feitos;
+            const etAnd = !etConcl && stPar === 'andamento' && k === chk.feitos;
+            return {
+              titulo: etTit.slice(0, 140),
+              respNome: atribNomes[k % Math.max(1, atribNomes.length)] || criadoNome || '',
+              inicio,
+              fim: prazo || conclEm || inicio,
+              status: etConcl ? 'concluida' : etAnd ? 'andamento' : 'a_fazer',
+              concluida_em: etConcl ? (conclEm || HOJE) : null,
+              ordem: k
+            };
+          });
+          res.paralelas.push({
+            titulo: tituloBruto.slice(0, 160),
+            descricao: descPartes.join('\n\n') || null,
+            atribNomes,
+            criadoNome,
+            criado_em: new Date(dt(criadoEm).getTime() + 12 * 36e5).toISOString(),
+            prazo: prazo || conclEm || null,
+            prioridade: prioPar,
+            origem: 'interna',
+            solicitante: rotulos ? rotulos.slice(0, 80) : null,
+            status: etapas.length ? (etapas.every(e => e.status === 'concluida') ? 'concluida' : etapas.some(e => e.status !== 'a_fazer') ? 'andamento' : 'a_fazer') : stPar,
+            concluida_em: stPar === 'concluida' ? conclEm : null,
+            etapas
+          });
+        }
+      });
+    } catch (e) {
+      res.erros.push(`${file.name}: ${e.message}`);
+    }
+  }
+  plannerPreview = res;
+  atualizarResumoPlannerUI();
+}
+
+function atualizarResumoPlannerUI() {
+  const box = document.getElementById('planner-resumo');
+  const btn = document.getElementById('btn-exec-planner');
+  if (!box) return;
+  if (!plannerPreview) { box.innerHTML = '<div class="muted small">Selecione um ou mais arquivos <b>.xlsx</b> exportados do Planner acima para ver a prévia.</div>'; if (btn) btn.disabled = true; return; }
+  const { paralelas, projetos, usuarios, erros } = plannerPreview;
+  const numProjs = Object.keys(projetos).length;
+  const numItens = Object.values(projetos).reduce((s, p) => s + p.itens.length, 0);
+  const numEtapas = paralelas.reduce((s, p) => s + p.etapas.length, 0);
+  const cadastradas = Object.entries(usuarios).filter(([n, em]) => resolverPessoaPlanner(n, usuarios));
+  const faltam = Object.entries(usuarios).filter(([n, em]) => !resolverPessoaPlanner(n, usuarios));
+  box.innerHTML = `
+    ${erros.length ? `<div class="pill bad nodot" style="margin-bottom:6px">${erros.map(esc).join(' · ')}</div>` : ''}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
+      <div class="card" style="padding:10px"><div class="small muted">Atividades paralelas</div><b class="num" style="font-size:18px">${paralelas.length}</b><div class="small muted">${numEtapas} etapas de checklist</div></div>
+      <div class="card" style="padding:10px"><div class="small muted">Projetos identificados</div><b class="num" style="font-size:18px">${numProjs}</b><div class="small muted">${numItens} itens de projeto</div></div>
+      <div class="card" style="padding:10px"><div class="small muted">Pessoas na planilha</div><b class="num" style="font-size:18px">${Object.keys(usuarios).length}</b><div class="small muted">${cadastradas.length} já no Hub · ${faltam.length} novas</div></div>
+    </div>
+    ${faltam.length ? `<label class="cb small" style="margin-top:4px"><input type="checkbox" id="f-criar-pessoas" name="criar_pessoas" checked> Cadastrar automaticamente na equipe as ${faltam.length} pessoas da planilha que ainda não existem no Hub (${faltam.map(([, em]) => esc(em.split('@')[0])).join(', ')})</label>` : ''}
+  `;
+  if (btn) btn.disabled = (paralelas.length + numItens) === 0;
+}
+
+function modalImportarPlanner() {
+  plannerPreview = null;
+  abrirModal('Importar histórico do Planner (.xlsx)', `<form data-form="importarPlanner">
+    <div class="fld full small muted">Selecione as planilhas exportadas do Microsoft Planner (ex.: <b>Atividades Paralelas MSR.xlsx</b> e <b>Projetos MSR.xlsx</b>). O Hub converte automaticamente as tarefas, datas, históricos de conclusão, checklists em etapas e projetos direto para a base de dados, sem duplicar o que já existir.</div>
+    <div class="fld full">
+      <label for="f-arq-planner">Planilhas do Planner (.xlsx)</label>
+      <input class="inp" type="file" id="f-arq-planner" accept=".xlsx" multiple data-chg="arqPlanner">
+    </div>
+    <div class="fld full" id="planner-resumo"><div class="muted small">Selecione os arquivos <b>.xlsx</b> acima para visualizar a prévia do mapeamento.</div></div>
+    <label class="cb"><input type="checkbox" name="pular_duplicadas" checked> Ignorar tarefas/projetos com o mesmo título que já estejam cadastrados no Hub</label>
+    <div class="actions">
+      <button class="btn" type="button" data-act="fecharModal">Cancelar</button>
+      <button class="btn pri" type="submit" id="btn-exec-planner" disabled>Importar na base de dados</button>
+    </div>
+  </form>`, { protecaoCliqueFora: true }, true);
 }
 
 // =====================================================================
@@ -2800,9 +4150,8 @@ function seedDemo() {
   const t = ls.get('hub-tema', null); if (t) document.documentElement.dataset.theme = t;
   const online = CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY;
   if (online) {
-    if (!window.supabase) { root.innerHTML = `<div class="login"><div class="card"><h2>Não foi possível carregar</h2><p class="muted">A biblioteca do banco de dados não carregou. Verifique a internet ou se a rede bloqueia cdn.jsdelivr.net.</p></div></div>`; return; }
     S.modo = 'online';
-    sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    sb = criarClienteSupabase(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data } = await sb.auth.getSession();
     S.sessao = data.session;
     sb.auth.onAuthStateChange((ev, sess) => {
@@ -2810,6 +4159,7 @@ function seedDemo() {
       if ((sess && sess.user.id) !== antes) { if (sess) recarregar(); else { S.me = null; render(); } }
     });
     if (S.sessao) await recarregar(); else render();
+    setInterval(() => { if (document.visibilityState === 'visible' && S.modo === 'online' && S.me && !modalRoot.innerHTML) recarregar(); }, 60000);
   } else {
     S.modo = 'teste';
     DEMO = ls.get(DEMO_KEY, null);
